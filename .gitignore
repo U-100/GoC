@@ -1,0 +1,8 @@
+*.suo
+Library
+Logs
+obj
+*.csproj
+*.vsconfig
+*.sln
+UserSettings
