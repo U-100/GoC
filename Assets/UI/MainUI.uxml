@@ -1,8 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement style="flex-grow: 1; flex-direction: column-reverse;">
-        <ui:VisualElement style="flex-direction: row;">
-            <ui:TextField name="ImmediateScript" style="flex-grow: 1;" />
-            <ui:Button text="Button" display-tooltip-when-elided="true" name="Go" style="width: 100px;" />
-        </ui:VisualElement>
-    </ui:VisualElement>
-</ui:UXML>

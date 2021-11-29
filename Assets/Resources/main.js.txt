@@ -1,2 +1,0 @@
-Runtime.MoveBox();
-log('i am done');

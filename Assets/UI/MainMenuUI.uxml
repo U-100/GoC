@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/GoCStyles.uss?fileID=7433441132597879392&amp;guid=80a2e23be22fad8418ac023d59da84e2&amp;type=3#GoCStyles" />
+    <ui:VisualElement style="flex-grow: 1; align-items: center; justify-content: center;">
+        <ui:Button text="Test hero movement" display-tooltip-when-elided="true" name="PlayButton" class="goc-button" style="max-height: 80px; min-height: 80px;" />
+    </ui:VisualElement>
+</ui:UXML>
