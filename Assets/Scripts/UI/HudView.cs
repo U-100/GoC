@@ -43,6 +43,9 @@ namespace GoC
 				}
 			);
 			textField.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
+			textField.RegisterCallback<AttachToPanelEvent>(_ => textField.Focus());
+			
+			textField.RegisterCallback<AttachToPanelEvent>(_ => textField.Q(TextInputBaseField<string>.textInputUssName).Focus());
 		}
 	}
 }

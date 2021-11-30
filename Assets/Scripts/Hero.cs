@@ -20,6 +20,8 @@ namespace GoC
 		public void walk(Vector3 delta) => MoveThreadSafe(delta, this._walkSpeed);
 		public void run(Vector3 delta) => MoveThreadSafe(4 * delta, this._runSpeed);
 
+		public Vector2 position => new Vector2(0, 0);
+
 		void Start()
 		{
 			this._synchronizationContext = SynchronizationContext.Current;

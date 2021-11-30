@@ -1,6 +1,5 @@
+using Jint;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -52,33 +51,38 @@ namespace GoC
 
 			await LoadSceneAsync("HeroMovement", this._rootViewModel.loading.SetProgress);
 
-			Dictionary<string, object> runtimeApi = new Dictionary<string, object>
-			{
-				["log"] = new Action<object>(Debug.Log),
-				["north"] = Vector3.forward,
-				["south"] = Vector3.back,
-				["west"] = Vector3.left,
-				["east"] = Vector3.right,
-				["Vector3"] = typeof(Vector3),
-			};
+			this._rootViewModel.hud = this._hudFactory();
+			this._rootViewModel.loading = null;
+
+			Engine engine = new Engine();
+			
+			engine.SetValue("log", new Action<object>(Debug.Log));
+			engine.SetValue("north", Vector3.forward);
+			engine.SetValue("south", Vector3.back);
+			engine.SetValue("west", Vector3.left);
+			engine.SetValue("east", Vector3.right);
+			engine.SetValue("Vector3", typeof(Vector3));
 
 			Scene activeScene = SceneManager.GetActiveScene();
 			foreach (GameObject gameObject in activeScene.GetRootGameObjects())
 			{
 				IRuntimeApiMarker runtimeApiMarker = gameObject.GetComponent<IRuntimeApiMarker>();
 				if (runtimeApiMarker != null)
-					runtimeApi[gameObject.name] = runtimeApiMarker;
+					engine.SetValue(gameObject.name, runtimeApiMarker);
 			}
-
-			this._rootViewModel.hud = this._hudFactory();
-			this._rootViewModel.loading = null;
 
 			while (true)
 			{
 				await this._rootViewModel.hud.WaitExecuteAsync();
 
-				ScriptRunner scriptRunner = new ScriptRunner();
-				await scriptRunner.Execute(runtimeApi, this._rootViewModel.hud.script);
+				try
+				{
+					await Task.Run(() => engine.Execute(this._rootViewModel.hud.script));
+				}
+				catch (Exception ex)
+				{
+					Debug.LogException(ex);
+				}
 			}
 		}
 
