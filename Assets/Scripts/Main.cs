@@ -17,7 +17,8 @@ namespace GoC
 			navigator = new Navigator(
 				rootViewModel,
 				() => new Loading(),
-				() => new MainMenu(navigator)
+				() => new MainMenu(navigator),
+				() => new Hud()
 			);
 
 			navigator.Start();

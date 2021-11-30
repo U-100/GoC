@@ -206,7 +206,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
@@ -284,7 +284,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &410087039
 GameObject:
@@ -379,7 +379,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
@@ -484,7 +484,7 @@ PrefabInstance:
     - target: {fileID: 4867597120721485902, guid: 45bea58c228359d43a4ac561167c24be,
         type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4867597120721485902, guid: 45bea58c228359d43a4ac561167c24be,
         type: 3}
@@ -539,7 +539,7 @@ PrefabInstance:
     - target: {fileID: 4867597120721728292, guid: 45bea58c228359d43a4ac561167c24be,
         type: 3}
       propertyPath: m_Name
-      value: GoblinShamanWithHammer
+      value: hero
       objectReference: {fileID: 0}
     - target: {fileID: 4867597120729089684, guid: 45bea58c228359d43a4ac561167c24be,
         type: 3}
@@ -579,7 +579,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 911184030}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1275185425
+--- !u!114 &1275185422
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -588,9 +588,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1275185421}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e741851cba3ad425c91ecf922cc6b379, type: 3}
+  m_Script: {fileID: 11500000, guid: 96ab352c9678a8d4286f44d2cb9153fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _data:
-    _json: '{"declarations":{"collection":{"$content":[],"$version":"A"},"$version":"A"}}'
-    _objectReferences: []
+  _walkSpeed: 1
+  _runSpeed: 2
+--- !u!114 &1275185423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1275185421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a90b3c15f3ea45478ded6bc81a64f8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

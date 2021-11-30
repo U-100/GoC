@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace GoC
 {
-	public class Hero : MonoBehaviour
+	public class Hero : MonoBehaviour, IRuntimeApiMarker
 	{
 		[SerializeField] private float _walkSpeed = 1;
 		[SerializeField] private float _runSpeed = 1;
@@ -67,7 +67,7 @@ namespace GoC
 					break;
 
 				this._transform.position += dir.normalized * speed * Time.deltaTime;
-				
+
 				await Task.Yield(); // skip a frame
 			}
 
