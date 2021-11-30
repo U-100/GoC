@@ -58,7 +58,8 @@ namespace GoC
 				["north"] = Vector3.forward,
 				["south"] = Vector3.back,
 				["west"] = Vector3.left,
-				["east"] = Vector3.right
+				["east"] = Vector3.right,
+				["Vector3"] = typeof(Vector3),
 			};
 
 			Scene activeScene = SceneManager.GetActiveScene();

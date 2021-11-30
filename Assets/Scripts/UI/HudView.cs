@@ -29,12 +29,20 @@ namespace GoC
 
 		void OnEnable()
 		{
-			GetComponent<UIDocument>().rootVisualElement.Q<Button>("Go").clicked += () => this.viewModel?.Execute();
-		}
+			VisualElement rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
 
-		void Update()
-		{
-			this.viewModel?.SetScript(GetComponent<UIDocument>().rootVisualElement.Q<TextField>("ImmediateScript").value);
+			Button button = rootVisualElement.Q<Button>("Go");
+			button.clicked += () => this.viewModel?.Execute();
+
+			TextField textField = rootVisualElement.Q<TextField>("ImmediateScript");
+			textField.RegisterCallback<KeyDownEvent>(
+				keyDownEvent =>
+				{
+					if(keyDownEvent.ctrlKey && keyDownEvent.keyCode == KeyCode.Return)
+						this.viewModel?.Execute();
+				}
+			);
+			textField.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
 		}
 	}
 }
