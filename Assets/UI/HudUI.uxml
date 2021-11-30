@@ -1,9 +1,29 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/GoCStyles.uss?fileID=7433441132597879392&amp;guid=80a2e23be22fad8418ac023d59da84e2&amp;type=3#GoCStyles" />
-    <ui:Foldout text="Code" class="goc-button">
-        <ui:TextField name="ImmediateScript" multiline="true" style="min-height: 136px; max-height: 140px; border-left-width: 0; margin-left: -30px; margin-right: 0; margin-top: 0; margin-bottom: 10px; border-top-left-radius: 15px; border-bottom-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; font-size: 24px;" />
-        <ui:VisualElement style="align-items: flex-end;">
-            <ui:Button text="Run" name="Go" focusable="false" class="goc-button" />
+    <ui:VisualElement style="flex-grow: 1; justify-content: space-between;">
+        <ui:VisualElement name="UpperArea" style="flex-grow: 1; justify-content: space-between;">
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: space-between; max-height: 300px; min-height: 300px;">
+                <ui:VisualElement class="goc-border" style="min-width: 200px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-left-width: 1px; border-top-width: 1px; border-top-left-radius: 10px; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0;" />
+            </ui:VisualElement>
+            <ui:TextField picking-mode="Ignore" name="Console" multiline="true" focusable="true" readonly="true" style="margin-left: 16px; margin-right: 16px; margin-top: -284px; margin-bottom: 100px; flex-grow: 1; background-color: rgba(0, 0, 0, 0); color: rgb(255, 255, 255); font-size: 28px; padding-left: 10px; padding-right: 10px; padding-top: 0; padding-bottom: 0;" />
         </ui:VisualElement>
-    </ui:Foldout>
+        <ui:VisualElement name="LowerArea" style="flex-grow: 1; max-height: 400px; justify-content: space-between; min-height: 400px; overflow: visible;">
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: space-between; max-height: 100px; min-height: 100px;">
+                <ui:VisualElement class="goc-border" style="min-width: 200px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-top-width: 1px; border-left-width: 1px; border-top-left-radius: 10px;" />
+                <ui:VisualElement class="goc-border" style="min-width: 200px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-right-width: 1px; border-top-width: 1px; border-top-right-radius: 10px;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; justify-content: space-between; overflow: visible; margin-top: -84px; margin-bottom: -84px; margin-left: 16px; margin-right: 16px; padding-top: 0;">
+                <ui:TextField picking-mode="Ignore" multiline="true" name="ImmediateScript" style="flex-grow: 1; -unity-text-align: upper-left; font-size: 28px; background-color: rgba(73, 229, 242, 0.1); padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; color: rgb(255, 255, 255); border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; max-height: 100px; flex-direction: row; justify-content: space-between; min-height: 100px;">
+                <ui:VisualElement class="goc-border" style="min-width: 200px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-left-width: 1px; border-bottom-width: 1px; border-bottom-left-radius: 10px;" />
+                <ui:VisualElement class="goc-border" style="min-width: 200px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-right-width: 1px; border-bottom-width: 1px; border-bottom-right-radius: 10px;" />
+            </ui:VisualElement>
+            <ui:Button name="Go" text="Run" class="goc-button" style="position: absolute; right: 22px; bottom: 22px; min-height: 80px; max-height: 80px; max-width: 100px; min-width: 100px; width: initial; height: initial; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <TabbedView>
+        <TabButton focusable="true" />
+        <TabButton focusable="true" />
+    </TabbedView>
 </ui:UXML>

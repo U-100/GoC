@@ -8,7 +8,7 @@ namespace GoC
 	{
 		private TaskCompletionSource<bool> _executeTcs;
 
-		public string script { get; set; }
+		public string script { get; set; } = "";
 
 		public Task WaitExecuteAsync()
 		{
@@ -25,16 +25,20 @@ namespace GoC
 
 	public class HudView : MonoBehaviour
 	{
+		private bool _justEnabled;
+
 		public Hud viewModel { get; set; }
 
 		void OnEnable()
 		{
-			VisualElement rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
+			UIDocument uiDocument = GetComponent<UIDocument>();
+			VisualElement rootVisualElement = uiDocument.rootVisualElement;
 
 			Button button = rootVisualElement.Q<Button>("Go");
 			button.clicked += () => this.viewModel?.Execute();
 
 			TextField textField = rootVisualElement.Q<TextField>("ImmediateScript");
+			textField.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
 			textField.RegisterCallback<KeyDownEvent>(
 				keyDownEvent =>
 				{
@@ -42,10 +46,20 @@ namespace GoC
 						this.viewModel?.Execute();
 				}
 			);
-			textField.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
-			textField.RegisterCallback<AttachToPanelEvent>(_ => textField.Focus());
-			
-			textField.RegisterCallback<AttachToPanelEvent>(_ => textField.Q(TextInputBaseField<string>.textInputUssName).Focus());
+
+			this._justEnabled = true;
+		}
+
+		void Update()
+		{
+			if (this._justEnabled)
+				OnJustEnabled();
+			this._justEnabled = false;
+		}
+
+		private void OnJustEnabled()
+		{
+			GetComponent<UIDocument>().rootVisualElement.Q(TextInputBaseField<string>.textInputUssName).Focus();
 		}
 	}
 }

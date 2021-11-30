@@ -1,28 +1,37 @@
+TextField TextInput#unity-text-input {
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+}
+
+.goc-border {
+    border-left-color: rgb(73, 229, 242);
+    border-right-color: rgb(73, 229, 242);
+    border-top-color: rgb(73, 229, 242);
+    border-bottom-color: rgb(73, 229, 242);
+}
+
+.goc-text {
+    color: rgb(73, 229, 242);
+}
+
 .goc-button {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    font-size: 48px;
-    background-color: rgba(123, 84, 57, 255);
-    -unity-slice-left: 0;
-    -unity-slice-top: 0;
-    -unity-slice-right: 0;
-    -unity-slice-bottom: 0;
-    border-left-color: rgba(165, 139, 55, 255);
-    border-right-color: rgba(165, 139, 55, 255);
-    border-top-color: rgba(165, 139, 55, 255);
-    border-bottom-color: rgba(165, 139, 55, 255);
-    border-left-width: 5px;
-    border-right-width: 5px;
-    border-top-width: 5px;
-    border-bottom-width: 5px;
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    font-size: 42px;
+    text-shadow: 1px 1px 1px rgb(51, 93, 128);
+    border-left-color: rgb(73, 229, 242);
+    border-right-color: rgb(73, 229, 242);
+    border-top-color: rgb(73, 229, 242);
+    border-bottom-color: rgb(73, 229, 242);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    color: rgb(73, 229, 242);
 }
