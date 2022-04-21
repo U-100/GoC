@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -9,6 +10,19 @@ namespace GoC
 		private TaskCompletionSource<bool> _executeTcs;
 
 		public string script { get; set; } = "";
+
+		public async IAsyncEnumerable<string> GetScriptsAsync()
+		{
+			while (true)
+			{
+				Task t = WaitExecuteAsync();
+				await t;
+				if (t.IsCompletedSuccessfully)
+					yield return this.script;
+				else
+					break;
+			}
+		}
 
 		public Task WaitExecuteAsync()
 		{

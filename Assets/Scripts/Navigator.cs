@@ -71,19 +71,31 @@ namespace GoC
 					engine.SetValue(gameObject.name, runtimeApiMarker);
 			}
 
-			while (true)
+			await foreach(string script in this._rootViewModel.hud.GetScriptsAsync())
 			{
-				await this._rootViewModel.hud.WaitExecuteAsync();
-
 				try
 				{
-					await Task.Run(() => engine.Execute(this._rootViewModel.hud.script));
+					await Task.Run(() => engine.Execute(script));
 				}
 				catch (Exception ex)
 				{
 					Debug.LogException(ex);
 				}
 			}
+
+			//while (true)
+			//{
+			//	await this._rootViewModel.hud.WaitExecuteAsync();
+
+			//	try
+			//	{
+			//		await Task.Run(() => engine.Execute(this._rootViewModel.hud.script));
+			//	}
+			//	catch (Exception ex)
+			//	{
+			//		Debug.LogException(ex);
+			//	}
+			//}
 		}
 
 		private async Task LoadSceneAsync(string sceneName, Action<float> progress)
