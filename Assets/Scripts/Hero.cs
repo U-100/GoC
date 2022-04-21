@@ -17,10 +17,8 @@ namespace GoC
 		private readonly int ANIMATOR_PARAM_WALKING = Animator.StringToHash("walking");
 		private readonly int ANIMATOR_PARAM_RUNNING = Animator.StringToHash("running");
 
-		public void walk(Vector3 delta) => MoveThreadSafe(delta, this._walkSpeed);
-		public void run(Vector3 delta) => MoveThreadSafe(4 * delta, this._runSpeed);
-
-		public Vector2 position => new Vector2(0, 0);
+		public void walk(Vector3 delta) => Post(() => MoveOnUnityMainThread(delta, this._walkSpeed));
+		public void run(Vector3 delta) => Post(() => MoveOnUnityMainThread(4 * delta, this._runSpeed));
 
 		void Start()
 		{
@@ -29,7 +27,7 @@ namespace GoC
 			this._animator = this.GetComponent<Animator>();
 		}
 
-		private void MoveThreadSafe(Vector3 delta, float speed)
+		private void Post(Func<Task> f)
 		{
 			TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 			this._synchronizationContext.Post(
@@ -37,7 +35,7 @@ namespace GoC
 				{
 					try
 					{
-						await MoveOnUnityMainThread(delta, speed);
+						await f();
 						tcs.SetResult(true);
 					}
 					catch (Exception ex)
