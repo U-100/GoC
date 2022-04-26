@@ -61,26 +61,12 @@ namespace GoC
 			Engine engine = new Engine();
 			
 			engine.SetValue("log", new Action<object>(Debug.Log));
-			engine.SetValue("north", Vector3.forward);
-			engine.SetValue("south", Vector3.back);
-			engine.SetValue("west", Vector3.left);
-			engine.SetValue("east", Vector3.right);
-			engine.SetValue("Vector3", typeof(Vector3));
 
-			Scene activeScene = SceneManager.GetActiveScene();
-			foreach (GameObject gameObject in activeScene.GetRootGameObjects())
-			{
-				IRuntimeApiMarker runtimeApiMarker = gameObject.GetComponent<IRuntimeApiMarker>();
-				if (runtimeApiMarker != null)
-				{
-					engine.SetValue(gameObject.name, runtimeApiMarker);
-					runtimeApiMarker.SetupRuntimeApi(engine);
-				}
-			}
+			foreach (GameObject gameObject in SceneManager.GetActiveScene().GetRootGameObjects())
+				gameObject.GetComponent<IRuntimeApiMarker>()?.SetupRuntimeApi(engine);
 
-			foreach (KeyValuePair<JsValue, PropertyDescriptor> kvp in engine.Realm.GlobalObject.GetOwnProperties())
-				Debug.Log($"{kvp.Key.AsString()}");
-
+			//foreach (KeyValuePair<JsValue, PropertyDescriptor> kvp in engine.Realm.GlobalObject.GetOwnProperties())
+			//	Debug.Log($"{kvp.Key.AsString()}");
 
 			await foreach(string script in this._rootViewModel.hud.GetScriptsAsync())
 			{

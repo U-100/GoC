@@ -14,11 +14,11 @@ namespace GoC
 		private SynchronizationContext _synchronizationContext;
 		private Transform _transform;
 
-		public void move(int distance) => Post(() => MoveOnUnityMainThread(distance));
+		public void Move(int distance) => Post(() => MoveOnUnityMainThread(distance));
 
 		void IRuntimeApiMarker.SetupRuntimeApi(Engine engine)
 		{
-			engine.SetValue("move", new Action<int>(this.move));
+			engine.SetValue("move", (Action<int>)this.Move);
 		}
 
 		void Start()
