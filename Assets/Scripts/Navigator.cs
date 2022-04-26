@@ -1,12 +1,8 @@
 using Jint;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Jint.Native;
-using Jint.Runtime.Descriptors;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace GoC
 {
