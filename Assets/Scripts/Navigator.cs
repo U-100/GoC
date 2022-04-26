@@ -1,8 +1,12 @@
 using Jint;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Jint.Native;
+using Jint.Runtime.Descriptors;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace GoC
 {
@@ -49,7 +53,7 @@ namespace GoC
 			this._rootViewModel.mainMenu = null;
 			this._rootViewModel.loading = this._loadingFactory();
 
-			await LoadSceneAsync("HeroMovement", this._rootViewModel.loading.SetProgress);
+			await LoadSceneAsync("MoveBot", this._rootViewModel.loading.SetProgress);
 
 			this._rootViewModel.hud = this._hudFactory();
 			this._rootViewModel.loading = null;
@@ -68,8 +72,15 @@ namespace GoC
 			{
 				IRuntimeApiMarker runtimeApiMarker = gameObject.GetComponent<IRuntimeApiMarker>();
 				if (runtimeApiMarker != null)
+				{
 					engine.SetValue(gameObject.name, runtimeApiMarker);
+					runtimeApiMarker.SetupRuntimeApi(engine);
+				}
 			}
+
+			foreach (KeyValuePair<JsValue, PropertyDescriptor> kvp in engine.Realm.GlobalObject.GetOwnProperties())
+				Debug.Log($"{kvp.Key.AsString()}");
+
 
 			await foreach(string script in this._rootViewModel.hud.GetScriptsAsync())
 			{

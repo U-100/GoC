@@ -10,10 +10,10 @@ EditorBuildSettings:
     guid: 725bb3d476f806a4884164cce656322a
   - enabled: 1
     path: Assets/Scenes/Intro.unity
-    guid: de1f2f38edc8a24409da0bcc6387033c
+    guid: 8ac044fa19eecf348bf6339aceb8752e
   - enabled: 1
-    path: Assets/Scenes/HeroMovement.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/Scenes/MoveBot.unity
+    guid: e9e8f29c1f9f7134d8871e2cec18303d
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 64acf69ee1566f648b735575b5a86c8a,
       type: 2}
