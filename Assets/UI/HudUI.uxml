@@ -2,7 +2,9 @@
     <Style src="project://database/Assets/UI/GoCStyles.uss?fileID=7433441132597879392&amp;guid=80a2e23be22fad8418ac023d59da84e2&amp;type=3#GoCStyles" />
     <ui:VisualElement style="flex-grow: 1;">
         <ui:VisualElement style="flex-grow: 2;" />
-        <ui:TextField picking-mode="Ignore" name="ImmediateScript" multiline="true" class="goc-text goc-border" style="flex-grow: 1; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; font-size: 24px;" />
-        <ui:Button tabindex="-1" text="Go" display-tooltip-when-elided="true" name="Go" class="goc-button" style="position: absolute; right: 10px; bottom: 10px;" />
+        <ui:VisualElement style="flex-direction: row;">
+            <ui:TextField picking-mode="Ignore" name="ImmediateScript" multiline="true" class="goc-text goc-border" style="flex-grow: 1; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; font-size: 24px; min-height: 320px; border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; max-height: 320px;" />
+            <ui:Button tabindex="-1" text="Go" display-tooltip-when-elided="true" name="Go" class="goc-button" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

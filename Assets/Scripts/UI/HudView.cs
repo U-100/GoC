@@ -52,6 +52,7 @@ namespace GoC
 			button.clicked += () => this.viewModel?.Execute();
 
 			TextField textField = rootVisualElement.Q<TextField>("ImmediateScript");
+			textField.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
 			textField.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
 			textField.RegisterCallback<KeyDownEvent>(
 				keyDownEvent =>
