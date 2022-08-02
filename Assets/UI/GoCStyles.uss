@@ -7,14 +7,14 @@ TextField TextInput#unity-text-input {
 }
 
 .goc-border {
-    border-left-color: rgb(73, 229, 242);
-    border-right-color: rgb(73, 229, 242);
-    border-top-color: rgb(73, 229, 242);
-    border-bottom-color: rgb(73, 229, 242);
+    border-left-color: rgb(80, 120, 231);
+    border-right-color: rgb(80, 120, 231);
+    border-top-color: rgb(80, 120, 231);
+    border-bottom-color: rgb(80, 120, 231);
 }
 
 .goc-text {
-    color: rgb(73, 229, 242);
+    color: rgb(208, 214, 231);
 }
 
 .goc-button {
@@ -25,13 +25,13 @@ TextField TextInput#unity-text-input {
     background-color: rgba(255, 255, 255, 0.1);
     font-size: 42px;
     text-shadow: 1px 1px 1px rgb(51, 93, 128);
-    border-left-color: rgb(73, 229, 242);
-    border-right-color: rgb(73, 229, 242);
-    border-top-color: rgb(73, 229, 242);
-    border-bottom-color: rgb(73, 229, 242);
+    border-left-color: rgb(80, 120, 231);
+    border-right-color: rgb(80, 120, 231);
+    border-top-color: rgb(80, 120, 231);
+    border-bottom-color: rgb(80, 120, 231);
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    color: rgb(73, 229, 242);
+    color: rgb(231, 222, 208);
 }
