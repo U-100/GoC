@@ -1,27 +1,43 @@
+using Jint;
+using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GoC
 {
 	public class Main : MonoBehaviour
 	{
-		[SerializeField] private RootView _rootView = null;
+		[SerializeField] private HudView _hudView;
 
-		void Start()
+		async void Start()
 		{
-			DontDestroyOnLoad(this.gameObject);
+			try
+			{
+				Hud hud = new Hud();
+				this._hudView.viewModel = hud;
 
-			RootViewModel rootViewModel = new RootViewModel();
-			this._rootView.viewModel = rootViewModel;
+				Engine jsEngine = new Engine();
+				jsEngine.SetValue("log", new Action<object>(Debug.Log));
 
-			Navigator navigator = null;
-			navigator = new Navigator(
-				rootViewModel,
-				() => new Loading(),
-				() => new MainMenu(navigator),
-				() => new Hud()
-			);
+				foreach (RuntimeApiMarker runtimeApiMarker in FindObjectsOfType<RuntimeApiMarker>())
+					runtimeApiMarker.SetupRuntimeApi(jsEngine);
 
-			navigator.Start();
+				await foreach(string script in hud.GetScriptsAsync())
+				{
+					try
+					{
+						await Task.Run(() => jsEngine.Execute(script));
+					}
+					catch (Exception ex)
+					{
+						Debug.LogException(ex);
+					}
+				}
+			}
+			finally
+			{
+				this._hudView.viewModel = null;
+			}
 		}
 	}
 }

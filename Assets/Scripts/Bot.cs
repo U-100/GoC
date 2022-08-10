@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace GoC
 {
-	public class Bot : MonoBehaviour, IRuntimeApiMarker
+	public class Bot : RuntimeApiMarker
 	{
 		[SerializeField]
 		private float _speed = 1.0f;
@@ -16,7 +16,7 @@ namespace GoC
 
 		public void Move(int distance) => Post(() => MoveOnUnityMainThread(distance));
 
-		void IRuntimeApiMarker.SetupRuntimeApi(Engine engine)
+		public override void SetupRuntimeApi(Engine engine)
 		{
 			engine.SetValue("move", (Action<int>)this.Move);
 		}
