@@ -22,6 +22,13 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.device-simulator.devices": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.ext.nunit": {
       "version": "1.0.6",
       "depth": 1,
@@ -92,7 +99,7 @@
       }
     },
     "com.unity.test-framework": {
-      "version": "1.1.31",
+      "version": "1.1.33",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -121,7 +128,7 @@
       }
     },
     "com.unity.vectorgraphics": {
-      "version": "2.0.0-preview.19",
+      "version": "2.0.0-preview.20",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -138,6 +145,15 @@
         "com.unity.modules.unitywebrequestwww": "1.0.0"
       },
       "url": "https://packages.unity.com"
+    },
+    "com.unity.visualeffectgraph": {
+      "version": "13.1.8",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.shadergraph": "13.1.8",
+        "com.unity.render-pipelines.core": "13.1.8"
+      }
     },
     "com.unity.visualscripting": {
       "version": "1.7.8",
