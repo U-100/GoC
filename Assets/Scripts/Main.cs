@@ -48,11 +48,5 @@ namespace GoC
 			this._cts.Dispose();
 			this._cts = null;
 		}
-
-		void Update()
-		{
-			if (this._bot.transform.position.z >= 0.5f)
-				this.gameObject.SetActive(false);
-		}
 	}
 }
