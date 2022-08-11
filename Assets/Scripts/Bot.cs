@@ -14,7 +14,7 @@ namespace GoC
 		private SynchronizationContext _synchronizationContext;
 		private Transform _transform;
 
-		public void Move(int distance) => Post(() => MoveOnUnityMainThread(distance));
+		public void Move(int distance) => Post(() => MoveImpl(distance));
 
 		public override void SetupRuntimeApi(Engine engine)
 		{
@@ -49,10 +49,19 @@ namespace GoC
 			tcs.Task.Wait();
 		}
 
-		private async Task MoveOnUnityMainThread(float distance)
+		private async Task MoveImpl(int distance)
 		{
 			Vector3 target = this._transform.position + distance * (Vector3)(this._transform.localToWorldMatrix * Vector3.forward);
+			int absDistance = Math.Abs(distance);
+			for (int step = 0; step < absDistance; ++step)
+			{
+				Vector3 stepTarget = Vector3.Lerp(this._transform.position, target, (step + 1.0f) / absDistance);
+				await MoveToImpl(stepTarget);
+			}
+		}
 
+		private async Task MoveToImpl(Vector3 target)
+		{
 			while (true)
 			{
 				float d = this._speed * Time.deltaTime;
