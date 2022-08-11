@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -11,29 +14,35 @@ namespace GoC
 
 		public string script { get; set; } = "";
 
-		public async IAsyncEnumerable<string> GetScriptsAsync()
+		public async IAsyncEnumerable<string> GetScriptsAsync([EnumeratorCancellation] CancellationToken ct)
 		{
-			while (true)
+			while (!ct.IsCancellationRequested)
 			{
-				Task t = WaitExecuteAsync();
-				await t;
-				if (t.IsCompletedSuccessfully)
-					yield return this.script;
-				else
-					break;
+				this._executeTcs = new TaskCompletionSource<bool>();
+				using (ct.Register(this.StopGetScriptsAsync))
+				{
+					if (await this._executeTcs.Task)
+						yield return this.script;
+					else
+						break;
+				}
 			}
 		}
 
-		public Task WaitExecuteAsync()
-		{
-			return (this._executeTcs ??= new TaskCompletionSource<bool>()).Task;
-		}
-
 		public void SetScript(string s) => this.script = s;
+
 		public void Execute()
 		{
-			this._executeTcs?.SetResult(true);
+			TaskCompletionSource<bool> tempExecuteTcs = this._executeTcs;
 			this._executeTcs = null;
+			tempExecuteTcs?.SetResult(true);
+		}
+
+		private void StopGetScriptsAsync()
+		{
+			TaskCompletionSource<bool> tempExecuteTcs = this._executeTcs;
+			this._executeTcs = null;
+			tempExecuteTcs?.SetResult(false);
 		}
 	}
 
@@ -57,7 +66,7 @@ namespace GoC
 			textField.RegisterCallback<KeyDownEvent>(
 				keyDownEvent =>
 				{
-					if(keyDownEvent.ctrlKey && keyDownEvent.keyCode == KeyCode.Return)
+					if (keyDownEvent.ctrlKey && keyDownEvent.keyCode == KeyCode.Return)
 						this.viewModel?.Execute();
 				}
 			);

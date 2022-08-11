@@ -14,18 +14,18 @@ namespace GoC
 		private SynchronizationContext _synchronizationContext;
 		private Transform _transform;
 
-		public void Move(int distance) => Post(() => MoveImpl(distance));
-
-		public override void SetupRuntimeApi(Engine engine)
+		public override void SetupRuntimeApi(Engine engine, CancellationToken executionCt)
 		{
-			engine.SetValue("move", (Action<int>)this.Move);
+			engine.SetValue("move", (Action<int>)(distance => this.Move(distance, executionCt)));
 		}
 
-		void Start()
+		void Awake()
 		{
 			this._synchronizationContext = SynchronizationContext.Current;
 			this._transform = this.transform;
 		}
+
+		private void Move(int distance, CancellationToken executionCt) => Post(() => MoveImpl(distance, executionCt));
 
 		private void Post(Func<Task> f)
 		{
@@ -33,7 +33,7 @@ namespace GoC
 			this._synchronizationContext.Post(
 				async state =>
 				{
-					TaskCompletionSource<bool> stateTcs = (TaskCompletionSource<bool>) state;
+					TaskCompletionSource<bool> stateTcs = (TaskCompletionSource<bool>)state;
 					try
 					{
 						await f();
@@ -49,18 +49,21 @@ namespace GoC
 			tcs.Task.Wait();
 		}
 
-		private async Task MoveImpl(int distance)
+		private async Task MoveImpl(int distance, CancellationToken executionCt)
 		{
 			int absDistance = Math.Abs(distance);
 			int step = Math.Sign(distance);
-			for (int i = 0; i < absDistance; ++i)
+			for (int i = 0; i < absDistance && !executionCt.IsCancellationRequested; ++i)
+			{
 				await MoveBy(step);
+				await Task.Delay(100); // skip a frame
+			}
 		}
 
 		private async Task MoveBy(int step)
 		{
 			Vector3 target = this._transform.position + step * (Vector3)(this._transform.localToWorldMatrix * Vector3.forward);
-			
+
 			// round target coordinates so that position remains in whole numbers
 			target.x = Mathf.Round(target.x);
 			target.y = Mathf.Round(target.y);
@@ -68,6 +71,9 @@ namespace GoC
 
 			while (true)
 			{
+				if (this == null || !this.isActiveAndEnabled) // cancel movement when this Bot is disabled or destroyed
+					throw new OperationCanceledException();
+
 				float d = this._speed * Time.deltaTime;
 				Vector3 dir = target - this._transform.position;
 				if (dir.magnitude < d)

@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _hudView: {fileID: 2006952725}
+  _bot: {fileID: 49330841587294632}
 --- !u!4 &245116312
 Transform:
   m_ObjectHideFlags: 0
@@ -379,7 +380,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462133253}
-  m_LocalRotation: {x: 0.65837306, y: -0.000000041626162, z: 0.00000003641004, w: 0.7526918}
+  m_LocalRotation: {x: 0.65837306, y: -0.000000048101708, z: 0.00000004207414, w: 0.7526918}
   m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1444,3 +1445,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speed: 1
+--- !u!114 &49330841587294632 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 49330841587294631, guid: 0a99dfa705d29d6498403890ceb5b15d,
+    type: 3}
+  m_PrefabInstance: {fileID: 49330841587294628}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 49330841587294630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dd7209fd7d6aea48a5d8dacdd274823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
