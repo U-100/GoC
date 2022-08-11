@@ -6,10 +6,9 @@ using UnityEngine;
 
 namespace GoC
 {
-	public class Main : MonoBehaviour
+	public class JsExecutor : MonoBehaviour
 	{
 		[SerializeField] private HudView _hudView;
-		[SerializeField] private Bot _bot;
 
 		private CancellationTokenSource _cts;
 

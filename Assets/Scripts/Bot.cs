@@ -54,10 +54,7 @@ namespace GoC
 			int absDistance = Math.Abs(distance);
 			int step = Math.Sign(distance);
 			for (int i = 0; i < absDistance && !executionCt.IsCancellationRequested; ++i)
-			{
 				await MoveBy(step);
-				await Task.Delay(100); // skip a frame
-			}
 		}
 
 		private async Task MoveBy(int step)
