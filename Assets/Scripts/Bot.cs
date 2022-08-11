@@ -51,17 +51,21 @@ namespace GoC
 
 		private async Task MoveImpl(int distance)
 		{
-			Vector3 target = this._transform.position + distance * (Vector3)(this._transform.localToWorldMatrix * Vector3.forward);
 			int absDistance = Math.Abs(distance);
-			for (int step = 0; step < absDistance; ++step)
-			{
-				Vector3 stepTarget = Vector3.Lerp(this._transform.position, target, (step + 1.0f) / absDistance);
-				await MoveToImpl(stepTarget);
-			}
+			int step = Math.Sign(distance);
+			for (int i = 0; i < absDistance; ++i)
+				await MoveBy(step);
 		}
 
-		private async Task MoveToImpl(Vector3 target)
+		private async Task MoveBy(int step)
 		{
+			Vector3 target = this._transform.position + step * (Vector3)(this._transform.localToWorldMatrix * Vector3.forward);
+			
+			// round target coordinates so that position remains in whole numbers
+			target.x = Mathf.Round(target.x);
+			target.y = Mathf.Round(target.y);
+			target.z = Mathf.Round(target.z);
+
 			while (true)
 			{
 				float d = this._speed * Time.deltaTime;
