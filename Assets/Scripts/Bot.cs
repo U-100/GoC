@@ -8,8 +8,8 @@ namespace GoC
 {
 	public class Bot : RuntimeApiMarker
 	{
-		[SerializeField]
-		private float _speed = 1.0f;
+		[SerializeField] private float _speed = 1.0f;
+		[SerializeField] private float _angularSpeed = 90.0f;
 
 		private SynchronizationContext _synchronizationContext;
 		private Transform _transform;
@@ -17,6 +17,7 @@ namespace GoC
 		public override void SetupRuntimeApi(Engine engine, CancellationToken executionCt)
 		{
 			engine.SetValue("move", (Action<int>)(distance => this.Move(distance, executionCt)));
+			engine.SetValue("turn", (Action<int>)(distance => this.Turn(distance, executionCt)));
 		}
 
 		void Awake()
@@ -26,6 +27,7 @@ namespace GoC
 		}
 
 		private void Move(int distance, CancellationToken executionCt) => Post(() => MoveImpl(distance, executionCt));
+		private void Turn(int angle, CancellationToken executionCt) => Post(() => TurnImpl(angle, executionCt));
 
 		private void Post(Func<Task> f)
 		{
@@ -77,11 +79,30 @@ namespace GoC
 					break;
 
 				this._transform.position += d * dir.normalized;
-
 				await Task.Yield(); // skip a frame
 			}
 
 			this._transform.position = target;
+		}
+
+		private async Task TurnImpl(int angle, CancellationToken executionCt)
+		{
+			float startAngle = this.transform.rotation.eulerAngles.y;
+			float endAngle = MathF.Round(startAngle) + (angle / 90) * 90;
+			Quaternion targetRotation = Quaternion.Euler(this.transform.rotation.eulerAngles.x, endAngle, this.transform.rotation.eulerAngles.z);
+
+			while (true)
+			{
+				float dAngle = this._angularSpeed * Time.deltaTime;
+				float currentAngle = Quaternion.Angle(this.transform.rotation, targetRotation);
+				if(currentAngle < dAngle)
+					break;
+
+				this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetRotation, this._angularSpeed * Time.deltaTime);
+				await Task.Yield(); // skip a frame
+			}
+
+			this.transform.rotation = targetRotation;
 		}
 	}
 }
