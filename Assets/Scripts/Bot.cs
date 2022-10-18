@@ -10,6 +10,7 @@ namespace GoC
 	{
 		[SerializeField] private float _speed = 1.0f;
 		[SerializeField] private float _angularSpeed = 90.0f;
+		[SerializeField] private LayerMask _walkableLayerMask;
 
 		private SynchronizationContext _synchronizationContext;
 		private Transform _transform;
@@ -62,6 +63,9 @@ namespace GoC
 		private async Task MoveBy(int step)
 		{
 			Vector3 target = this._transform.position + step * (Vector3)(this._transform.localToWorldMatrix * Vector3.forward);
+
+			if (!Physics.CheckSphere(target, 0, this._walkableLayerMask))
+				throw new Exception("Can't move there");
 
 			// round target coordinates so that position remains in whole numbers
 			target.x = Mathf.Round(target.x);

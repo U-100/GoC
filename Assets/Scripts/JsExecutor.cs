@@ -32,7 +32,14 @@ namespace GoC
 					if (this._cts.IsCancellationRequested)
 						break;
 
-					await Task.Run(() => jsEngine.Execute(script));
+					try
+					{
+						await Task.Run(() => jsEngine.Execute(script));
+					}
+					catch (Exception ex)
+					{
+						Debug.LogException(ex, this);
+					}
 				}
 			}
 			finally
