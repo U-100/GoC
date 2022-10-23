@@ -11,14 +11,18 @@ namespace GoC
 		[SerializeField] private float _speed = 1.0f;
 		[SerializeField] private float _angularSpeed = 90.0f;
 		[SerializeField] private LayerMask _walkableLayerMask;
+		[SerializeField] private LayerMask _usableLayerMask;
 
 		private SynchronizationContext _synchronizationContext;
 		private Transform _transform;
 
+		private readonly Collider[] _tempSpatialQueryResult = new Collider[1];
+
 		public override void SetupRuntimeApi(Engine engine, CancellationToken executionCt)
 		{
 			engine.SetValue("move", (Action<int>)(distance => this.Move(distance, executionCt)));
-			engine.SetValue("turn", (Action<int>)(distance => this.Turn(distance, executionCt)));
+			engine.SetValue("turn", (Action<int>)(angle => this.Turn(angle, executionCt)));
+			engine.SetValue("use", (Action<int>)(distance => this.Use(executionCt)));
 		}
 
 		void Awake()
@@ -29,6 +33,7 @@ namespace GoC
 
 		private void Move(int distance, CancellationToken executionCt) => Post(() => MoveImpl(distance, executionCt));
 		private void Turn(int angle, CancellationToken executionCt) => Post(() => TurnImpl(angle, executionCt));
+		private void Use(CancellationToken executionCt) => Post(() => UseImpl(executionCt));
 
 		private void Post(Func<Task> f)
 		{
@@ -107,6 +112,20 @@ namespace GoC
 			}
 
 			this.transform.rotation = targetRotation;
+		}
+
+		private async Task UseImpl(CancellationToken executionCt)
+		{
+			Vector3 target = this._transform.position + (Vector3)(this._transform.localToWorldMatrix * Vector3.forward);
+
+			if (Physics.OverlapSphereNonAlloc(target, 0, this._tempSpatialQueryResult, this._usableLayerMask) == 0)
+				throw new Exception("Nothing usable here");
+
+			IUsable usable = this._tempSpatialQueryResult[0].GetComponent<IUsable>();
+			if(usable == null)
+				throw new Exception("That's unusable");
+
+			await usable.Use(executionCt);
 		}
 	}
 }

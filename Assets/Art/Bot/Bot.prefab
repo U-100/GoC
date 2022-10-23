@@ -33,7 +33,7 @@ Transform:
   m_Children:
   - {fileID: 4736839311297217625}
   m_Father: {fileID: 0}
-  m_RootOrder: 16
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &49330841587294631
 MonoBehaviour:
@@ -52,6 +52,9 @@ MonoBehaviour:
   _walkableLayerMask:
     serializedVersion: 2
     m_Bits: 512
+  _usableLayerMask:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!54 &49330841587294634
 Rigidbody:
   m_ObjectHideFlags: 0
