@@ -8,6 +8,8 @@
             <ui:VisualElement style="flex-grow: 1;" />
             <ui:Button tabindex="-1" text="Go (Ctrl + Enter)" display-tooltip-when-elided="true" name="Go" class="goc-button" style="flex-shrink: 1;" />
         </ui:VisualElement>
-        <ui:VisualElement style="flex-grow: 2;" />
+        <ui:VisualElement style="flex-grow: 2;">
+            <ui:TextField picking-mode="Ignore" multiline="true" name="Log" focusable="false" readonly="true" class="goc-text" style="flex-grow: 1; align-items: flex-end;" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

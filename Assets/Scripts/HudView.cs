@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -8,11 +9,23 @@ using UnityEngine.UIElements;
 
 namespace GoC
 {
-	public class Hud
+	public class Hud : IDisposable
 	{
 		private TaskCompletionSource<bool> _executeTcs;
 
-		public string script { get; set; } = "";
+		private string _script { get; set; } = "";
+
+		public Hud()
+		{
+			Application.logMessageReceivedThreaded += OnLogMessageReceived;
+		}
+
+		public void Dispose()
+		{
+			Application.logMessageReceivedThreaded -= OnLogMessageReceived;
+		}
+
+		public string logText { get; private set; }
 
 		public async IAsyncEnumerable<string> GetScriptsAsync([EnumeratorCancellation] CancellationToken ct)
 		{
@@ -22,14 +35,14 @@ namespace GoC
 				using (ct.Register(this.StopGetScriptsAsync))
 				{
 					if (await this._executeTcs.Task)
-						yield return this.script;
+						yield return this._script;
 					else
 						break;
 				}
 			}
 		}
 
-		public void SetScript(string s) => this.script = s;
+		public void SetScript(string s) => this._script = s;
 
 		public void Execute()
 		{
@@ -43,6 +56,12 @@ namespace GoC
 			TaskCompletionSource<bool> tempExecuteTcs = this._executeTcs;
 			this._executeTcs = null;
 			tempExecuteTcs?.SetResult(false);
+		}
+
+		private void OnLogMessageReceived(string condition, string stacktrace, LogType type)
+		{
+			// TODO: need threading protection
+			this.logText += condition + "\n";
 		}
 	}
 
@@ -60,10 +79,10 @@ namespace GoC
 			Button button = rootVisualElement.Q<Button>("Go");
 			button.clicked += () => this.viewModel?.Execute();
 
-			TextField textField = rootVisualElement.Q<TextField>("ImmediateScript");
-			textField.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
-			textField.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
-			textField.RegisterCallback<KeyDownEvent>(
+			TextField immediateScript = rootVisualElement.Q<TextField>("ImmediateScript");
+			immediateScript.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
+			immediateScript.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
+			immediateScript.RegisterCallback<KeyDownEvent>(
 				keyDownEvent =>
 				{
 					if (keyDownEvent.ctrlKey && keyDownEvent.keyCode == KeyCode.Return)
@@ -79,6 +98,11 @@ namespace GoC
 			if (this._justEnabled)
 				OnJustEnabled();
 			this._justEnabled = false;
+
+			UIDocument uiDocument = GetComponent<UIDocument>();
+			VisualElement rootVisualElement = uiDocument.rootVisualElement;
+			TextField logTextField = rootVisualElement.Q<TextField>("Log");
+			logTextField.SetValueWithoutNotify(this.viewModel.logText);
 		}
 
 		private void OnJustEnabled()
