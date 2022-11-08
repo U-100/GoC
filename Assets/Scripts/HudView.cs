@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -11,6 +12,8 @@ namespace GoC
 {
 	public class Hud : IDisposable
 	{
+		private const int MAX_LOG_LINES = 11;
+
 		private TaskCompletionSource<bool> _executeTcs;
 
 		private string _script { get; set; } = "";
@@ -62,7 +65,25 @@ namespace GoC
 		{
 			// TODO: need threading protection
 			this.logText += string.IsNullOrEmpty(this.logText) ? condition : "\n" + condition;
+			int linesCount = CountLines(this.logText);
+			if (linesCount > MAX_LOG_LINES)
+				this.logText = TrimLeadingLines(this.logText, linesCount - MAX_LOG_LINES);
 		}
+
+		private static int CountLines(string text)
+		{
+			if (string.IsNullOrEmpty(text))
+				return 0;
+
+			int linesCount = 1;
+			foreach (char c in text)
+				if (c == '\n')
+					++linesCount;
+
+			return linesCount;
+		}
+
+		private static string TrimLeadingLines(string text, int trimCount) => string.Join('\n', text.Split('\n').Skip(trimCount));
 	}
 
 	public class HudView : MonoBehaviour
