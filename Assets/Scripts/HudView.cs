@@ -61,13 +61,14 @@ namespace GoC
 		private void OnLogMessageReceived(string condition, string stacktrace, LogType type)
 		{
 			// TODO: need threading protection
-			this.logText += condition + "\n";
+			this.logText += string.IsNullOrEmpty(this.logText) ? condition : "\n" + condition;
 		}
 	}
 
 	public class HudView : MonoBehaviour
 	{
 		private bool _justEnabled;
+		private TextField _logTextField;
 
 		public Hud viewModel { get; set; }
 
@@ -90,6 +91,10 @@ namespace GoC
 				}
 			);
 
+			this._logTextField = rootVisualElement.Q<TextField>("Log");
+			//this._logTextField.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
+			this._logTextField.Q("unity-text-input").style.unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.LowerLeft);
+
 			this._justEnabled = true;
 		}
 
@@ -99,10 +104,12 @@ namespace GoC
 				OnJustEnabled();
 			this._justEnabled = false;
 
-			UIDocument uiDocument = GetComponent<UIDocument>();
-			VisualElement rootVisualElement = uiDocument.rootVisualElement;
-			TextField logTextField = rootVisualElement.Q<TextField>("Log");
-			logTextField.SetValueWithoutNotify(this.viewModel.logText);
+			if(this._logTextField.value != this.viewModel.logText)
+			{
+				this._logTextField.value = this.viewModel.logText;
+				this._logTextField.textSelection.cursorIndex = this._logTextField.value?.Length ?? 0;
+				this._logTextField.SelectNone();
+			}
 		}
 
 		private void OnJustEnabled()
