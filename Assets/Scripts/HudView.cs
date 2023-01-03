@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -88,54 +87,51 @@ namespace GoC
 
 	public class HudView : MonoBehaviour
 	{
-		private bool _justEnabled;
+		private UIDocument _uiDocument;
 		private TextField _logTextField;
 
 		public Hud viewModel { get; set; }
 
-		void OnEnable()
-		{
-			UIDocument uiDocument = GetComponent<UIDocument>();
-			VisualElement rootVisualElement = uiDocument.rootVisualElement;
-
-			Button button = rootVisualElement.Q<Button>("Go");
-			button.clicked += () => this.viewModel?.Execute();
-
-			TextField immediateScript = rootVisualElement.Q<TextField>("ImmediateScript");
-			immediateScript.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
-			immediateScript.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
-			immediateScript.RegisterCallback<KeyDownEvent>(
-				keyDownEvent =>
-				{
-					if (keyDownEvent.ctrlKey && keyDownEvent.keyCode == KeyCode.Return)
-						this.viewModel?.Execute();
-				}
-			);
-
-			this._logTextField = rootVisualElement.Q<TextField>("Log");
-			//this._logTextField.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
-			this._logTextField.Q("unity-text-input").style.unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.LowerLeft);
-
-			this._justEnabled = true;
-		}
+		void OnEnable() => (this._uiDocument = GetComponent<UIDocument>()).enabled = false;
 
 		void Update()
 		{
-			if (this._justEnabled)
-				OnJustEnabled();
-			this._justEnabled = false;
-
-			if(this._logTextField.value != this.viewModel.logText)
+			if (this.viewModel != null)
 			{
-				this._logTextField.value = this.viewModel.logText;
-				this._logTextField.textSelection.cursorIndex = this._logTextField.value?.Length ?? 0;
-				this._logTextField.SelectNone();
-			}
-		}
+				if (!this._uiDocument.enabled)
+				{
+					this._uiDocument.enabled = true;
 
-		private void OnJustEnabled()
-		{
-			GetComponent<UIDocument>().rootVisualElement.Q(TextInputBaseField<string>.textInputUssName).Focus();
+					VisualElement rootVisualElement = this._uiDocument.rootVisualElement;
+
+					Button button = rootVisualElement.Q<Button>("Go");
+					button.clicked += () => this.viewModel?.Execute();
+
+					TextField immediateScript = rootVisualElement.Q<TextField>("ImmediateScript");
+					immediateScript.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
+					immediateScript.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
+					immediateScript.RegisterCallback<KeyDownEvent>(
+						keyDownEvent =>
+						{
+							if (keyDownEvent.ctrlKey && keyDownEvent.keyCode == KeyCode.Return)
+								this.viewModel?.Execute();
+						}
+					);
+
+					this._logTextField = rootVisualElement.Q<TextField>("Log");
+					//this._logTextField.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
+					this._logTextField.Q("unity-text-input").style.unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.LowerLeft);
+
+					rootVisualElement.Q(TextInputBaseField<string>.textInputUssName).Focus();
+				}
+
+				if(this._logTextField.value != this.viewModel.logText)
+				{
+					this._logTextField.value = this.viewModel.logText;
+					this._logTextField.textSelection.cursorIndex = this._logTextField.value?.Length ?? 0;
+					this._logTextField.SelectNone();
+				}
+			}
 		}
 	}
 }
