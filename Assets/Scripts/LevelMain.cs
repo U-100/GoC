@@ -8,11 +8,18 @@ namespace GoC
 {
 	public class LevelMain : ExclusiveMainBehaviour
 	{
+		[SerializeField] private GameObject _enableForTesting;
 		[SerializeField] private HudView _hudView;
 
 		private CancellationTokenSource _cts;
 
-		protected override void Run() => RunLevel();
+		protected override void Run()
+		{
+			if (this._enableForTesting != null)
+				this._enableForTesting.SetActive(true);
+
+			RunLevel();
+		}
 
 		public async void RunLevel()
 		{
@@ -20,7 +27,7 @@ namespace GoC
 
 			try
 			{
-				Hud hud = new Hud();
+				using Hud hud = new Hud();
 				this._hudView.viewModel = hud;
 
 				Engine jsEngine = new Engine();

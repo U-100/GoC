@@ -6,8 +6,16 @@ namespace GoC
 {
 	public class MenuMain : ExclusiveMainBehaviour
 	{
-		protected override async void Run()
+		protected override void Run()
 		{
+		}
+
+		public async void LoadLevel(string levelName)
+		{
+			Debug.Log($"LoadLevel(\"{levelName}\")");
+			
+			this.gameObject.SetActive(false);
+
 			AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("Test", LoadSceneMode.Additive);
 
 			while (!asyncOperation.isDone)
