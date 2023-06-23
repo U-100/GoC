@@ -21,7 +21,7 @@ namespace GoC
 			while (!asyncOperation.isDone)
 				await Task.Yield();
 
-			FindObjectOfType<LevelMain>().RunLevel();
+			FindFirstObjectByType<LevelMain>().RunLevel();
 		}
 	}
 }

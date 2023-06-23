@@ -33,7 +33,7 @@ namespace GoC
 				Engine jsEngine = new Engine();
 				jsEngine.SetValue("log", new Action<object>(Debug.Log));
 
-				foreach (RuntimeApiMarker runtimeApiMarker in FindObjectsOfType<RuntimeApiMarker>())
+				foreach (RuntimeApiMarker runtimeApiMarker in FindObjectsByType<RuntimeApiMarker>(FindObjectsSortMode.None))
 					runtimeApiMarker.SetupRuntimeApi(jsEngine, this._cts.Token);
 
 				await foreach (string script in hud.GetScriptsAsync(this._cts.Token))
