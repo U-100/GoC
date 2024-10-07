@@ -119,18 +119,11 @@ namespace GoC
 					);
 
 					this._logTextField = rootVisualElement.Q<TextField>("Log");
-					//this._logTextField.SetVerticalScrollerVisibility(ScrollerVisibility.Auto);
-					this._logTextField.Q("unity-text-input").style.unityTextAlign = new StyleEnum<TextAnchor>(TextAnchor.LowerLeft);
-
-					rootVisualElement.Q(TextInputBaseField<string>.textInputUssName).Focus();
+					immediateScript.Focus();
 				}
 
 				if(this._logTextField.value != this.viewModel.logText)
-				{
 					this._logTextField.value = this.viewModel.logText;
-					this._logTextField.textSelection.cursorIndex = this._logTextField.value?.Length ?? 0;
-					this._logTextField.SelectNone();
-				}
 			}
 		}
 	}

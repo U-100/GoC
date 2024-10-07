@@ -1,16 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/GoCStyles.uss?fileID=7433441132597879392&amp;guid=80a2e23be22fad8418ac023d59da84e2&amp;type=3#GoCStyles" />
     <ui:VisualElement style="flex-grow: 1;">
-        <ui:VisualElement style="flex-direction: row;">
-            <ui:TextField picking-mode="Ignore" name="ImmediateScript" multiline="true" class="goc-text goc-border" style="flex-grow: 1; min-height: 320px; max-height: 320px; background-color: rgba(255, 255, 255, 0.25);" />
-        </ui:VisualElement>
-        <ui:VisualElement style="flex-direction: row; display: none;">
-            <ui:VisualElement style="flex-grow: 1;" />
-            <ui:Button tabindex="-1" text="Go (Ctrl + Enter)" display-tooltip-when-elided="true" name="Go1" class="goc-button" style="flex-shrink: 1;" />
-        </ui:VisualElement>
-        <ui:VisualElement style="flex-grow: 2;">
-            <ui:TextField picking-mode="Ignore" multiline="true" name="Log" focusable="false" readonly="true" class="goc-text" style="flex-grow: 1; align-items: flex-end; max-height: 293px; min-height: 293px;" />
-            <ui:VisualElement style="flex-grow: 2; border-top-color: rgb(80, 120, 231); border-top-width: 1px; max-width: 100px;" />
+        <ui:TextField picking-mode="Ignore" name="ImmediateScript" multiline="true" class="goc-text goc-border" style="flex-grow: 1; min-height: 320px; background-color: rgba(255, 255, 255, 0.25);" />
+        <ui:VisualElement style="flex-grow: 3;">
+            <ui:TextField picking-mode="Ignore" multiline="true" name="Log" focusable="false" readonly="true" class="goc-text" style="flex-grow: 1; align-items: flex-start;" />
             <ui:Button tabindex="-1" text="Go (Ctrl + Enter)" display-tooltip-when-elided="true" name="Go" class="goc-button" style="flex-shrink: 1; position: absolute; right: 0; top: 0;" />
         </ui:VisualElement>
     </ui:VisualElement>
