@@ -22,7 +22,7 @@ namespace GoC
 		{
 			engine.SetValue("move", (Action<int>)(distance => Move(distance, executionCt)));
 			engine.SetValue("turn", (Action<int>)(angle => Turn(angle, executionCt)));
-			engine.SetValue("use", (Action<int>)(distance => Use(executionCt)));
+			engine.SetValue("use", (Action)(() => Use(executionCt)));
 		}
 
 		void Awake()
