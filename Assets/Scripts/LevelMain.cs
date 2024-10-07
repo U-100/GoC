@@ -15,30 +15,30 @@ namespace GoC
 
 		protected override void Run()
 		{
-			if (this._enableForTesting != null)
-				this._enableForTesting.SetActive(true);
+			if (_enableForTesting != null)
+				_enableForTesting.SetActive(true);
 
 			RunLevel();
 		}
 
 		public async void RunLevel()
 		{
-			this._cts = new CancellationTokenSource();
+			_cts = new CancellationTokenSource();
 
 			try
 			{
 				using Hud hud = new Hud();
-				this._hudView.viewModel = hud;
+				_hudView.viewModel = hud;
 
 				Engine jsEngine = new Engine();
 				jsEngine.SetValue("log", new Action<object>(Debug.Log));
 
 				foreach (RuntimeApiMarker runtimeApiMarker in FindObjectsByType<RuntimeApiMarker>(FindObjectsSortMode.None))
-					runtimeApiMarker.SetupRuntimeApi(jsEngine, this._cts.Token);
+					runtimeApiMarker.SetupRuntimeApi(jsEngine, _cts.Token);
 
-				await foreach (string script in hud.GetScriptsAsync(this._cts.Token))
+				await foreach (string script in hud.GetScriptsAsync(_cts.Token))
 				{
-					if (this._cts.IsCancellationRequested)
+					if (_cts.IsCancellationRequested)
 						break;
 
 					try
@@ -53,7 +53,7 @@ namespace GoC
 			}
 			finally
 			{
-				this._hudView.viewModel = null;
+				_hudView.viewModel = null;
 			}
 		}
 	}

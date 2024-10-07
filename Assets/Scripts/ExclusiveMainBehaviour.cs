@@ -13,14 +13,14 @@ namespace GoC
 			if (!_exclusiveSlot)
 			{
 				_exclusiveSlot = true;
-				this._shouldStart = true;
+				_shouldStart = true;
 				Application.quitting += () => _exclusiveSlot = false;
 			}
 		}
 
 		protected virtual void Start()
 		{
-			if (this._shouldStart)
+			if (_shouldStart)
 				Run();
 		}
 

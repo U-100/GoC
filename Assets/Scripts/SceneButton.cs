@@ -11,7 +11,7 @@ namespace GoC
 		public void OnPointerClick(PointerEventData eventData)
 		{
 			Debug.Log("OnPointerClick");
-			this._onPointerClick?.Invoke("Test");
+			_onPointerClick?.Invoke("Test");
 		}
 	}
 }

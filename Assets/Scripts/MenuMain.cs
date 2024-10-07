@@ -14,7 +14,7 @@ namespace GoC
 		{
 			Debug.Log($"LoadLevel(\"{levelName}\")");
 			
-			this.gameObject.SetActive(false);
+			gameObject.SetActive(false);
 
 			AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("Test", LoadSceneMode.Additive);
 

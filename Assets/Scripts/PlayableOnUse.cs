@@ -12,8 +12,8 @@ namespace GoC
 
 		public Task Use(CancellationToken executionCt)
 		{
-			this._playableDirector.Play();
-			return Task.Delay(TimeSpan.FromSeconds(this._playableDirector.playableAsset.duration), executionCt);
+			_playableDirector.Play();
+			return Task.Delay(TimeSpan.FromSeconds(_playableDirector.playableAsset.duration), executionCt);
 		}
 	}
 }

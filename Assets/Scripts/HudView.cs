@@ -33,40 +33,40 @@ namespace GoC
 		{
 			while (!ct.IsCancellationRequested)
 			{
-				this._executeTcs = new TaskCompletionSource<bool>();
-				using (ct.Register(this.StopGetScriptsAsync))
+				_executeTcs = new TaskCompletionSource<bool>();
+				using (ct.Register(StopGetScriptsAsync))
 				{
-					if (await this._executeTcs.Task)
-						yield return this._script;
+					if (await _executeTcs.Task)
+						yield return _script;
 					else
 						break;
 				}
 			}
 		}
 
-		public void SetScript(string s) => this._script = s;
+		public void SetScript(string s) => _script = s;
 
 		public void Execute()
 		{
-			TaskCompletionSource<bool> tempExecuteTcs = this._executeTcs;
-			this._executeTcs = null;
+			TaskCompletionSource<bool> tempExecuteTcs = _executeTcs;
+			_executeTcs = null;
 			tempExecuteTcs?.SetResult(true);
 		}
 
 		private void StopGetScriptsAsync()
 		{
-			TaskCompletionSource<bool> tempExecuteTcs = this._executeTcs;
-			this._executeTcs = null;
+			TaskCompletionSource<bool> tempExecuteTcs = _executeTcs;
+			_executeTcs = null;
 			tempExecuteTcs?.SetResult(false);
 		}
 
 		private void OnLogMessageReceived(string condition, string stacktrace, LogType type)
 		{
 			// TODO: need threading protection
-			this.logText += string.IsNullOrEmpty(this.logText) ? condition : "\n" + condition;
-			int linesCount = CountLines(this.logText);
+			logText += string.IsNullOrEmpty(logText) ? condition : "\n" + condition;
+			int linesCount = CountLines(logText);
 			if (linesCount > MAX_LOG_LINES)
-				this.logText = TrimLeadingLines(this.logText, linesCount - MAX_LOG_LINES);
+				logText = TrimLeadingLines(logText, linesCount - MAX_LOG_LINES);
 		}
 
 		private static int CountLines(string text)
@@ -92,38 +92,38 @@ namespace GoC
 
 		public Hud viewModel { get; set; }
 
-		void OnEnable() => (this._uiDocument = GetComponent<UIDocument>()).enabled = false;
+		void OnEnable() => (_uiDocument = GetComponent<UIDocument>()).enabled = false;
 
 		void Update()
 		{
-			if (this.viewModel != null)
+			if (viewModel != null)
 			{
-				if (!this._uiDocument.enabled)
+				if (!_uiDocument.enabled)
 				{
-					this._uiDocument.enabled = true;
+					_uiDocument.enabled = true;
 
-					VisualElement rootVisualElement = this._uiDocument.rootVisualElement;
+					VisualElement rootVisualElement = _uiDocument.rootVisualElement;
 
 					Button button = rootVisualElement.Q<Button>("Go");
-					button.clicked += () => this.viewModel?.Execute();
+					button.clicked += () => viewModel?.Execute();
 
 					TextField immediateScript = rootVisualElement.Q<TextField>("ImmediateScript");
 					immediateScript.verticalScrollerVisibility = ScrollerVisibility.Auto;
-					immediateScript.RegisterValueChangedCallback(changeEvent => this.viewModel?.SetScript(changeEvent.newValue));
+					immediateScript.RegisterValueChangedCallback(changeEvent => viewModel?.SetScript(changeEvent.newValue));
 					immediateScript.RegisterCallback<KeyDownEvent>(
 						keyDownEvent =>
 						{
 							if (keyDownEvent.ctrlKey && keyDownEvent.keyCode == KeyCode.Return)
-								this.viewModel?.Execute();
+								viewModel?.Execute();
 						}
 					);
 
-					this._logTextField = rootVisualElement.Q<TextField>("Log");
+					_logTextField = rootVisualElement.Q<TextField>("Log");
 					immediateScript.Focus();
 				}
 
-				if(this._logTextField.value != this.viewModel.logText)
-					this._logTextField.value = this.viewModel.logText;
+				if(_logTextField.value != viewModel.logText)
+					_logTextField.value = viewModel.logText;
 			}
 		}
 	}
