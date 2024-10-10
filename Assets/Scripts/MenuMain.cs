@@ -4,24 +4,24 @@ using UnityEngine.SceneManagement;
 
 namespace GoC
 {
-	public class MenuMain : ExclusiveMainBehaviour
-	{
-		protected override void Run()
-		{
-		}
+    public class MenuMain : ExclusiveMainBehaviour
+    {
+        protected override void Run()
+        {
+        }
 
-		public async void LoadLevel(string levelName)
-		{
-			Debug.Log($"LoadLevel(\"{levelName}\")");
-			
-			gameObject.SetActive(false);
+        public async void LoadLevel(string levelName)
+        {
+            Debug.Log($"LoadLevel(\"{levelName}\")");
 
-			AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("Test", LoadSceneMode.Additive);
+            gameObject.SetActive(false);
 
-			while (!asyncOperation.isDone)
-				await Task.Yield();
+            AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("Test", LoadSceneMode.Additive);
 
-			FindFirstObjectByType<LevelMain>().RunLevel();
-		}
-	}
+            while (!asyncOperation.isDone)
+                await Task.Yield();
+
+            FindFirstObjectByType<LevelMain>().RunLevel();
+        }
+    }
 }

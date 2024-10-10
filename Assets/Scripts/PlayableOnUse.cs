@@ -6,14 +6,14 @@ using UnityEngine.Playables;
 
 namespace GoC
 {
-	public class PlayableOnUse : MonoBehaviour, IUsable
-	{
-		[SerializeField] private PlayableDirector _playableDirector;
+    public class PlayableOnUse : MonoBehaviour, IUsable
+    {
+        [SerializeField] private PlayableDirector _playableDirector;
 
-		public Task Use(CancellationToken executionCt)
-		{
-			_playableDirector.Play();
-			return Task.Delay(TimeSpan.FromSeconds(_playableDirector.playableAsset.duration), executionCt);
-		}
-	}
+        public Task Use(CancellationToken executionCt)
+        {
+            _playableDirector.Play();
+            return Task.Delay(TimeSpan.FromSeconds(_playableDirector.playableAsset.duration), executionCt);
+        }
+    }
 }

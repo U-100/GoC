@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace GoC
 {
-	public interface IUsable
-	{
-		Task Use(CancellationToken executionCt);
-	}
+    public interface IUsable
+    {
+        Task Use(CancellationToken executionCt);
+    }
 }
