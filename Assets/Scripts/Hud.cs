@@ -13,7 +13,7 @@ namespace GoC
     {
         private const int MAX_LOG_LINES = 11;
 
-        private TaskCompletionSource<bool> _executeTcs;
+        private TaskCompletionSource<string> _executeTcs;
 
         public Hud()
         {
@@ -33,33 +33,20 @@ namespace GoC
 
         public async IAsyncEnumerable<string> GetScriptsAsync([EnumeratorCancellation] CancellationToken ct)
         {
-            while (!ct.IsCancellationRequested)
-            {
-                _executeTcs = new TaskCompletionSource<bool>();
-                using (ct.Register(StopGetScriptsAsync))
-                {
-                    if (await _executeTcs.Task)
-                        yield return script;
-                    else
-                        break;
-                }
-            }
+            using (ct.Register(() => StopGetScriptsAsync()))
+                while (!ct.IsCancellationRequested)
+                    yield return await (_executeTcs = new TaskCompletionSource<string>()).Task;
         }
 
         public void Execute()
         {
-            // _executeTcs can be null if hud is currently not ready to accept new script for execution
-            TaskCompletionSource<bool> tempExecuteTcs = _executeTcs;
+            // _executeTcs can be null if hud is currently not ready to accept new script for execution (i.e. it hasn't finished executing previous script yet)
+            TaskCompletionSource<string> tempExecuteTcs = _executeTcs;
             _executeTcs = null;
-            tempExecuteTcs?.SetResult(true);
+            tempExecuteTcs?.SetResult(script);
         }
 
-        private void StopGetScriptsAsync()
-        {
-            TaskCompletionSource<bool> tempExecuteTcs = _executeTcs;
-            _executeTcs = null;
-            tempExecuteTcs?.SetResult(false);
-        }
+        private void StopGetScriptsAsync() => _executeTcs?.SetCanceled();
 
         private void OnLogMessageReceived(string condition, string stacktrace, LogType type)
         {

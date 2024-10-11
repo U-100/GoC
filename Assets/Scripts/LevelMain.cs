@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Jint;
 using UnityEngine;
@@ -11,8 +10,6 @@ namespace GoC
         [SerializeField] private GameObject _enableForTesting;
         [SerializeField] private HudView _hudView;
 
-        private CancellationTokenSource _cts;
-
         protected override void Run()
         {
             if (_enableForTesting != null)
@@ -23,8 +20,6 @@ namespace GoC
 
         public async void RunLevel()
         {
-            _cts = new CancellationTokenSource();
-
             try
             {
                 using Hud hud = new Hud();
@@ -34,11 +29,11 @@ namespace GoC
                 jsEngine.SetValue("log", new Action<object>(Debug.Log));
 
                 foreach (RuntimeApiMarker runtimeApiMarker in FindObjectsByType<RuntimeApiMarker>(FindObjectsSortMode.None))
-                    runtimeApiMarker.SetupRuntimeApi(jsEngine, _cts.Token);
+                    runtimeApiMarker.SetupRuntimeApi(jsEngine, destroyCancellationToken);
 
-                await foreach (string script in hud.GetScriptsAsync(_cts.Token))
+                await foreach (string script in hud.GetScriptsAsync(destroyCancellationToken))
                 {
-                    if (_cts.IsCancellationRequested)
+                    if (destroyCancellationToken.IsCancellationRequested)
                         break;
 
                     try
