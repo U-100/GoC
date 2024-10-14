@@ -3,7 +3,7 @@
     <ui:VisualElement data-source-type="GoC.Hud, Assembly-CSharp" style="flex-grow: 1;">
         <ui:TextField picking-mode="Ignore" name="ImmediateScript" multiline="true" vertical-scroller-visibility="Auto" class="goc-text goc-border" style="flex-grow: 1; min-height: 320px; background-color: rgba(255, 255, 255, 0.25);">
             <Bindings>
-                <ui:DataBinding property="value" data-source-path="script" binding-mode="ToSource" />
+                <ui:DataBinding property="value" data-source-path="script" binding-mode="TwoWay" />
             </Bindings>
         </ui:TextField>
         <ui:VisualElement style="flex-grow: 3;">

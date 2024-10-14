@@ -244,6 +244,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _enableForTesting: {fileID: 575752448}
   _hudView: {fileID: 2006952725}
+  _scriptFilePath: JavaScript/Test/index.js
 --- !u!1 &278531543
 GameObject:
   m_ObjectHideFlags: 0
