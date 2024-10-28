@@ -33,7 +33,8 @@ namespace GoC
                 foreach (RuntimeApiMarker runtimeApiMarker in FindObjectsByType<RuntimeApiMarker>(FindObjectsSortMode.None))
                     runtimeApiMarker.SetupRuntimeApi(jsEngine, destroyCancellationToken);
 
-                hud.script = await File.ReadAllTextAsync(_scriptFilePath);
+                if(!string.IsNullOrEmpty(_scriptFilePath))
+                    hud.script = await File.ReadAllTextAsync(_scriptFilePath);
                 
                 await foreach (string script in hud.GetScriptsAsync(destroyCancellationToken))
                 {
