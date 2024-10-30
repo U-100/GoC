@@ -1,5 +1,6 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.VFX;
 
 using static Unity.Mathematics.math;
 
@@ -7,6 +8,8 @@ namespace GoC
 {
     public class Unit : MonoBehaviour, IMyUnit
     {
+        [SerializeField] private VisualEffect _exhaust;
+        
         private Vector3 _targetPosition;
         private Quaternion _targetRotation;
 
@@ -14,6 +17,8 @@ namespace GoC
         {
             _targetPosition = transform.position;
             _targetRotation = transform.rotation;
+
+            _exhaust.Stop();
         }
 
         void Update()
@@ -37,6 +42,9 @@ namespace GoC
             
             // settle transform
             transform.SetPositionAndRotation(_targetPosition, _targetRotation);
+
+            // stop engine emission
+            _exhaust.Stop();
         }
 
         public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
@@ -45,6 +53,7 @@ namespace GoC
         {
             Settle();
             _targetPosition = transform.position + transform.forward;
+            _exhaust.Play();
         }
 
         public void TurnLeft()
