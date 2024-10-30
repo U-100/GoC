@@ -1,9 +1,11 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
 
+using static Unity.Mathematics.math;
+
 namespace GoC
 {
-    public class Unit : MonoBehaviour, IUnit
+    public class Unit : MonoBehaviour, IMyUnit
     {
         private Vector3 _targetPosition;
         private Quaternion _targetRotation;
@@ -36,7 +38,9 @@ namespace GoC
             // settle transform
             transform.SetPositionAndRotation(_targetPosition, _targetRotation);
         }
-        
+
+        public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
+
         public void Move()
         {
             Settle();
@@ -46,13 +50,13 @@ namespace GoC
         public void TurnLeft()
         {
             Settle();
-            _targetRotation = quaternion.RotateY(90 * Mathf.Deg2Rad) * transform.rotation;
+            _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;
         }
 
         public void TurnRight()
         {
             Settle();
-            _targetRotation = quaternion.RotateY(-90 * Mathf.Deg2Rad) * transform.rotation;
+            _targetRotation = Quaternion.Euler(0, -90, 0) * transform.rotation;
         }
     }
 }

@@ -23,17 +23,16 @@ namespace GoC
         private void OnEnable()
         {
             _engine = EngineFactory.Create();
-            _redTickFunction = PrepareTeam(_engine, "red", _redStartingUnit, _redScriptFilePath);
-            _blueTickFunction = PrepareTeam(_engine, "blue", _blueStartingUnit, _blueScriptFilePath);
+            UnifiedModel unifiedModel = new UnifiedModel(_redStartingUnit, _blueStartingUnit);
+            _redTickFunction = PrepareTeam(_engine, unifiedModel.red, _redScriptFilePath);
+            _blueTickFunction = PrepareTeam(_engine, unifiedModel.blue, _blueScriptFilePath);
         }
 
-        private static JsValue PrepareTeam(Engine engine, string team, Unit startingUnit, string scriptFilePath)
+        private static JsValue PrepareTeam(Engine engine, IModel model, string scriptFilePath)
         {
-            Model model = new Model(startingUnit) { team = team };
-
             string script = File.ReadAllText(scriptFilePath);
-            engine.Modules.Add(team, script);
-            ObjectInstance moduleInstance = engine.Modules.Import(team);
+            engine.Modules.Add(model.team, script);
+            ObjectInstance moduleInstance = engine.Modules.Import(model.team);
             JsValue initFunction = engine.GetValue(moduleInstance, "init");
             engine.Invoke(initFunction, model);
             return engine.GetValue(moduleInstance, "tick");

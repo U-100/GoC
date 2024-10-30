@@ -9,7 +9,7 @@ var unitDataStore = {}
 
 export function tick()
 {
-    for(let unit of model.units)
+    for(let unit of model.myUnits)
     {
         let unitData = (unitDataStore[unit] ??= {});
 

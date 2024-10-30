@@ -1,8 +1,14 @@
 ﻿using System.Collections.Generic;
+using Unity.Mathematics;
 
 namespace GoC
 {
     public interface IUnit
+    {
+        int2 pos { get; }
+    }
+    
+    public interface IMyUnit : IUnit
     {
         void Move();
         void TurnLeft();
@@ -13,6 +19,7 @@ namespace GoC
     {
         string team { get; }
         
-        IReadOnlyList<IUnit> units { get; }
+        IReadOnlyList<IMyUnit> myUnits { get; }
+        IReadOnlyList<IUnit> enemies { get; }
     }
 }
