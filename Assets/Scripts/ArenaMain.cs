@@ -14,7 +14,6 @@ namespace GoC
         private Engine _engine;
         private JsValue _redTickFunction;
 
-        private const float TICK = 1;
         private float _tickCooldown;
 
         private void OnEnable()
@@ -47,7 +46,7 @@ namespace GoC
             if((_tickCooldown -= Time.deltaTime) <= 0)
             {
                 _engine.Invoke(_redTickFunction);
-                _tickCooldown += TICK;
+                _tickCooldown += Tick.TIME;
             }
         }
     }

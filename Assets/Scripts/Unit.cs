@@ -16,8 +16,11 @@ namespace GoC
 
         void Update()
         {
-            transform.position = Vector3.MoveTowards(transform.position, _targetPosition, 1 * Time.deltaTime);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation, 90 * Time.deltaTime);
+            float linearSpeed = 1 / Tick.TIME; // units per tick
+            transform.position = Vector3.MoveTowards(transform.position, _targetPosition, linearSpeed * Time.deltaTime);
+
+            float rotationSpeed = 90 / Tick.TIME; // degrees per tick
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation, rotationSpeed * Time.deltaTime);
         }
         
         private void Settle()
