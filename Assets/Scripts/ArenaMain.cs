@@ -8,32 +8,35 @@ namespace GoC
 {
     public class ArenaMain : MonoBehaviour
     {
+        [SerializeField] private Unit _redStartingUnit;
         [SerializeField] private string _redScriptFilePath;
-        [SerializeField] private Unit _unit;
+
+        [SerializeField] private Unit _blueStartingUnit;
+        [SerializeField] private string _blueScriptFilePath;
 
         private Engine _engine;
         private JsValue _redTickFunction;
+        private JsValue _blueTickFunction;
 
         private float _tickCooldown;
 
         private void OnEnable()
         {
-            if (!string.IsNullOrEmpty(_redScriptFilePath))
-            {
-                _engine = EngineFactory.Create();
-                
-                string redScript = File.ReadAllText(_redScriptFilePath);
-                _engine.Modules.Add("red", redScript);
+            _engine = EngineFactory.Create();
+            _redTickFunction = PrepareTeam(_engine, "red", _redStartingUnit, _redScriptFilePath);
+            _blueTickFunction = PrepareTeam(_engine, "blue", _blueStartingUnit, _blueScriptFilePath);
+        }
 
-                ObjectInstance redModuleInstance = _engine.Modules.Import("red");
+        private static JsValue PrepareTeam(Engine engine, string team, Unit startingUnit, string scriptFilePath)
+        {
+            Model model = new Model(startingUnit) { team = team };
 
-                Model redModel = new Model(_unit) { team = "red" };
-
-                JsValue redInitFunction = _engine.GetValue(redModuleInstance, "init");
-                _engine.Invoke(redInitFunction, redModel);
-
-                _redTickFunction = _engine.GetValue(redModuleInstance, "tick");
-            }
+            string script = File.ReadAllText(scriptFilePath);
+            engine.Modules.Add(team, script);
+            ObjectInstance moduleInstance = engine.Modules.Import(team);
+            JsValue initFunction = engine.GetValue(moduleInstance, "init");
+            engine.Invoke(initFunction, model);
+            return engine.GetValue(moduleInstance, "tick");
         }
 
         private void OnDisable()
@@ -46,6 +49,7 @@ namespace GoC
             if((_tickCooldown -= Time.deltaTime) <= 0)
             {
                 _engine.Invoke(_redTickFunction);
+                _engine.Invoke(_blueTickFunction);
                 _tickCooldown += Tick.TIME;
             }
         }

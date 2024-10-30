@@ -328,8 +328,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af1e62ed9942425d82ec1578b7ac6695, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _redStartingUnit: {fileID: 1603734184}
   _redScriptFilePath: JavaScript/Test/red.js
-  _unit: {fileID: 1603734184}
+  _blueStartingUnit: {fileID: 1117846193}
+  _blueScriptFilePath: JavaScript/Test/red.js
 --- !u!1 &278531543
 GameObject:
   m_ObjectHideFlags: 0
@@ -773,6 +775,83 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &799691754
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -678588488315902003, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 74b211223ec6303469fbc7e6db94362a, type: 2}
+    - target: {fileID: 919132149155446097, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: m_Name
+      value: blue_bot
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1117846193}
+  m_SourcePrefab: {fileID: 100100000, guid: 7c3c0906f79369c49a47726636e12d8b, type: 3}
 --- !u!850595691 &1040069291
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -834,6 +913,24 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
   m_RespectSceneVisibilityWhenBakingGI: 0
+--- !u!1 &1117846192 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7c3c0906f79369c49a47726636e12d8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 799691754}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1117846193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1117846192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4528f46c50cb4c1a9bf2d942c5193a37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1417224636
 GameObject:
   m_ObjectHideFlags: 0
@@ -2083,7 +2180,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
         type: 3}
@@ -2130,10 +2227,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -678588488315902003, guid: 7c3c0906f79369c49a47726636e12d8b,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 18dcaa68376922b4e8b51168a2950639, type: 2}
     - target: {fileID: 919132149155446097, guid: 7c3c0906f79369c49a47726636e12d8b,
         type: 3}
       propertyPath: m_Name
-      value: flying_bot
+      value: red_bot
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2384,4 +2486,5 @@ SceneRoots:
   - {fileID: 278531547}
   - {fileID: 582264391}
   - {fileID: 1461136135}
+  - {fileID: 799691754}
   - {fileID: 1417224641}
