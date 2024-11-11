@@ -10,62 +10,69 @@ namespace GoC
     {
         [SerializeField] private VisualEffect _exhaust;
         
-        private Vector3 _targetPosition;
-        private Quaternion _targetRotation;
+        private Vector3? _targetPosition;
+        private Quaternion? _targetRotation;
 
-        void Start()
-        {
-            _targetPosition = transform.position;
-            _targetRotation = transform.rotation;
+        public int id => GetInstanceID();
+        public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
 
-            _exhaust.Stop();
-        }
-
-        void Update()
-        {
-            float linearSpeed = 1 / Tick.TIME; // units per tick
-            transform.position = Vector3.MoveTowards(transform.position, _targetPosition, linearSpeed * Time.deltaTime);
-
-            float rotationSpeed = 90 / Tick.TIME; // degrees per tick
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation, rotationSpeed * Time.deltaTime);
-        }
-        
-        private void Settle()
-        {
-            // eliminate rounding errors in position
-            _targetPosition.x = Mathf.Round(_targetPosition.x);
-            _targetPosition.y = Mathf.Round(_targetPosition.y);
-            _targetPosition.z = Mathf.Round(_targetPosition.z);
-
-            // eliminate rounding errors in rotation
-            _targetRotation = Quaternion.Euler(0, Mathf.Round(_targetRotation.eulerAngles.y / 90) * 90, 0);
-            
-            // settle transform
-            transform.SetPositionAndRotation(_targetPosition, _targetRotation);
-
-            // stop engine emission
-            _exhaust.Stop();
-        }
-
-        int2 IUnit.pos => (int2)round(float2(transform.position.x, transform.position.z));
-
-        void IMyUnit.Move()
+        public void Move()
         {
             Settle();
             _targetPosition = transform.position + transform.forward;
             _exhaust.Play();
         }
 
-        void IMyUnit.TurnLeft()
+        public void TurnLeft()
         {
             Settle();
             _targetRotation = Quaternion.Euler(0, -90, 0) * transform.rotation;
         }
 
-        void IMyUnit.TurnRight()
+        public void TurnRight()
         {
             Settle();
             _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;
+        }
+
+        void Start()
+        {
+            _exhaust.Stop();
+        }
+
+        void Update()
+        {
+            if(_targetPosition.HasValue)
+            {
+                float linearSpeed = 1 / Tick.TIME; // units per tick
+                transform.position = Vector3.MoveTowards(transform.position, _targetPosition.Value, linearSpeed * Time.deltaTime);
+            }
+
+            if(_targetRotation.HasValue)
+            {
+                float rotationSpeed = 90 / Tick.TIME; // degrees per tick
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation.Value, rotationSpeed * Time.deltaTime);
+            }
+        }
+        
+        private void Settle()
+        {
+            if (_targetPosition.HasValue)
+            {
+                // eliminate rounding errors in position
+                transform.position = new Vector3(Mathf.Round(_targetPosition.Value.x), Mathf.Round(_targetPosition.Value.y), Mathf.Round(_targetPosition.Value.z));
+                _targetPosition = null;
+            }
+
+            if (_targetRotation.HasValue)
+            {
+                // eliminate rounding errors in rotation
+                transform.rotation = Quaternion.Euler(0, Mathf.Round(_targetRotation.Value.eulerAngles.y / 90) * 90, 0);
+                _targetRotation = null;
+            }
+
+            // stop engine emission
+            _exhaust.Stop();
         }
     }
 }

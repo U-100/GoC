@@ -5,6 +5,7 @@ namespace GoC
 {
     public interface IUnit
     {
+        int id { get; }
         int2 pos { get; }
     }
     
@@ -15,11 +16,31 @@ namespace GoC
         void TurnRight();
     }
 
+    public interface IFactory
+    {
+        int id { get; }
+        int2 pos { get; }
+    }
+
+    public enum Result
+    {
+        Ok,
+        Busy,
+    }
+    
+    public interface IMyFactory : IFactory
+    {
+        Result Produce();
+    }
+
     public interface IModel
     {
         string team { get; }
         
+        IMyFactory myFactory { get; }
         IReadOnlyList<IMyUnit> myUnits { get; }
-        IReadOnlyList<IUnit> enemies { get; }
+        
+        IFactory enemyFactory { get; }
+        IReadOnlyList<IUnit> enemyUnits { get; }
     }
 }
