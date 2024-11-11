@@ -39,7 +39,7 @@ namespace GoC
 
         private void Fabricate()
         {
-            Unit unit = Instantiate(_unit, transform.position + transform.forward, Quaternion.identity);
+            Unit unit = Instantiate(_unit, transform.position, transform.rotation);
             _addUnit(unit);
         } 
     }
