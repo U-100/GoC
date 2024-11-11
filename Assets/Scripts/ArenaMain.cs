@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using Jint;
 using Jint.Native;
-using Jint.Native.Object;
 using UnityEngine;
 
 namespace GoC
@@ -14,41 +13,45 @@ namespace GoC
         [SerializeField] private Unit _blueStartingUnit;
         [SerializeField] private string _blueScriptFilePath;
 
-        private Engine _engine;
+        private Engine _redEngine;
         private JsValue _redTickFunction;
+        
+        private Engine _blueEngine;
         private JsValue _blueTickFunction;
 
         private float _tickCooldown;
 
         private void OnEnable()
         {
-            _engine = EngineFactory.Create();
             UnifiedModel unifiedModel = new UnifiedModel(_redStartingUnit, _blueStartingUnit);
-            _redTickFunction = PrepareTeam(_engine, unifiedModel.red, _redScriptFilePath);
-            _blueTickFunction = PrepareTeam(_engine, unifiedModel.blue, _blueScriptFilePath);
+            
+            _redEngine = EngineFactory.Create();
+            _redTickFunction = PrepareTeam(_redEngine, unifiedModel.red, _redScriptFilePath);
+            
+            _blueEngine = EngineFactory.Create();
+            _blueTickFunction = PrepareTeam(_blueEngine, unifiedModel.blue, _blueScriptFilePath);
         }
 
         private static JsValue PrepareTeam(Engine engine, IModel model, string scriptFilePath)
         {
             string script = File.ReadAllText(scriptFilePath);
-            engine.Modules.Add(model.team, script);
-            ObjectInstance moduleInstance = engine.Modules.Import(model.team);
-            JsValue initFunction = engine.GetValue(moduleInstance, "init");
-            engine.Invoke(initFunction, model);
-            return engine.GetValue(moduleInstance, "tick");
+            engine.SetValue("model", model);
+            engine.Execute(script);
+            return engine.GetValue("tick");
         }
 
         private void OnDisable()
         {
-            _engine?.Dispose();
+            _redEngine?.Dispose();
+            _blueEngine?.Dispose();
         }
 
         private void Update()
         {
             if((_tickCooldown -= Time.deltaTime) <= 0)
             {
-                _engine.Invoke(_redTickFunction);
-                _engine.Invoke(_blueTickFunction);
+                _redEngine.Invoke(_redTickFunction);
+                _blueEngine.Invoke(_blueTickFunction);
                 _tickCooldown += Tick.TIME;
             }
         }

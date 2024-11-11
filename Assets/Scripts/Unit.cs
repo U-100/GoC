@@ -47,25 +47,25 @@ namespace GoC
             _exhaust.Stop();
         }
 
-        public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
+        int2 IUnit.pos => (int2)round(float2(transform.position.x, transform.position.z));
 
-        public void Move()
+        void IMyUnit.Move()
         {
             Settle();
             _targetPosition = transform.position + transform.forward;
             _exhaust.Play();
         }
 
-        public void TurnLeft()
-        {
-            Settle();
-            _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;
-        }
-
-        public void TurnRight()
+        void IMyUnit.TurnLeft()
         {
             Settle();
             _targetRotation = Quaternion.Euler(0, -90, 0) * transform.rotation;
+        }
+
+        void IMyUnit.TurnRight()
+        {
+            Settle();
+            _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;
         }
     }
 }

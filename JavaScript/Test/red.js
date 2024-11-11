@@ -1,13 +1,6 @@
-var model;
+const unitDataStore = {};
 
-export function init(initModel)
-{
-    model = initModel;
-}
-
-var unitDataStore = {}
-
-export function tick()
+function tick()
 {
     for(let unit of model.myUnits)
     {
