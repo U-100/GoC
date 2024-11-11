@@ -1,5 +1,6 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.VFX;
 
 using static Unity.Mathematics.math;
 
@@ -9,7 +10,8 @@ namespace GoC
     
     public class Factory : MonoBehaviour, IMyFactory
     {
-        [SerializeField] private Unit _unit; 
+        [SerializeField] private Unit _unit;
+        [SerializeField] private VisualEffect _spawn;
 
         private AddUnit _addUnit;
         private float _cooldown;
@@ -25,6 +27,9 @@ namespace GoC
                 return Result.Busy;
             
             _cooldown = Tick.TIME - Time.deltaTime; // slightly less than a tick
+            
+            _spawn.Play();
+            
             return Result.Ok;
         }
         
