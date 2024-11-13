@@ -2,11 +2,12 @@ const unitDataStore = {};
 
 function tick()
 {
-    if(model.myUnits.Count < 4)
-        model.myFactory.Produce();
+    let myUnitsCount = 0;
     
     for(let unit of model.myUnits)
     {
+        ++myUnitsCount;
+        
         let unitData = (unitDataStore[unit.id] ??= {});
 
         if (unitData.moved)
@@ -32,5 +33,8 @@ function tick()
             unit.Move();
         }
     }
+
+    if(myUnitsCount < 4)
+        model.myFactory.Produce();
 }
 

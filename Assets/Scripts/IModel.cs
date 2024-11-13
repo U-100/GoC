@@ -35,12 +35,12 @@ namespace GoC
 
     public interface IModel
     {
-        string team { get; }
+        int teamId { get; }
         
         IMyFactory myFactory { get; }
-        IReadOnlyList<IMyUnit> myUnits { get; }
+        IEnumerable<IMyUnit> myUnits { get; }
         
-        IFactory enemyFactory { get; }
-        IReadOnlyList<IUnit> enemyUnits { get; }
+        IEnumerable<IFactory> factories { get; }
+        IEnumerable<IUnit> units { get; }
     }
 }

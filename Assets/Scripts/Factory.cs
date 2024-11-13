@@ -13,12 +13,20 @@ namespace GoC
         [SerializeField] private Unit _unit;
         [SerializeField] private VisualEffect _spawn;
 
+        private int _teamId;
         private AddUnit _addUnit;
         private float _cooldown;
 
-        public void Init(AddUnit addUnit) => _addUnit = addUnit;
+        public void Init(int teamId, AddUnit addUnit)
+        {
+            _teamId = teamId;
+            _addUnit = addUnit;
+        }
 
         public int id => GetInstanceID();
+
+        public int teamId => _teamId;
+
         public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
         
         public Result Produce()

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Jint;
 using Jint.Native;
 using Jint.Runtime.Interop;
@@ -6,33 +7,50 @@ using UnityEngine;
 
 namespace GoC
 {
+    [Serializable]
+    public struct TeamSetup
+    {
+        public string scriptFilePath;
+        public Factory factory;
+    }
+
+    [Serializable]
+    public struct Team
+    {
+        public int teamId;
+        public Engine engine;
+        public JsValue tickFunction;
+    }
+
     public class ArenaMain : MonoBehaviour
     {
-        [SerializeField] private string _redScriptFilePath;
-        [SerializeField] private Factory _redFactory;
-        [SerializeField] private Unit[] _redUnits;
+        [SerializeField] private TeamSetup[] _teamSetups;
 
-        [SerializeField] private string _blueScriptFilePath;
-        [SerializeField] private Factory _blueFactory;
-        [SerializeField] private Unit[] _blueUnits;
-
-        private Engine _redEngine;
-        private JsValue _redTickFunction;
-        
-        private Engine _blueEngine;
-        private JsValue _blueTickFunction;
+        private Team[] _teams;
 
         private float _tickCooldown;
 
         private void OnEnable()
         {
-            UnifiedModel unifiedModel = new UnifiedModel(_redFactory, _blueFactory);
-            
-            _redEngine = EngineFactory.Create();
-            _redTickFunction = PrepareTeam(_redEngine, unifiedModel.redModel, _redScriptFilePath);
-            
-            _blueEngine = EngineFactory.Create();
-            _blueTickFunction = PrepareTeam(_blueEngine, unifiedModel.blueModel, _blueScriptFilePath);
+            UnifiedModel unifiedModel = new UnifiedModel();
+
+            _teams = new Team[_teamSetups.Length];
+            for (int iTeam = 0; iTeam < _teamSetups.Length; iTeam++)
+            {
+                TeamSetup teamSetup = _teamSetups[iTeam];
+
+                Engine engine = EngineFactory.Create();
+                IModel model = unifiedModel.AddTeamModel(iTeam, teamSetup.factory);
+                JsValue tickFunction = PrepareTeam(engine, model, teamSetup.scriptFilePath);
+                
+                _teams[iTeam] =
+                    new Team
+                    {
+                        teamId = iTeam,
+                        engine = engine,
+                        tickFunction = tickFunction
+                    };
+            }
         }
 
         private static JsValue PrepareTeam(Engine engine, IModel model, string scriptFilePath)
@@ -46,16 +64,17 @@ namespace GoC
 
         private void OnDisable()
         {
-            _redEngine?.Dispose();
-            _blueEngine?.Dispose();
+            foreach (Team team in _teams)
+                team.engine?.Dispose();
         }
 
         private void Update()
         {
-            if((_tickCooldown -= Time.deltaTime) <= 0)
+            if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
-                _redEngine.Invoke(_redTickFunction);
-                _blueEngine.Invoke(_blueTickFunction);
+                foreach (Team team in _teams)
+                    team.engine.Invoke(team.tickFunction);
+
                 _tickCooldown += Tick.TIME;
             }
         }

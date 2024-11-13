@@ -9,12 +9,19 @@ namespace GoC
     public class Unit : MonoBehaviour, IMyUnit
     {
         [SerializeField] private VisualEffect _exhaust;
-        
+
+        private int _teamId;
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
 
         public int id => GetInstanceID();
+        public int teamId => _teamId;
         public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
+
+        public void Init(int teamId)
+        {
+            _teamId = teamId;
+        }
 
         public void Move()
         {
