@@ -175,6 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af1e62ed9942425d82ec1578b7ac6695, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _executionContext: {fileID: 11400000, guid: dbcd18b484d28574a90e755cc0f7ed7b, type: 2}
   _teamSetups:
   - scriptFilePath: JavaScript/Test/red.js
     factory: {fileID: 236789826}

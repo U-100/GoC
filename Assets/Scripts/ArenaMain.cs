@@ -14,16 +14,42 @@ namespace GoC
         public Factory factory;
     }
 
-    [Serializable]
-    public struct Team
+    public class Team : IDisposable
     {
-        public int teamId;
-        public Engine engine;
-        public JsValue tickFunction;
+        private readonly Engine _engine;
+        private readonly IModel _model;
+        private readonly JsValue _tickFunction;
+        private readonly ExecutionContext _executionContext;
+
+        public Team(int teamId, TeamSetup teamSetup, UnifiedModel unifiedModel, ExecutionContext executionContext)
+        {
+            _executionContext = executionContext;
+            
+            _engine = EngineFactory.Create();
+            
+            _model = unifiedModel.AddTeamModel(teamId, teamSetup.factory);
+
+            _engine.SetValue("model", _model);
+            _engine.SetValue("Result", TypeReference.CreateTypeReference<Result>(_engine));
+
+            string script = File.ReadAllText(teamSetup.scriptFilePath);
+            _engine.Execute(script);
+            
+            _tickFunction = _engine.GetValue("tick");
+        }
+
+        public void Dispose() => _engine.Dispose();
+
+        public void Update()
+        {
+            using(_executionContext.ForModel(_model))
+                _engine.Invoke(_tickFunction);
+        }
     }
 
     public class ArenaMain : MonoBehaviour
     {
+        [SerializeField] private ExecutionContext _executionContext;
         [SerializeField] private TeamSetup[] _teamSetups;
 
         private Team[] _teams;
@@ -36,36 +62,13 @@ namespace GoC
 
             _teams = new Team[_teamSetups.Length];
             for (int iTeam = 0; iTeam < _teamSetups.Length; iTeam++)
-            {
-                TeamSetup teamSetup = _teamSetups[iTeam];
-
-                Engine engine = EngineFactory.Create();
-                IModel model = unifiedModel.AddTeamModel(iTeam, teamSetup.factory);
-                JsValue tickFunction = PrepareTeam(engine, model, teamSetup.scriptFilePath);
-                
-                _teams[iTeam] =
-                    new Team
-                    {
-                        teamId = iTeam,
-                        engine = engine,
-                        tickFunction = tickFunction
-                    };
-            }
-        }
-
-        private static JsValue PrepareTeam(Engine engine, IModel model, string scriptFilePath)
-        {
-            string script = File.ReadAllText(scriptFilePath);
-            engine.SetValue("model", model);
-            engine.SetValue("Result", TypeReference.CreateTypeReference<Result>(engine));
-            engine.Execute(script);
-            return engine.GetValue("tick");
+                _teams[iTeam] = new Team(iTeam, _teamSetups[iTeam], unifiedModel, _executionContext);
         }
 
         private void OnDisable()
         {
             foreach (Team team in _teams)
-                team.engine?.Dispose();
+                team.Dispose();
         }
 
         private void Update()
@@ -73,7 +76,7 @@ namespace GoC
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
                 foreach (Team team in _teams)
-                    team.engine.Invoke(team.tickFunction);
+                    team.Update();
 
                 _tickCooldown += Tick.TIME;
             }

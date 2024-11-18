@@ -11,9 +11,9 @@ namespace GoC
     
     public interface IMyUnit : IUnit
     {
-        void Move();
-        void TurnLeft();
-        void TurnRight();
+        Result Move();
+        Result TurnLeft();
+        Result TurnRight();
     }
 
     public interface IFactory
@@ -26,6 +26,7 @@ namespace GoC
     {
         Ok,
         Busy,
+        AccessDenied,
     }
     
     public interface IMyFactory : IFactory

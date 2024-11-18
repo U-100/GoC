@@ -8,38 +8,53 @@ namespace GoC
 {
     public class Unit : MonoBehaviour, IMyUnit
     {
+        [SerializeField] private ExecutionContext _executionContext;
         [SerializeField] private VisualEffect _exhaust;
 
-        private int _teamId;
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
 
         public int id => GetInstanceID();
-        public int teamId => _teamId;
+        public int teamId { get; private set; }
         public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
 
-        public void Init(int teamId)
+        public void Init(int initTeamId)
         {
-            _teamId = teamId;
+            teamId = initTeamId;
         }
 
-        public void Move()
+        public Result Move()
         {
+            if (!CheckExecutionRestrictions())
+                return Result.AccessDenied;
+            
             Settle();
             _targetPosition = transform.position + transform.forward;
             _exhaust.Play();
+
+            return Result.Ok;
         }
 
-        public void TurnLeft()
+        public Result TurnLeft()
         {
+            if (!CheckExecutionRestrictions())
+                return Result.AccessDenied;
+            
             Settle();
             _targetRotation = Quaternion.Euler(0, -90, 0) * transform.rotation;
+
+            return Result.Ok;
         }
 
-        public void TurnRight()
+        public Result TurnRight()
         {
+            if (!CheckExecutionRestrictions())
+                return Result.AccessDenied;
+            
             Settle();
             _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;
+
+            return Result.Ok;
         }
 
         void Start()
@@ -61,7 +76,9 @@ namespace GoC
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation.Value, rotationSpeed * Time.deltaTime);
             }
         }
-        
+
+        private bool CheckExecutionRestrictions() => _executionContext.teamId == teamId;
+
         private void Settle()
         {
             if (_targetPosition.HasValue)

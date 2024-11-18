@@ -10,27 +10,30 @@ namespace GoC
     
     public class Factory : MonoBehaviour, IMyFactory
     {
+        [SerializeField] private ExecutionContext _executionContext;
         [SerializeField] private Unit _unit;
         [SerializeField] private VisualEffect _spawn;
 
-        private int _teamId;
         private AddUnit _addUnit;
         private float _cooldown;
 
-        public void Init(int teamId, AddUnit addUnit)
+        public void Init(int initTeamId, AddUnit addUnit)
         {
-            _teamId = teamId;
+            teamId = initTeamId;
             _addUnit = addUnit;
         }
 
         public int id => GetInstanceID();
 
-        public int teamId => _teamId;
+        public int teamId { get; private set; }
 
         public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
         
         public Result Produce()
         {
+            if (!CheckExecutionRestrictions())
+                return Result.AccessDenied;
+            
             if (_cooldown > 0)
                 return Result.Busy;
             
@@ -49,6 +52,8 @@ namespace GoC
                 Fabricate();
             }
         }
+
+        private bool CheckExecutionRestrictions() => _executionContext.teamId == teamId;
 
         private void Fabricate()
         {

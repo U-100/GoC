@@ -37,7 +37,7 @@ namespace GoC
             return new Model(teamId, _factories, _units);
         }
 
-        private void AddUnit(int teamId, Unit unit)
+        public void AddUnit(int teamId, Unit unit)
         {
             unit.Init(teamId);
             _units.Add(unit);
