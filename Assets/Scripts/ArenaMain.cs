@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using GoC.ScriptingApi;
 using Jint;
 using Jint.Native;
 using Jint.Runtime.Interop;

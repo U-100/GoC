@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.Mathematics;
 
-namespace GoC
+namespace GoC.ScriptingApi
 {
     public enum Result
     {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GoC.ScriptingApi;
 
 namespace GoC
 {
@@ -28,7 +29,6 @@ namespace GoC
             }
 
             public int id => teamId;
-            public object data { get; set; }
             
             public int teamId { get; }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using GoC.ScriptingApi;
 
 namespace GoC
 {

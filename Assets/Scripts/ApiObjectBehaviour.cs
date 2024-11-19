@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using GoC.ScriptingApi;
+using UnityEngine;
 
 namespace GoC
 {

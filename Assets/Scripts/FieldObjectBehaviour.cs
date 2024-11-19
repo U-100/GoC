@@ -1,4 +1,5 @@
-﻿using Unity.Mathematics;
+﻿using GoC.ScriptingApi;
+using Unity.Mathematics;
 
 using static Unity.Mathematics.math;
 
