@@ -1,34 +1,39 @@
-﻿using Unity.Mathematics;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.VFX;
-
-using static Unity.Mathematics.math;
 
 namespace GoC
 {
-    public class Unit : MonoBehaviour, IMyUnit
+    public class Unit : FieldObjectBehaviour, IUnit
     {
-        [SerializeField] private ExecutionContext _executionContext;
+        private class Control : IUnitControl
+        {
+            private readonly Unit _unit;
+            public Control(Unit unit) => _unit = unit;
+
+            public Result Move() => _unit.Move();
+            public Result TurnLeft() => _unit.TurnLeft();
+            public Result TurnRight() => _unit.TurnRight();
+        }
+
         [SerializeField] private VisualEffect _exhaust;
 
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
+        private IUnitControl _control;
 
-        public int id => GetInstanceID();
-        public int teamId { get; private set; }
-        public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
-
-        public void Init(int initTeamId)
+        public new void Init(int initTeamId, IExecutionContext executionContext)
         {
-            teamId = initTeamId;
+            base.Init(initTeamId, executionContext);
+            _control = new Control(this);
         }
 
-        public object data { get; set; }
-        
-        public Result Move()
+        public IUnitControl control => CheckExecutionRestrictions() ? _control : null;
+
+        private Result Move()
         {
-            if (!CheckExecutionRestrictions())
-                return Result.AccessDenied;
+            // TODO: implement busy-ness
+            //if (_targetPosition.HasValue)
+              //  return Result.Busy;
             
             Settle();
             _targetPosition = transform.position + transform.forward;
@@ -37,22 +42,16 @@ namespace GoC
             return Result.Ok;
         }
 
-        public Result TurnLeft()
+        private Result TurnLeft()
         {
-            if (!CheckExecutionRestrictions())
-                return Result.AccessDenied;
-            
             Settle();
             _targetRotation = Quaternion.Euler(0, -90, 0) * transform.rotation;
 
             return Result.Ok;
         }
 
-        public Result TurnRight()
+        private Result TurnRight()
         {
-            if (!CheckExecutionRestrictions())
-                return Result.AccessDenied;
-            
             Settle();
             _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;
 
@@ -78,8 +77,6 @@ namespace GoC
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation.Value, rotationSpeed * Time.deltaTime);
             }
         }
-
-        private bool CheckExecutionRestrictions() => _executionContext.teamId == teamId;
 
         private void Settle()
         {

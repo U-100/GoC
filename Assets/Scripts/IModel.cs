@@ -13,6 +13,7 @@ namespace GoC
     public interface IApiObject
     {
         int id { get; } // unique id
+        int teamId { get; } // owner team id
         object data { get; set; } // custom data store
     }
 
@@ -20,31 +21,35 @@ namespace GoC
     {
         int2 pos { get; }
     }
-    
-    public interface IUnit : IPositionedObject { }
-    
-    public interface IMyUnit : IUnit
+
+    public interface IUnitControl
     {
         Result Move();
         Result TurnLeft();
         Result TurnRight();
     }
-
-    public interface IFactory : IPositionedObject { }
     
-    public interface IMyFactory : IFactory
+    public interface IUnit : IPositionedObject
+    {
+        public IUnitControl control { get; }
+    }
+    
+    public interface IFactoryControl
     {
         Result Produce();
     }
 
+    public interface IFactory : IPositionedObject
+    {
+        public IFactoryControl control { get; }
+    }
+
     public interface IModel : IApiObject
     {
-        int teamId { get; }
+        IEnumerable<IFactory> myFactories { get; }
+        IEnumerable<IUnit> myUnits { get; }
         
-        IMyFactory myFactory { get; }
-        IEnumerable<IMyUnit> myUnits { get; }
-        
-        IEnumerable<IFactory> factories { get; }
-        IEnumerable<IUnit> units { get; }
+        IReadOnlyDictionary<int, IFactory> factories { get; }
+        IReadOnlyDictionary<int, IUnit> units { get; }
     }
 }

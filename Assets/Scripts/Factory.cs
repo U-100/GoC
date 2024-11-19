@@ -1,40 +1,39 @@
-﻿using Unity.Mathematics;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.VFX;
-
-using static Unity.Mathematics.math;
 
 namespace GoC
 {
     public delegate void AddUnit(Unit unit);
-    
-    public class Factory : MonoBehaviour, IMyFactory
+
+    public class Factory : FieldObjectBehaviour, IFactory
     {
-        [SerializeField] private ExecutionContext _executionContext;
+        private class Control : IFactoryControl
+        {
+            private readonly Factory _factory;
+            public Control(Factory factory) => _factory = factory;
+
+            public Result Produce() => _factory.Produce();
+        }
+        
         [SerializeField] private Unit _unit;
         [SerializeField] private VisualEffect _spawn;
 
         private AddUnit _addUnit;
+        private Control _control;
+        
         private float _cooldown;
 
-        public void Init(int initTeamId, AddUnit addUnit)
+        public void Init(int initTeamId, IExecutionContext executionContext, AddUnit addUnit)
         {
-            teamId = initTeamId;
+            base.Init(initTeamId, executionContext);
             _addUnit = addUnit;
+            _control = new Control(this);
         }
 
-        public int id => GetInstanceID();
-        public object data { get; set; }
-
-        public int2 pos => (int2)round(float2(transform.position.x, transform.position.z));
-
-        public int teamId { get; private set; }
+        public IFactoryControl control => CheckExecutionRestrictions() ? _control : null;
         
-        public Result Produce()
+        private Result Produce()
         {
-            if (!CheckExecutionRestrictions())
-                return Result.AccessDenied;
-            
             if (_cooldown > 0)
                 return Result.Busy;
             
@@ -54,12 +53,10 @@ namespace GoC
             }
         }
 
-        private bool CheckExecutionRestrictions() => _executionContext.teamId == teamId;
-
         private void Fabricate()
         {
             Unit unit = Instantiate(_unit, transform.position, transform.rotation);
             _addUnit(unit);
-        } 
+        }
     }
 }

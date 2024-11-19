@@ -1,10 +1,15 @@
 ﻿using System;
-using UnityEngine;
 
 namespace GoC
 {
-    [CreateAssetMenu]
-    public class ExecutionContext : ScriptableObject
+    public interface IExecutionContext
+    {
+        int teamId { get; }
+        
+        IDisposable ForModel(IModel model);
+    }
+    
+    public class ExecutionContext : IExecutionContext
     {
         public struct Token : IDisposable
         {
@@ -24,7 +29,7 @@ namespace GoC
 
         public int teamId => _currentModel.teamId;
 
-        public Token ForModel(IModel model)
+        public IDisposable ForModel(IModel model)
         {
             Token token = new Token(this, _currentModel);
             _currentModel = model;

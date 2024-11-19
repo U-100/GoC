@@ -19,9 +19,9 @@ namespace GoC
         private readonly Engine _engine;
         private readonly IModel _model;
         private readonly JsValue _tickFunction;
-        private readonly ExecutionContext _executionContext;
+        private readonly IExecutionContext _executionContext;
 
-        public Team(int teamId, TeamSetup teamSetup, UnifiedModel unifiedModel, ExecutionContext executionContext)
+        public Team(int teamId, TeamSetup teamSetup, UnifiedModel unifiedModel, IExecutionContext executionContext)
         {
             _executionContext = executionContext;
             
@@ -49,7 +49,6 @@ namespace GoC
 
     public class ArenaMain : MonoBehaviour
     {
-        [SerializeField] private ExecutionContext _executionContext;
         [SerializeField] private TeamSetup[] _teamSetups;
 
         private Team[] _teams;
@@ -58,11 +57,12 @@ namespace GoC
 
         private void OnEnable()
         {
-            UnifiedModel unifiedModel = new UnifiedModel();
+            IExecutionContext executionContext = new ExecutionContext();
+            UnifiedModel unifiedModel = new UnifiedModel(executionContext);
 
             _teams = new Team[_teamSetups.Length];
             for (int iTeam = 0; iTeam < _teamSetups.Length; iTeam++)
-                _teams[iTeam] = new Team(iTeam, _teamSetups[iTeam], unifiedModel, _executionContext);
+                _teams[iTeam] = new Team(iTeam, _teamSetups[iTeam], unifiedModel, executionContext);
         }
 
         private void OnDisable()

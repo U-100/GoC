@@ -2,35 +2,29 @@ function tick()
 {
     let myUnitsCount = 0;
     
-    for(let unit of model.myUnits)
+    for(let myUnit of model.myUnits)
     {
         ++myUnitsCount;
         
-        if ((unit.data ??= {}).moved)
+        if ((myUnit.data ??= {}).moved)
         {
-            unit.data.moved = false;
+            myUnit.data.moved = false;
 
             let r = Math.floor(Math.random() * 2);
-
-            switch (r)
-            {
-                case 0:
-                    unit.TurnLeft();
-                    break;
-
-                case 1:
-                    unit.TurnRight();
-                    break;
-            }
+            if (r)
+                myUnit.control.TurnLeft();
+            else
+                myUnit.control.TurnRight();
         }
         else
         {
-            unit.data.moved = true;
-            unit.Move();
+            myUnit.data.moved = true;
+            myUnit.control.Move();
         }
     }
 
     if(myUnitsCount < 4)
-        model.myFactory.Produce();
+        for(let myFactory of model.myFactories)
+            myFactory.control.Produce();
 }
 
