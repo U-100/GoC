@@ -3,39 +3,41 @@ using Unity.Mathematics;
 
 namespace GoC
 {
-    public interface IUnit
-    {
-        int id { get; }
-        int2 pos { get; }
-    }
-    
-    public interface IMyUnit : IUnit
-    {
-        object data { get; set; }
-        Result Move();
-        Result TurnLeft();
-        Result TurnRight();
-    }
-
-    public interface IFactory
-    {
-        int id { get; }
-        int2 pos { get; }
-    }
-
     public enum Result
     {
         Ok,
         Busy,
         AccessDenied,
     }
+
+    public interface IApiObject
+    {
+        int id { get; } // unique id
+        object data { get; set; } // custom data store
+    }
+
+    public interface IPositionedObject : IApiObject
+    {
+        int2 pos { get; }
+    }
+    
+    public interface IUnit : IPositionedObject { }
+    
+    public interface IMyUnit : IUnit
+    {
+        Result Move();
+        Result TurnLeft();
+        Result TurnRight();
+    }
+
+    public interface IFactory : IPositionedObject { }
     
     public interface IMyFactory : IFactory
     {
         Result Produce();
     }
 
-    public interface IModel
+    public interface IModel : IApiObject
     {
         int teamId { get; }
         

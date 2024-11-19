@@ -20,6 +20,9 @@ namespace GoC
                 _units = units;
             }
 
+            public int id => teamId;
+            public object data { get; set; }
+            
             public int teamId { get; }
 
             public IMyFactory myFactory => _factories.FirstOrDefault(factory => factory.teamId == teamId);
