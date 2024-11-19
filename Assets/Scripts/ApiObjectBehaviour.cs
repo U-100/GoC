@@ -8,7 +8,6 @@ namespace GoC
 
         public int id => GetInstanceID();
         public int teamId { get; private set; }
-        public object data { get; set; }
 
         protected void Init(int initTeamId, IExecutionContext executionContext)
         {

@@ -6,9 +6,9 @@ function tick()
     {
         ++myUnitsCount;
         
-        if ((myUnit.data ??= {}).moved)
+        if (myUnit.moved)
         {
-            myUnit.data.moved = false;
+            myUnit.moved = false;
 
             let r = Math.floor(Math.random() * 2);
             if (r)
@@ -18,7 +18,7 @@ function tick()
         }
         else
         {
-            myUnit.data.moved = true;
+            myUnit.moved = true;
             myUnit.control.Move();
         }
     }

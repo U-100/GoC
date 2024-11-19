@@ -14,7 +14,6 @@ namespace GoC
     {
         int id { get; } // unique id
         int teamId { get; } // owner team id
-        object data { get; set; } // custom data store
     }
 
     public interface IPositionedObject : IApiObject

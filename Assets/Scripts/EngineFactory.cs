@@ -22,6 +22,7 @@ namespace GoC
         private static void Configure(Options options)
         {
             options.Culture = CultureInfo.InvariantCulture;
+            options.Interop.TrackObjectWrapperIdentity = true;
         }
         
         private static async void SetTimeout(Action callback, int milliseconds)
