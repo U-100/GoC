@@ -11,6 +11,7 @@ namespace GoC
     
     public interface IMyUnit : IUnit
     {
+        object data { get; set; }
         Result Move();
         Result TurnLeft();
         Result TurnRight();

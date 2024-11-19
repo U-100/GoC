@@ -1,5 +1,3 @@
-const unitDataStore = {};
-
 function tick()
 {
     let myUnitsCount = 0;
@@ -8,11 +6,9 @@ function tick()
     {
         ++myUnitsCount;
         
-        let unitData = (unitDataStore[unit.id] ??= {});
-
-        if (unitData.moved)
+        if ((unit.data ??= {}).moved)
         {
-            unitData.moved = false;
+            unit.data.moved = false;
 
             let r = Math.floor(Math.random() * 2);
 
@@ -29,7 +25,7 @@ function tick()
         }
         else
         {
-            unitData.moved = true;
+            unit.data.moved = true;
             unit.Move();
         }
     }

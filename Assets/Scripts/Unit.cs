@@ -23,6 +23,8 @@ namespace GoC
             teamId = initTeamId;
         }
 
+        public object data { get; set; }
+        
         public Result Move()
         {
             if (!CheckExecutionRestrictions())
