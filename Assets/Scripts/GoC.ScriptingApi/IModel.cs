@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Mathematics;
 
 namespace GoC.ScriptingApi
@@ -8,17 +9,8 @@ namespace GoC.ScriptingApi
         Ok,
         Busy,
         AccessDenied,
-    }
-
-    public interface IApiObject
-    {
-        int id { get; } // unique id
-        int teamId { get; } // owner team id
-    }
-
-    public interface IPositionedObject : IApiObject
-    {
-        int2 pos { get; }
+        NotEnoughSubstance,
+        TooFar,
     }
 
     public interface IUnitControl
@@ -27,9 +19,28 @@ namespace GoC.ScriptingApi
         Result TurnLeft();
         Result TurnRight();
     }
-    
-    public interface IUnit : IPositionedObject
+
+    public static class Substance
     {
+        public enum Type
+        {
+            Energy,
+            Matter,
+        }
+
+        public static int ToIndex(this Substance.Type substanceType) => substanceType - Substance.Type.Energy;
+        
+        public static readonly int count = Enum.GetValues(typeof(Type)).Length;
+    }
+    
+    public interface IUnit
+    {
+        int id { get; } // unique id
+        int teamId { get; } // owner team id
+        int2 pos { get; }
+
+        public IReadOnlyList<int> storage { get; }
+        
         public IUnitControl control { get; }
     }
     
@@ -38,13 +49,20 @@ namespace GoC.ScriptingApi
         Result Produce();
     }
 
-    public interface IFactory : IPositionedObject
+    public interface IFactory
     {
+        int id { get; } // unique id
+        int teamId { get; } // owner team id
+        int2 pos { get; }
+
         public IFactoryControl control { get; }
     }
-
-    public interface IModel : IApiObject
+    
+    public interface IModel
     {
+        int id { get; } // unique id
+        int teamId { get; } // owner team id
+
         IEnumerable<IFactory> myFactories { get; }
         IEnumerable<IUnit> myUnits { get; }
         

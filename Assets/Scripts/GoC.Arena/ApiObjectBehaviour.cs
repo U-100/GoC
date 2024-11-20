@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace GoC.Arena
 {
-    public abstract class ApiObjectBehaviour : MonoBehaviour, IApiObject
+    public abstract class ApiObjectBehaviour : MonoBehaviour
     {
         private IArenaContext _arenaContext;
 
