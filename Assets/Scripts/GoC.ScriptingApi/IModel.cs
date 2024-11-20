@@ -9,18 +9,21 @@ namespace GoC.ScriptingApi
         Ok,
         Busy,
         AccessDenied,
-        NotEnoughSubstance,
+        InvalidArgument,
         TooFar,
+        InvalidTarget,
+        NotEnoughSubstance,
     }
 
     public interface IUnitControl
     {
+        Result Give(object target, Substance.Type substanceType, int count);
         Result Move();
         Result TurnLeft();
         Result TurnRight();
     }
 
-    public static class Substance
+    public class Substance
     {
         public enum Type
         {
@@ -28,9 +31,12 @@ namespace GoC.ScriptingApi
             Matter,
         }
 
-        public static int ToIndex(this Substance.Type substanceType) => substanceType - Substance.Type.Energy;
-        
         public static readonly int count = Enum.GetValues(typeof(Type)).Length;
+    }
+    
+    public static class SubstanceExtensions
+    {
+        public static int ToIndex(this Substance.Type substanceType) => substanceType - Substance.Type.Energy;
     }
     
     public interface IUnit

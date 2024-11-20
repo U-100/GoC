@@ -16,7 +16,7 @@ namespace GoC.Arena
             private readonly Unit _unit;
             public Control(Unit unit) => _unit = unit;
 
-            public Result Give(Unit recipient, Substance.Type substanceType, int count) => _unit.Give(recipient, substanceType, count);
+            public Result Give(object target, Substance.Type substanceType, int count) => _unit.Give(target, substanceType, count);
             public Result Move() => _unit.Move();
             public Result TurnLeft() => _unit.TurnLeft();
             public Result TurnRight() => _unit.TurnRight();
@@ -41,16 +41,22 @@ namespace GoC.Arena
         public IReadOnlyList<int> storage => _storage;
         public IUnitControl control => _restrictedControl.control;
 
-        private Result Give(Unit recipient, Substance.Type substanceType, int count)
+        private Result Give(object targetObject, Substance.Type substanceType, int count)
         {
-            if (distance(pos, recipient.pos) > 1)
+            if (count <= 0)
+                return Result.InvalidArgument;
+            
+            if (targetObject is not Unit target)
+                return Result.InvalidTarget;
+            
+            if (distance(pos, target.pos) > 1)
                 return Result.TooFar;
             
             int substanceIndex = substanceType.ToIndex();
             if (_storage[substanceIndex] >= count)
             {
                 _storage[substanceIndex] -= count;
-                recipient._storage[substanceIndex] += count;
+                target._storage[substanceIndex] += count;
                 return Result.Ok;
             }
 

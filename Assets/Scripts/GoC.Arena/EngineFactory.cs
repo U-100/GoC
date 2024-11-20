@@ -19,13 +19,16 @@ namespace GoC.Arena
 
             engine.SetValue("log", new Action<object>(Debug.Log));
             engine.SetValue("Result", TypeReference.CreateTypeReference<Result>(engine));
+            engine.SetValue(nameof(Substance), TypeReference.CreateTypeReference<Substance>(engine));
             return engine;
         }
         
         private static void Configure(Options options)
         {
             options.Culture = CultureInfo.InvariantCulture;
+            
             options.Interop.TrackObjectWrapperIdentity = true;
+            options.Interop.ExtensionMethodTypes.Add(typeof(SubstanceExtensions)); 
             
             options.SetTypeResolver(new TypeResolver { MemberFilter = MEMBER_FILTER });
         }
