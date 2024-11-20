@@ -1,21 +1,21 @@
 ﻿using GoC.ScriptingApi;
 using UnityEngine;
 
-namespace GoC
+namespace GoC.Arena
 {
     public abstract class ApiObjectBehaviour : MonoBehaviour, IApiObject
     {
-        private IExecutionContext _executionContext;
+        private IArenaContext _arenaContext;
 
         public int id => GetInstanceID();
         public int teamId { get; private set; }
 
-        protected void Init(int initTeamId, IExecutionContext executionContext)
+        protected void Init(int initTeamId, IArenaContext arenaContext)
         {
             teamId = initTeamId;
-            _executionContext = executionContext;
+            _arenaContext = arenaContext;
         }
         
-        protected bool CheckExecutionRestrictions() => _executionContext.teamId == teamId;
+        protected bool CheckExecutionRestrictions() => _arenaContext.teamId == teamId;
     }
 }

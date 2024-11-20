@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-namespace GoC
+namespace GoC.Arena
 {
     public delegate void AddUnit(Unit unit);
 
@@ -24,9 +24,9 @@ namespace GoC
         
         private float _cooldown;
 
-        public void Init(int initTeamId, IExecutionContext executionContext, AddUnit addUnit)
+        public void Init(int initTeamId, IArenaContext arenaContext, AddUnit addUnit)
         {
-            base.Init(initTeamId, executionContext);
+            base.Init(initTeamId, arenaContext);
             _addUnit = addUnit;
             _control = new Control(this);
         }

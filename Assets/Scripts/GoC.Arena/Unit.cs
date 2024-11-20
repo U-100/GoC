@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-namespace GoC
+namespace GoC.Arena
 {
     public class Unit : FieldObjectBehaviour, IUnit
     {
@@ -22,9 +22,9 @@ namespace GoC
         private Quaternion? _targetRotation;
         private IUnitControl _control;
 
-        public new void Init(int initTeamId, IExecutionContext executionContext)
+        public new void Init(int initTeamId, IArenaContext arenaContext)
         {
-            base.Init(initTeamId, executionContext);
+            base.Init(initTeamId, arenaContext);
             _control = new Control(this);
         }
 

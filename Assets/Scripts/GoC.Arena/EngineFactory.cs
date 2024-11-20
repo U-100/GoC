@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using System.Threading.Tasks;
 using GoC.Attributes;
+using GoC.ScriptingApi;
 using Jint;
 using Jint.Runtime.Interop;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace GoC
+namespace GoC.Arena
 {
     public static class EngineFactory
     {
@@ -18,9 +18,7 @@ namespace GoC
             Engine engine = new Engine(Configure);
 
             engine.SetValue("log", new Action<object>(Debug.Log));
-            engine.SetValue("setTimeout", new Action<Action, int>(SetTimeout));
-            engine.SetValue("delay", new Func<int, Task>(Delay));
-            
+            engine.SetValue("Result", TypeReference.CreateTypeReference<Result>(engine));
             return engine;
         }
         
@@ -28,13 +26,6 @@ namespace GoC
         {
             options.Culture = CultureInfo.InvariantCulture;
             options.Interop.TrackObjectWrapperIdentity = true;
-            
-            // options.Interop.WrapObjectHandler =
-            //     static (engine, target, type) =>
-            //     {
-            //         //UnityEngine.Debug.Log($"Wrapping {target} as {type}");
-            //         return ObjectWrapper.Create(engine, target, type);
-            //     };
             
             options.SetTypeResolver(new TypeResolver { MemberFilter = MEMBER_FILTER });
         }
@@ -47,6 +38,8 @@ namespace GoC
             typeof(IReadOnlyDictionary<,>),
         };
         
+        // member filter decides which apis should be exposed to javascript by jint engine.
+        // We expose apis of ENABLED_TYPES plus apis from assemblies and types marked with ScriptingApiAttribute
         private static readonly Predicate<MemberInfo> MEMBER_FILTER = delegate(MemberInfo memberInfo)
         {
             Type declaringType = memberInfo.DeclaringType;
@@ -70,16 +63,5 @@ namespace GoC
 
             return false;
         };
-        
-        private static async void SetTimeout(Action callback, int milliseconds)
-        {
-            await Task.Delay(milliseconds);
-            callback();
-        }
-
-        private static async Task Delay(int milliseconds)
-        {
-            await Task.Delay(milliseconds).ConfigureAwait(false);
-        }
     }
 }

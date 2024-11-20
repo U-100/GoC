@@ -3,10 +3,9 @@ using System.IO;
 using GoC.ScriptingApi;
 using Jint;
 using Jint.Native;
-using Jint.Runtime.Interop;
 using UnityEngine;
 
-namespace GoC
+namespace GoC.Arena
 {
     [Serializable]
     public struct TeamSetup
@@ -20,18 +19,15 @@ namespace GoC
         private readonly Engine _engine;
         private readonly IModel _model;
         private readonly JsValue _tickFunction;
-        private readonly IExecutionContext _executionContext;
+        private readonly IArenaContext _arenaContext;
 
-        public Team(int teamId, TeamSetup teamSetup, UnifiedModel unifiedModel, IExecutionContext executionContext)
+        public Team(int teamId, TeamSetup teamSetup, Arena arena, IArenaContext arenaContext)
         {
-            _executionContext = executionContext;
+            _arenaContext = arenaContext;
+            _model = arena.AddTeamModel(teamId, teamSetup.factory);
             
             _engine = EngineFactory.Create();
-            
-            _model = unifiedModel.AddTeamModel(teamId, teamSetup.factory);
-
             _engine.SetValue("model", _model);
-            _engine.SetValue("Result", TypeReference.CreateTypeReference<Result>(_engine));
 
             string script = File.ReadAllText(teamSetup.scriptFilePath);
             _engine.Execute(script);
@@ -43,7 +39,7 @@ namespace GoC
 
         public void Update()
         {
-            using(_executionContext.ForModel(_model))
+            using(_arenaContext.ForModel(_model))
                 _engine.Invoke(_tickFunction);
         }
     }
@@ -58,12 +54,12 @@ namespace GoC
 
         private void OnEnable()
         {
-            IExecutionContext executionContext = new ExecutionContext();
-            UnifiedModel unifiedModel = new UnifiedModel(executionContext);
+            IArenaContext arenaContext = new ArenaContext();
+            Arena arena = new Arena(arenaContext);
 
             _teams = new Team[_teamSetups.Length];
             for (int iTeam = 0; iTeam < _teamSetups.Length; iTeam++)
-                _teams[iTeam] = new Team(iTeam, _teamSetups[iTeam], unifiedModel, executionContext);
+                _teams[iTeam] = new Team(iTeam, _teamSetups[iTeam], arena, arenaContext);
         }
 
         private void OnDisable()

@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 using static Unity.Mathematics.math;
 
-namespace GoC
+namespace GoC.Arena
 {
     public abstract class FieldObjectBehaviour : ApiObjectBehaviour, IPositionedObject
     {

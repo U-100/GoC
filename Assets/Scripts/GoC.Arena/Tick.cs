@@ -1,4 +1,4 @@
-﻿namespace GoC
+﻿namespace GoC.Arena
 {
     public static class Tick
     {
