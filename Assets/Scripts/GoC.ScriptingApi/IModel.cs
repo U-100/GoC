@@ -17,7 +17,7 @@ namespace GoC.ScriptingApi
 
     public interface IUnitControl
     {
-        Result Give(object target, Substance.Type substanceType, int count);
+        Result Give(object target, Substance.Type substanceType, int amount);
         Result Move();
         Result TurnLeft();
         Result TurnRight();
@@ -31,7 +31,7 @@ namespace GoC.ScriptingApi
             Matter,
         }
 
-        public static readonly int count = Enum.GetValues(typeof(Type)).Length;
+        public static readonly int TYPES_COUNT = Enum.GetValues(typeof(Type)).Length;
     }
     
     public static class SubstanceExtensions

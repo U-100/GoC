@@ -30,7 +30,9 @@ function tick()
         }
 
         let giveResult = source.control.Give(target, Substance.Type.Energy, 1)
-        if(giveResult != Result.Ok)
+        if(giveResult == Result.Ok)
+            log("Source has " + source.storage[Substance.Type.Energy] + " and target has " + target.storage[Substance.Type.Energy]);
+        else
             log("Give failed with error " + giveResult);
     }
 }

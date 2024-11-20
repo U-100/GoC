@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
@@ -9,6 +8,7 @@ using static Unity.Mathematics.math;
 
 namespace GoC.Arena
 {
+    [RequireComponent(typeof(StorageBehaviour))]
     public class Unit : MonoBehaviour, IUnit
     {
         private class Control : IUnitControl
@@ -26,8 +26,8 @@ namespace GoC.Arena
 
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
-        private readonly List<int> _storage = Enumerable.Repeat(0, Substance.count).ToList();
         private RestrictedControl<IUnitControl> _restrictedControl;
+        private IStorageBehaviour _storageBehaviour;
 
         public void Init(IArenaContext arenaContext, int initTeamId)
         {
@@ -38,27 +38,29 @@ namespace GoC.Arena
         public int teamId => _restrictedControl.teamId;
         public int2 pos => transform.position.ToArenaPos();
 
-        public IReadOnlyList<int> storage => _storage;
+        public IReadOnlyList<int> storage => _storageBehaviour.content;
         public IUnitControl control => _restrictedControl.control;
 
-        private Result Give(object targetObject, Substance.Type substanceType, int count)
+        private Result Give(object targetObject, Substance.Type substanceType, int amount)
         {
-            if (count <= 0)
+            if (amount <= 0)
                 return Result.InvalidArgument;
             
-            if (targetObject is not Unit target)
+            if (targetObject is not MonoBehaviour target)
+                return Result.InvalidTarget;
+
+            IStorageBehaviour targetStorageBehaviour = target.GetComponent<IStorageBehaviour>();
+            if (targetStorageBehaviour == null)
                 return Result.InvalidTarget;
             
-            if (distance(pos, target.pos) > 1)
+            if (distance(pos, target.transform.position.ToArenaPos()) > 1)
                 return Result.TooFar;
-            
-            int substanceIndex = substanceType.ToIndex();
-            if (_storage[substanceIndex] >= count)
+
+            if (_storageBehaviour.Withdraw(substanceType, amount))
             {
-                _storage[substanceIndex] -= count;
-                target._storage[substanceIndex] += count;
+                targetStorageBehaviour.Deposit(substanceType, amount);
                 return Result.Ok;
-            }
+            } 
 
             return Result.NotEnoughSubstance;
         }
@@ -92,8 +94,12 @@ namespace GoC.Arena
             return Result.Ok;
         }
 
-        void Start()
+        private void OnEnable()
         {
+            // ReSharper disable once ConvertIfStatementToNullCoalescingAssignment - null is not quite what it seems in Unity
+            if (_storageBehaviour == null)
+                _storageBehaviour = GetComponent<IStorageBehaviour>();
+            
             _exhaust.Stop();
         }
 
