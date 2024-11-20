@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GoC.ScriptingApi;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -8,7 +9,7 @@ using static Unity.Mathematics.math;
 
 namespace GoC.Arena
 {
-    public class Unit : FieldObjectBehaviour, IUnit
+    public class Unit : MonoBehaviour, IUnit
     {
         private class Control : IUnitControl
         {
@@ -26,16 +27,19 @@ namespace GoC.Arena
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
         private readonly List<int> _storage = Enumerable.Repeat(0, Substance.count).ToList();
-        private IUnitControl _control;
+        private RestrictedControl<IUnitControl> _restrictedControl;
 
-        public new void Init(IArenaContext arenaContext, int initTeamId)
+        public void Init(IArenaContext arenaContext, int initTeamId)
         {
-            base.Init(arenaContext, initTeamId);
-            _control = new Control(this);
+            _restrictedControl = new RestrictedControl<IUnitControl>(arenaContext, initTeamId, new Control(this));
         }
 
+        public int id => GetInstanceID();
+        public int teamId => _restrictedControl.teamId;
+        public int2 pos => transform.position.ToArenaPos();
+
         public IReadOnlyList<int> storage => _storage;
-        public IUnitControl control => CheckExecutionRestrictions() ? _control : null;
+        public IUnitControl control => _restrictedControl.control;
 
         private Result Give(Unit recipient, Substance.Type substanceType, int count)
         {

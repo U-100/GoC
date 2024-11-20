@@ -1,4 +1,5 @@
 ﻿using GoC.ScriptingApi;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -6,7 +7,7 @@ namespace GoC.Arena
 {
     public delegate void AddUnit(Unit unit);
 
-    public class Factory : FieldObjectBehaviour, IFactory
+    public class Factory : MonoBehaviour, IFactory
     {
         private class Control : IFactoryControl
         {
@@ -20,18 +21,20 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _spawn;
 
         private AddUnit _addUnit;
-        private Control _control;
+        private RestrictedControl<IFactoryControl> _restrictedControl;
         
         private float _cooldown;
 
         public void Init(IArenaContext arenaContext, int initTeamId, AddUnit addUnit)
         {
-            base.Init(arenaContext, initTeamId);
             _addUnit = addUnit;
-            _control = new Control(this);
+            _restrictedControl = new RestrictedControl<IFactoryControl>(arenaContext, initTeamId, new Control(this));
         }
 
-        public IFactoryControl control => CheckExecutionRestrictions() ? _control : null;
+        public int id => GetInstanceID();
+        public int teamId => _restrictedControl.teamId;
+        public int2 pos => transform.position.ToArenaPos();
+        public IFactoryControl control => _restrictedControl.control;
         
         private Result Produce()
         {
