@@ -14,66 +14,55 @@ namespace GoC.Arena
         public Factory factory;
     }
 
-    public class Team : IDisposable
+    public struct TeamRecord
     {
-        private readonly Engine _engine;
-        private readonly IModel _model;
-        private readonly JsValue _tickFunction;
-        private readonly IArenaContext _arenaContext;
-
-        public Team(int teamId, TeamSetup teamSetup, Arena arena, IArenaContext arenaContext)
-        {
-            _arenaContext = arenaContext;
-            _model = arena.AddTeamModel(teamId, teamSetup.factory);
-            
-            _engine = EngineFactory.Create();
-            _engine.SetValue("model", _model);
-
-            string script = File.ReadAllText(teamSetup.scriptFilePath);
-            _engine.Execute(script);
-            
-            _tickFunction = _engine.GetValue("tick");
-        }
-
-        public void Dispose() => _engine.Dispose();
-
-        public void Update()
-        {
-            using(_arenaContext.ForModel(_model))
-                _engine.Invoke(_tickFunction);
-        }
+        public Engine engine;
+        public IModel model;
+        public JsValue tickFunction;
     }
-
+    
     public class ArenaMain : MonoBehaviour
     {
         [SerializeField] private TeamSetup[] _teamSetups;
 
-        private Team[] _teams;
-
+        private Arena _arena;
+        private TeamRecord[] _teamRecords;
         private float _tickCooldown;
 
         private void OnEnable()
         {
-            IArenaContext arenaContext = new ArenaContext();
-            Arena arena = new Arena(arenaContext);
+            _arena = new Arena();
 
-            _teams = new Team[_teamSetups.Length];
-            for (int iTeam = 0; iTeam < _teamSetups.Length; iTeam++)
-                _teams[iTeam] = new Team(iTeam, _teamSetups[iTeam], arena, arenaContext);
+            _teamRecords = new TeamRecord[_teamSetups.Length];
+            for (int teamId = 0; teamId < _teamSetups.Length; ++teamId)
+            {
+                TeamSetup teamSetup = _teamSetups[teamId];
+                IModel model = _arena.AddTeamModel(teamId, teamSetup.factory);
+            
+                Engine engine = EngineFactory.Create();
+                engine.SetValue("model", model);
+
+                string script = File.ReadAllText(teamSetup.scriptFilePath);
+                engine.Execute(script);
+                JsValue tickFunction = engine.GetValue("tick");
+                
+                _teamRecords[teamId] = new TeamRecord { model = model, engine = engine, tickFunction = tickFunction };
+            }
         }
 
         private void OnDisable()
         {
-            foreach (Team team in _teams)
-                team.Dispose();
+            foreach (TeamRecord teamRecord in _teamRecords)
+                teamRecord.engine.Dispose();
         }
 
         private void Update()
         {
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
-                foreach (Team team in _teams)
-                    team.Update();
+                foreach (TeamRecord teamRecord in _teamRecords)
+                    using(_arena.ForModel(teamRecord.model))
+                        teamRecord.engine.Invoke(teamRecord.tickFunction);
 
                 _tickCooldown += Tick.TIME;
             }

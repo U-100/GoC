@@ -22,9 +22,9 @@ namespace GoC.Arena
         private Quaternion? _targetRotation;
         private IUnitControl _control;
 
-        public new void Init(int initTeamId, IArenaContext arenaContext)
+        public new void Init(IArenaContext arenaContext, int initTeamId)
         {
-            base.Init(initTeamId, arenaContext);
+            base.Init(arenaContext, initTeamId);
             _control = new Control(this);
         }
 

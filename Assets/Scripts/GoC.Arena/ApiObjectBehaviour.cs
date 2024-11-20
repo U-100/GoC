@@ -10,7 +10,7 @@ namespace GoC.Arena
         public int id => GetInstanceID();
         public int teamId { get; private set; }
 
-        protected void Init(int initTeamId, IArenaContext arenaContext)
+        protected void Init(IArenaContext arenaContext, int initTeamId)
         {
             teamId = initTeamId;
             _arenaContext = arenaContext;

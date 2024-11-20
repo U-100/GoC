@@ -24,9 +24,9 @@ namespace GoC.Arena
         
         private float _cooldown;
 
-        public void Init(int initTeamId, IArenaContext arenaContext, AddUnit addUnit)
+        public void Init(IArenaContext arenaContext, int initTeamId, AddUnit addUnit)
         {
-            base.Init(initTeamId, arenaContext);
+            base.Init(arenaContext, initTeamId);
             _addUnit = addUnit;
             _control = new Control(this);
         }
