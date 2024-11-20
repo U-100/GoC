@@ -5,7 +5,7 @@ namespace GoC.Arena
 {
     public interface IArenaContext
     {
-        int teamId { get; }
+        int executingTeamId { get; }
         
         IDisposable ForModel(IModel model);
     }

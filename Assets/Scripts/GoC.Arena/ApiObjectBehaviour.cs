@@ -16,6 +16,6 @@ namespace GoC.Arena
             _arenaContext = arenaContext;
         }
         
-        protected bool CheckExecutionRestrictions() => _arenaContext.teamId == teamId;
+        protected bool CheckExecutionRestrictions() => _arenaContext.executingTeamId == teamId;
     }
 }

@@ -11,21 +11,21 @@ namespace GoC.Arena
 
         private IModel _currentModel;
 
-        public IModel AddTeamModel(int newTeamId, Factory newTeamFactory)
+        public IModel AddTeamModel(int addedTeamId, Factory newTeamFactory)
         {
-            newTeamFactory.Init(this, newTeamId, unit => AddUnit(newTeamId, unit));
+            newTeamFactory.Init(this, addedTeamId, unit => AddUnit(addedTeamId, unit));
             _factories.Add(newTeamFactory.id, newTeamFactory);
 
-            return new TeamModel(newTeamId, _factories, _units);
+            return new TeamModel(addedTeamId, _factories, _units);
         }
 
-        private void AddUnit(int teamId, Unit unit)
+        private void AddUnit(int unitTeamId, Unit unit)
         {
-            unit.Init(this, teamId);
+            unit.Init(this, unitTeamId);
             _units.Add(unit.id, unit);
         }
 
-        public int teamId => _currentModel.teamId;
+        public int executingTeamId => _currentModel.teamId;
 
         private readonly struct Token : IDisposable
         {
