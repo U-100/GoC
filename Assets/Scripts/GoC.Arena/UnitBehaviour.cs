@@ -28,7 +28,6 @@ namespace GoC.Arena
             _team = team;
         }
 
-        public int id => GetInstanceID();
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
 
@@ -40,6 +39,11 @@ namespace GoC.Arena
                 ? _unitControlBehaviour ??= GetComponent<UnitControlBehaviour>()
                 : null;
 
+        public Result Mine(object targetObject)
+        {
+            return Result.Ok;
+        }
+        
         public Result Give(object targetObject, Substance.Type substanceType, int amount)
         {
             if (amount <= 0)

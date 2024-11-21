@@ -25,7 +25,6 @@ namespace GoC.Arena
             _team = team;
         }
 
-        public int id => GetInstanceID();
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         

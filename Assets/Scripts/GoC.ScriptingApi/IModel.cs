@@ -15,14 +15,6 @@ namespace GoC.ScriptingApi
         NotEnoughSubstance,
     }
 
-    public interface IUnitControl
-    {
-        Result Give(object target, Substance.Type substanceType, int amount);
-        Result Move();
-        Result TurnLeft();
-        Result TurnRight();
-    }
-
     public class Substance
     {
         public enum Type
@@ -33,10 +25,18 @@ namespace GoC.ScriptingApi
 
         public static readonly int TYPES_COUNT = Enum.GetValues(typeof(Type)).Length;
     }
+
+    public interface IUnitControl
+    {
+        Result Mine(object target);
+        Result Give(object target, Substance.Type substanceType, int amount);
+        Result Move();
+        Result TurnLeft();
+        Result TurnRight();
+    }
     
     public interface IUnit
     {
-        int id { get; } // unique id
         int teamId { get; } // owner team id
         int2 pos { get; }
 
@@ -52,13 +52,17 @@ namespace GoC.ScriptingApi
 
     public interface IFactory
     {
-        int id { get; } // unique id
         int teamId { get; } // owner team id
         int2 pos { get; }
 
         public IReadOnlyList<int> storage { get; }
         
         public IFactoryControl control { get; }
+    }
+
+    public interface IDeposit
+    {
+        int2 pos { get; }
     }
     
     public interface IModel
@@ -70,5 +74,6 @@ namespace GoC.ScriptingApi
         
         IEnumerable<IFactory> factories { get; }
         IEnumerable<IUnit> units { get; }
+        IEnumerable<IDeposit> deposits { get; }
     }
 }

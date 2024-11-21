@@ -24,6 +24,7 @@ namespace GoC.Arena
 
         public IEnumerable<IFactory> factories => FindObjectsByType<FactoryBehaviour>(FindObjectsSortMode.None);
         public IEnumerable<IUnit> units => FindObjectsByType<UnitBehaviour>(FindObjectsSortMode.None);
+        public IEnumerable<IDeposit> deposits => FindObjectsByType<DepositBehaviour>(FindObjectsSortMode.None);
 
         private void OnEnable()
         {
