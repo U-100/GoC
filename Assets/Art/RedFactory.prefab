@@ -241,6 +241,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6816330614459917673}
+  - component: {fileID: 3621413765074378116}
   - component: {fileID: 8277746951006310841}
   m_Layer: 0
   m_Name: RedFactory
@@ -266,6 +267,18 @@ Transform:
   - {fileID: 8425503065736966408}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3621413765074378116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6991883633332805110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e206bb5d4bd4891be91d5fd0d3ea62f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8277746951006310841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -278,6 +291,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4deb0a561a249a39c31799200c5e74e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _executionContext: {fileID: 11400000, guid: dbcd18b484d28574a90e755cc0f7ed7b, type: 2}
-  _unit: {fileID: 8391022737454312585, guid: 08fb3a1303a359648b32627116f743aa, type: 3}
+  _prototype: {fileID: 8391022737454312585, guid: 08fb3a1303a359648b32627116f743aa,
+    type: 3}
   _spawn: {fileID: 2210560471988874357}

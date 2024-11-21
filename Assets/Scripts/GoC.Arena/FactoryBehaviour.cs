@@ -1,29 +1,33 @@
-﻿using GoC.ScriptingApi;
+﻿using System.Collections.Generic;
+using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
 
 namespace GoC.Arena
 {
-    public delegate void AddUnit(Unit unit);
+    public delegate void AddUnit(UnitBehaviour unitBehaviour);
 
-    public class Factory : MonoBehaviour, IFactory
+    [RequireComponent(typeof(StorageBehaviour))]
+    public class FactoryBehaviour : MonoBehaviour, IFactory
     {
         private class Control : IFactoryControl
         {
-            private readonly Factory _factory;
-            public Control(Factory factory) => _factory = factory;
+            private readonly FactoryBehaviour _factoryBehaviour;
+            public Control(FactoryBehaviour factoryBehaviour) => _factoryBehaviour = factoryBehaviour;
 
-            public Result Produce() => _factory.Produce();
+            public Result Produce() => _factoryBehaviour.Produce();
         }
         
-        [SerializeField] private Unit _unit;
+        [SerializeField] private UnitBehaviour _prototype;
         [SerializeField] private VisualEffect _spawn;
 
         private AddUnit _addUnit;
-        private RestrictedControl<IFactoryControl> _restrictedControl;
-        
         private float _cooldown;
+        private RestrictedControl<IFactoryControl> _restrictedControl;
+
+        private IStorageBehaviour _storageBehaviour;
+        private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
 
         public void Init(IArenaContext arenaContext, int initTeamId, AddUnit addUnit)
         {
@@ -34,6 +38,8 @@ namespace GoC.Arena
         public int id => GetInstanceID();
         public int teamId => _restrictedControl.teamId;
         public int2 pos => transform.position.ToArenaPos();
+        
+        public IReadOnlyList<int> storage => storageBehaviour.content;
         public IFactoryControl control => _restrictedControl.control;
         
         private Result Produce()
@@ -59,8 +65,8 @@ namespace GoC.Arena
 
         private void Fabricate()
         {
-            Unit unit = Instantiate(_unit, transform.position, transform.rotation);
-            _addUnit(unit);
+            UnitBehaviour unitBehaviour = Instantiate(_prototype, transform.position, transform.rotation);
+            _addUnit(unitBehaviour);
         }
     }
 }

@@ -9,17 +9,17 @@ using static Unity.Mathematics.math;
 namespace GoC.Arena
 {
     [RequireComponent(typeof(StorageBehaviour))]
-    public class Unit : MonoBehaviour, IUnit
+    public class UnitBehaviour : MonoBehaviour, IUnit
     {
         private class Control : IUnitControl
         {
-            private readonly Unit _unit;
-            public Control(Unit unit) => _unit = unit;
+            private readonly UnitBehaviour _unitBehaviour;
+            public Control(UnitBehaviour unitBehaviour) => _unitBehaviour = unitBehaviour;
 
-            public Result Give(object target, Substance.Type substanceType, int count) => _unit.Give(target, substanceType, count);
-            public Result Move() => _unit.Move();
-            public Result TurnLeft() => _unit.TurnLeft();
-            public Result TurnRight() => _unit.TurnRight();
+            public Result Give(object target, Substance.Type substanceType, int count) => _unitBehaviour.Give(target, substanceType, count);
+            public Result Move() => _unitBehaviour.Move();
+            public Result TurnLeft() => _unitBehaviour.TurnLeft();
+            public Result TurnRight() => _unitBehaviour.TurnRight();
         }
 
         [SerializeField] private VisualEffect _exhaust;
@@ -27,8 +27,10 @@ namespace GoC.Arena
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
         private RestrictedControl<IUnitControl> _restrictedControl;
-        private IStorageBehaviour _storageBehaviour;
 
+        private IStorageBehaviour _storageBehaviour;
+        private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
+        
         public void Init(IArenaContext arenaContext, int initTeamId)
         {
             _restrictedControl = new RestrictedControl<IUnitControl>(arenaContext, initTeamId, new Control(this));
@@ -38,7 +40,7 @@ namespace GoC.Arena
         public int teamId => _restrictedControl.teamId;
         public int2 pos => transform.position.ToArenaPos();
 
-        public IReadOnlyList<int> storage => _storageBehaviour.content;
+        public IReadOnlyList<int> storage => storageBehaviour.content;
         public IUnitControl control => _restrictedControl.control;
 
         private Result Give(object targetObject, Substance.Type substanceType, int amount)
@@ -49,14 +51,14 @@ namespace GoC.Arena
             if (targetObject is not MonoBehaviour target)
                 return Result.InvalidTarget;
 
+            if (distance(pos, target.transform.position.ToArenaPos()) > 1)
+                return Result.TooFar;
+
             IStorageBehaviour targetStorageBehaviour = target.GetComponent<IStorageBehaviour>();
             if (targetStorageBehaviour == null)
                 return Result.InvalidTarget;
             
-            if (distance(pos, target.transform.position.ToArenaPos()) > 1)
-                return Result.TooFar;
-
-            if (_storageBehaviour.Withdraw(substanceType, amount))
+            if (storageBehaviour.Withdraw(substanceType, amount))
             {
                 targetStorageBehaviour.Deposit(substanceType, amount);
                 return Result.Ok;
@@ -96,10 +98,6 @@ namespace GoC.Arena
 
         private void OnEnable()
         {
-            // ReSharper disable once ConvertIfStatementToNullCoalescingAssignment - null is not quite what it seems in Unity
-            if (_storageBehaviour == null)
-                _storageBehaviour = GetComponent<IStorageBehaviour>();
-            
             _exhaust.Stop();
         }
 

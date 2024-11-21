@@ -11,18 +11,18 @@ namespace GoC.Arena
 
         private IModel _currentModel;
 
-        public IModel AddTeamModel(int addedTeamId, Factory newTeamFactory)
+        public IModel AddTeamModel(int addedTeamId, FactoryBehaviour newTeamFactoryBehaviour)
         {
-            newTeamFactory.Init(this, addedTeamId, unit => AddUnit(addedTeamId, unit));
-            _factories.Add(newTeamFactory.id, newTeamFactory);
+            newTeamFactoryBehaviour.Init(this, addedTeamId, unit => AddUnit(addedTeamId, unit));
+            _factories.Add(newTeamFactoryBehaviour.id, newTeamFactoryBehaviour);
 
             return new TeamModel(addedTeamId, _factories, _units);
         }
 
-        private void AddUnit(int unitTeamId, Unit unit)
+        private void AddUnit(int unitTeamId, UnitBehaviour unitBehaviour)
         {
-            unit.Init(this, unitTeamId);
-            _units.Add(unit.id, unit);
+            unitBehaviour.Init(this, unitTeamId);
+            _units.Add(unitBehaviour.id, unitBehaviour);
         }
 
         public int executingTeamId => _currentModel.teamId;

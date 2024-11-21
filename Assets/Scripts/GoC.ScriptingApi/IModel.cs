@@ -61,6 +61,8 @@ namespace GoC.ScriptingApi
         int teamId { get; } // owner team id
         int2 pos { get; }
 
+        public IReadOnlyList<int> storage { get; }
+        
         public IFactoryControl control { get; }
     }
     

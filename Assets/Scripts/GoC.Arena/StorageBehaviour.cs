@@ -14,7 +14,8 @@ namespace GoC.Arena
 
     public class StorageBehaviour : MonoBehaviour, IStorageBehaviour
     {
-        private readonly List<int> _content = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToList();
+        [SerializeField]
+        private int[] _content = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
         
         public IReadOnlyList<int> content => _content;
         

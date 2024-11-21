@@ -11,7 +11,7 @@ namespace GoC.Arena
     public struct TeamSetup
     {
         public string scriptFilePath;
-        public Factory factory;
+        public FactoryBehaviour factoryBehaviour;
     }
 
     public struct TeamRecord
@@ -37,7 +37,7 @@ namespace GoC.Arena
             for (int teamId = 0; teamId < _teamSetups.Length; ++teamId)
             {
                 TeamSetup teamSetup = _teamSetups[teamId];
-                IModel model = _arena.AddTeamModel(teamId, teamSetup.factory);
+                IModel model = _arena.AddTeamModel(teamId, teamSetup.factoryBehaviour);
             
                 Engine engine = EngineFactory.Create();
                 engine.SetValue("model", model);
