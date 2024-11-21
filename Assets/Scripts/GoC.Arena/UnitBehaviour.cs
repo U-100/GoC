@@ -9,27 +9,15 @@ using static Unity.Mathematics.math;
 namespace GoC.Arena
 {
     [RequireComponent(typeof(StorageBehaviour))]
+    [RequireComponent(typeof(UnitControlBehaviour))]
     public class UnitBehaviour : MonoBehaviour, IUnit
     {
-        private class Control : IUnitControl
-        {
-            private readonly UnitBehaviour _unitBehaviour;
-            public Control(UnitBehaviour unitBehaviour) => _unitBehaviour = unitBehaviour;
-
-            public Result Give(object target, Substance.Type substanceType, int count) => _unitBehaviour.Give(target, substanceType, count);
-            public Result Move() => _unitBehaviour.Move();
-            public Result TurnLeft() => _unitBehaviour.TurnLeft();
-            public Result TurnRight() => _unitBehaviour.TurnRight();
-        }
-
-        [SerializeField] private VisualEffect _exhaust;
-
-        [Space]
         [SerializeField] private Team _team;
+        [Space]
+        [SerializeField] private VisualEffect _exhaust;
         
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
-        private RestrictedControl<IUnitControl> _restrictedControl;
 
         private IStorageBehaviour _storageBehaviour;
         private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
@@ -38,17 +26,21 @@ namespace GoC.Arena
         public void Setup(Team team)
         {
             _team = team;
-            _restrictedControl = new RestrictedControl<IUnitControl>(_team.arena, _team.teamId, new Control(this));
         }
 
         public int id => GetInstanceID();
-        public int teamId => _restrictedControl.teamId;
+        public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
 
         public IReadOnlyList<int> storage => storageBehaviour.content;
-        public IUnitControl control => _restrictedControl.control;
 
-        private Result Give(object targetObject, Substance.Type substanceType, int amount)
+        private UnitControlBehaviour _unitControlBehaviour;
+        public IUnitControl control =>
+            _team.arena.executingTeamId == teamId
+                ? _unitControlBehaviour ??= GetComponent<UnitControlBehaviour>()
+                : null;
+
+        public Result Give(object targetObject, Substance.Type substanceType, int amount)
         {
             if (amount <= 0)
                 return Result.InvalidArgument;
@@ -72,7 +64,7 @@ namespace GoC.Arena
             return Result.NotEnoughSubstance;
         }
 
-        private Result Move()
+        public Result Move()
         {
             // TODO: implement busy-ness
             //if (_targetPosition.HasValue)
@@ -85,7 +77,7 @@ namespace GoC.Arena
             return Result.Ok;
         }
 
-        private Result TurnLeft()
+        public Result TurnLeft()
         {
             Settle();
             _targetRotation = Quaternion.Euler(0, -90, 0) * transform.rotation;
@@ -93,7 +85,7 @@ namespace GoC.Arena
             return Result.Ok;
         }
 
-        private Result TurnRight()
+        public Result TurnRight()
         {
             Settle();
             _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;

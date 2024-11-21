@@ -7,22 +7,15 @@ using UnityEngine.VFX;
 namespace GoC.Arena
 {
     [RequireComponent(typeof(StorageBehaviour))]
+    [RequireComponent(typeof(FactoryControlBehaviour))]
     public class FactoryBehaviour : MonoBehaviour, IFactory
     {
-        private class Control : IFactoryControl
-        {
-            private readonly FactoryBehaviour _factoryBehaviour;
-            public Control(FactoryBehaviour factoryBehaviour) => _factoryBehaviour = factoryBehaviour;
-
-            public Result Produce() => _factoryBehaviour.Produce();
-        }
-
         [SerializeField] private Team _team;
-        [SerializeField] private UnitBehaviour _prototype;
+        [SerializeField] private UnitBehaviour _fabricatedUnitPrototype;
+        [Space]
         [SerializeField] private VisualEffect _spawn;
 
         private float _cooldown;
-        private RestrictedControl<IFactoryControl> _restrictedControl;
 
         private IStorageBehaviour _storageBehaviour;
         private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
@@ -33,13 +26,18 @@ namespace GoC.Arena
         }
 
         public int id => GetInstanceID();
-        public int teamId => _restrictedControl.teamId;
+        public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         
         public IReadOnlyList<int> storage => storageBehaviour.content;
-        public IFactoryControl control => _restrictedControl.control;
         
-        private Result Produce()
+        private FactoryControlBehaviour _factoryControlBehaviour;
+        public IFactoryControl control =>
+            _team.arena.executingTeamId == teamId
+                ? _factoryControlBehaviour ??= GetComponent<FactoryControlBehaviour>()
+                : null;
+
+        public Result Produce()
         {
             if (_cooldown > 0)
                 return Result.Busy;
@@ -49,11 +47,6 @@ namespace GoC.Arena
             _spawn.Play();
             
             return Result.Ok;
-        }
-
-        private void OnEnable()
-        {
-            _restrictedControl = new RestrictedControl<IFactoryControl>(_team.arena, _team.teamId, new Control(this));
         }
 
         void Update()
@@ -67,7 +60,7 @@ namespace GoC.Arena
 
         private void Fabricate()
         {
-            UnitBehaviour unitBehaviour = Instantiate(_prototype, transform.position, transform.rotation);
+            UnitBehaviour unitBehaviour = Instantiate(_fabricatedUnitPrototype, transform.position, transform.rotation);
             unitBehaviour.Setup(_team);
         }
     }

@@ -90,6 +90,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5431936576394582313, guid: 3f2203b64daaeda4ca6f4eabf0015a95,
         type: 3}
+    - target: {fileID: 8277746951006310841, guid: 5382fd2146412a34fb0d37aa8d869939,
+        type: 3}
+      propertyPath: _fabricatedUnitPrototype
+      value: 
+      objectReference: {fileID: 5431936576394582313, guid: 3f2203b64daaeda4ca6f4eabf0015a95,
+        type: 3}
     - target: {fileID: 8359894187957255651, guid: 5382fd2146412a34fb0d37aa8d869939,
         type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
