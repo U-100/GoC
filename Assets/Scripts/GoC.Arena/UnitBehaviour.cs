@@ -30,6 +30,7 @@ namespace GoC.Arena
 
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
+        public int2 dir => transform.forward.ToArenaPos();
 
         public IReadOnlyList<int> storage => storageBehaviour.content;
 
@@ -41,6 +42,19 @@ namespace GoC.Arena
 
         public Result Mine(object targetObject)
         {
+            if (targetObject is not MonoBehaviour target)
+                return Result.InvalidTarget;
+
+            if (distance(pos, target.transform.position.ToArenaPos()) > 1)
+                return Result.TooFar;
+
+            DepositBehaviour targetDepositBehaviour = target.GetComponent<DepositBehaviour>();
+            if (targetDepositBehaviour == null)
+                return Result.InvalidTarget;
+
+            DepositExtractionOutcome depositExtractionOutcome = targetDepositBehaviour.Extract();
+            storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
+            
             return Result.Ok;
         }
         

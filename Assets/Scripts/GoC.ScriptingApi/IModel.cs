@@ -39,6 +39,7 @@ namespace GoC.ScriptingApi
     {
         int teamId { get; } // owner team id
         int2 pos { get; }
+        int2 dir { get; }
 
         public IReadOnlyList<int> storage { get; }
         
