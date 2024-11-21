@@ -24,6 +24,9 @@ namespace GoC.Arena
 
         [SerializeField] private VisualEffect _exhaust;
 
+        [Space]
+        [SerializeField] private Team _team;
+        
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
         private RestrictedControl<IUnitControl> _restrictedControl;
@@ -31,9 +34,11 @@ namespace GoC.Arena
         private IStorageBehaviour _storageBehaviour;
         private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
         
-        public void Init(IArenaContext arenaContext, int initTeamId)
+        // to set up upon instantiation
+        public void Setup(Team team)
         {
-            _restrictedControl = new RestrictedControl<IUnitControl>(arenaContext, initTeamId, new Control(this));
+            _team = team;
+            _restrictedControl = new RestrictedControl<IUnitControl>(_team.arena, _team.teamId, new Control(this));
         }
 
         public int id => GetInstanceID();

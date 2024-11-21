@@ -6,8 +6,6 @@ using UnityEngine.VFX;
 
 namespace GoC.Arena
 {
-    public delegate void AddUnit(UnitBehaviour unitBehaviour);
-
     [RequireComponent(typeof(StorageBehaviour))]
     public class FactoryBehaviour : MonoBehaviour, IFactory
     {
@@ -18,21 +16,20 @@ namespace GoC.Arena
 
             public Result Produce() => _factoryBehaviour.Produce();
         }
-        
+
+        [SerializeField] private Team _team;
         [SerializeField] private UnitBehaviour _prototype;
         [SerializeField] private VisualEffect _spawn;
 
-        private AddUnit _addUnit;
         private float _cooldown;
         private RestrictedControl<IFactoryControl> _restrictedControl;
 
         private IStorageBehaviour _storageBehaviour;
         private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
 
-        public void Init(IArenaContext arenaContext, int initTeamId, AddUnit addUnit)
+        public void Setup(Team team)
         {
-            _addUnit = addUnit;
-            _restrictedControl = new RestrictedControl<IFactoryControl>(arenaContext, initTeamId, new Control(this));
+            _team = team;
         }
 
         public int id => GetInstanceID();
@@ -53,7 +50,12 @@ namespace GoC.Arena
             
             return Result.Ok;
         }
-        
+
+        private void OnEnable()
+        {
+            _restrictedControl = new RestrictedControl<IFactoryControl>(_team.arena, _team.teamId, new Control(this));
+        }
+
         void Update()
         {
             if (_cooldown > 0 && (_cooldown -= Time.deltaTime) <= 0)
@@ -66,7 +68,7 @@ namespace GoC.Arena
         private void Fabricate()
         {
             UnitBehaviour unitBehaviour = Instantiate(_prototype, transform.position, transform.rotation);
-            _addUnit(unitBehaviour);
+            unitBehaviour.Setup(_team);
         }
     }
 }

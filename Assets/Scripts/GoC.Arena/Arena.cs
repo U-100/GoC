@@ -1,51 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using GoC.ScriptingApi;
+﻿using System.Collections.Generic;
+using System.IO;
+using Jint;
+using Jint.Native;
+using UnityEngine;
 
 namespace GoC.Arena
 {
-    public class Arena : IArenaContext
+    public struct TeamRecord
     {
-        private readonly Dictionary<int, IFactory> _factories = new();
-        private readonly Dictionary<int, IUnit> _units = new();
+        public Engine engine;
+        public Team team;
+        public JsValue tickFunction;
+    }
+    
+    public class Arena : MonoBehaviour, IArenaContext
+    {
+        private readonly List<TeamRecord> _teamRecords = new();
+        private float _tickCooldown;
+        private Team _executingTeam;
 
-        private IModel _currentModel;
-
-        public IModel AddTeamModel(int addedTeamId, FactoryBehaviour newTeamFactoryBehaviour)
+        public int executingTeamId => _executingTeam.teamId;
+        
+        public void TeamEnabled(Team team)
         {
-            newTeamFactoryBehaviour.Init(this, addedTeamId, unit => AddUnit(addedTeamId, unit));
-            _factories.Add(newTeamFactoryBehaviour.id, newTeamFactoryBehaviour);
+            Engine engine = EngineFactory.Create();
+            engine.SetValue("model", team);
 
-            return new TeamModel(addedTeamId, _factories, _units);
+            string script = File.ReadAllText(team.scriptFilePath);
+            engine.Execute(script);
+            JsValue tickFunction = engine.GetValue("tick");
+
+            _teamRecords.Add(
+                new TeamRecord
+                {
+                    team = team,
+                    engine = engine,
+                    tickFunction = tickFunction
+                }
+            );
         }
 
-        private void AddUnit(int unitTeamId, UnitBehaviour unitBehaviour)
+        private void OnDisable()
         {
-            unitBehaviour.Init(this, unitTeamId);
-            _units.Add(unitBehaviour.id, unitBehaviour);
+            foreach (TeamRecord teamRecord in _teamRecords)
+                teamRecord.engine.Dispose();
         }
 
-        public int executingTeamId => _currentModel.teamId;
-
-        private readonly struct Token : IDisposable
+        private void Update()
         {
-            private readonly Arena _arena;
-            private readonly IModel _savedModel;
-            
-            public Token(Arena arena, IModel savedModel)
+            if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
-                _arena = arena;
-                _savedModel = savedModel;
+                foreach (TeamRecord teamRecord in _teamRecords)
+                {
+                    try
+                    {
+                        _executingTeam = teamRecord.team;
+                        teamRecord.engine.Invoke(teamRecord.tickFunction);
+                    }
+                    finally
+                    {
+                        _executingTeam = null;
+                    }
+                }
+
+                _tickCooldown += Tick.TIME;
             }
-
-            public void Dispose() => _arena._currentModel = _savedModel;
-        }
-
-        public IDisposable ForModel(IModel model)
-        {
-            Token token = new Token(this, _currentModel);
-            _currentModel = model;
-            return token;
         }
     }
 }

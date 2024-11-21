@@ -34,11 +34,6 @@ namespace GoC.ScriptingApi
         public static readonly int TYPES_COUNT = Enum.GetValues(typeof(Type)).Length;
     }
     
-    public static class SubstanceExtensions
-    {
-        public static int ToIndex(this Substance.Type substanceType) => substanceType - Substance.Type.Energy;
-    }
-    
     public interface IUnit
     {
         int id { get; } // unique id
@@ -68,13 +63,12 @@ namespace GoC.ScriptingApi
     
     public interface IModel
     {
-        int id { get; } // unique id
-        int teamId { get; } // owner team id
+        int teamId { get; } // team id
 
         IEnumerable<IFactory> myFactories { get; }
         IEnumerable<IUnit> myUnits { get; }
         
-        IReadOnlyDictionary<int, IFactory> factories { get; }
-        IReadOnlyDictionary<int, IUnit> units { get; }
+        IEnumerable<IFactory> factories { get; }
+        IEnumerable<IUnit> units { get; }
     }
 }

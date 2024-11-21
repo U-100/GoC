@@ -40,6 +40,7 @@ namespace GoC.Arena
             typeof(int2),
             typeof(IEnumerable<>),
             typeof(IReadOnlyCollection<>),
+            typeof(IReadOnlyList<>),
             typeof(IReadOnlyDictionary<,>),
         };
         
