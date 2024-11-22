@@ -10,7 +10,7 @@ namespace GoC.ScriptingApi
         Busy,
         AccessDenied,
         InvalidArgument,
-        TooFar,
+        InvalidPosition,
         InvalidTarget,
         NotEnoughSubstance,
     }
@@ -30,6 +30,8 @@ namespace GoC.ScriptingApi
     {
         Result Mine(object target);
         Result Give(object target, Substance.Type substanceType, int amount);
+        Result MoveTo(object target);
+        Result MoveTo(int x, int y);
         Result Move();
         Result TurnLeft();
         Result TurnRight();
@@ -42,6 +44,8 @@ namespace GoC.ScriptingApi
         int2 dir { get; }
 
         public IReadOnlyList<int> storage { get; }
+        
+        Result CanMine(object target);
         
         public IUnitControl control { get; }
     }

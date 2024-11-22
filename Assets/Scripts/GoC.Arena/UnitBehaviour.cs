@@ -40,18 +40,28 @@ namespace GoC.Arena
                 ? _unitControlBehaviour ??= GetComponent<UnitControlBehaviour>()
                 : null;
 
-        public Result Mine(object targetObject)
+        public Result CanMine(object targetObject)
         {
             if (targetObject is not MonoBehaviour target)
                 return Result.InvalidTarget;
-
-            if (distance(pos, target.transform.position.ToArenaPos()) > 1)
-                return Result.TooFar;
 
             DepositBehaviour targetDepositBehaviour = target.GetComponent<DepositBehaviour>();
             if (targetDepositBehaviour == null)
                 return Result.InvalidTarget;
 
+            if (!all(pos + dir == targetDepositBehaviour.pos)) 
+                return Result.InvalidPosition;
+
+            return Result.Ok;
+        }
+        
+        public Result Mine(object targetObject)
+        {
+            Result canMine = CanMine(targetObject);
+            if (canMine != Result.Ok)
+                return canMine;
+            
+            DepositBehaviour targetDepositBehaviour = ((MonoBehaviour)targetObject).GetComponent<DepositBehaviour>();
             DepositExtractionOutcome depositExtractionOutcome = targetDepositBehaviour.Extract();
             storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
             
@@ -67,7 +77,7 @@ namespace GoC.Arena
                 return Result.InvalidTarget;
 
             if (distance(pos, target.transform.position.ToArenaPos()) > 1)
-                return Result.TooFar;
+                return Result.InvalidPosition;
 
             IStorageBehaviour targetStorageBehaviour = target.GetComponent<IStorageBehaviour>();
             if (targetStorageBehaviour == null)
@@ -82,6 +92,54 @@ namespace GoC.Arena
             return Result.NotEnoughSubstance;
         }
 
+        public Result MoveTo(object target)
+        {
+            switch (target)
+            {
+                case int2 targetPos:
+                    return MoveTo(targetPos.x, targetPos.y);
+                
+                case MonoBehaviour targetMonoBehaviour:
+                    int2 targetMonoBehaviourPos = targetMonoBehaviour.transform.position.ToArenaPos();
+                    return MoveTo(targetMonoBehaviourPos.x, targetMonoBehaviourPos.y);
+                
+                case object[] {Length: 2} targetObjArr:
+                    if (targetObjArr[0] is double x && targetObjArr[1] is double y)
+                        return MoveTo((int)x, (int)y);
+                    break;
+            }
+            return Result.InvalidTarget;
+        }
+
+        public Result MoveTo(int x, int y)
+        {
+            Settle();
+
+            int2 delta = (int2)round(int2(x, y) - transform.position.ToArenaPos());
+            int2 absDelta = abs(delta);
+            if (all(absDelta == 0))
+                return Result.Ok;
+
+            int2 dirTo = sign(delta);
+
+            if (absDelta.x > absDelta.y)
+                dirTo.y = 0;
+            else
+                dirTo.x = 0;
+
+            if (all(dirTo == dir))
+                Move();
+            else
+            {
+                if (cross(transform.forward, float3(dirTo.x, 0, dirTo.y)).y < 0)
+                    TurnLeft();
+                else
+                    TurnRight();
+            }
+            
+            return Result.Ok;
+        }
+        
         public Result Move()
         {
             // TODO: implement busy-ness

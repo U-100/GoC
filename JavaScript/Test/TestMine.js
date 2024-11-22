@@ -1,7 +1,3 @@
-let manhdist = (a, b) => Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]);
-
-let vecsum = (a, b) => [a[0] + b[0], a[1] + b[1]];
-
 function tick()
 {
     let myUnitsCount = 0;
@@ -14,22 +10,13 @@ function tick()
      
         if(deposit)
         {
-            let curDist = manhdist(myUnit.pos, deposit.pos);
-            
-            if(curDist > 1)
-            {
-                let posAfterMove = vecsum(myUnit.pos, myUnit.dir);
-                let distAfterMove = manhdist(posAfterMove, deposit.pos);
-                if(distAfterMove < curDist)
-                    myUnit.control.Move();
-                else
-                    myUnit.control.TurnLeft();
-            }
-            else
+            if(myUnit.CanMine(deposit) == Result.Ok)
             {
                 myUnit.control.Mine(deposit);
                 log("Have " + myUnit.storage[Substance.Type.Energy] + " Energy");
             }
+            else
+                myUnit.control.MoveTo(deposit.pos);
         }
     }
 
