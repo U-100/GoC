@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: 2468237046736121382, guid: 08fb3a1303a359648b32627116f743aa,
         type: 3}
       propertyPath: m_Name
-      value: blue_bot
+      value: BlueUnit
       objectReference: {fileID: 0}
     - target: {fileID: 2957492940002964636, guid: 08fb3a1303a359648b32627116f743aa,
         type: 3}

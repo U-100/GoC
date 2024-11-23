@@ -20,11 +20,6 @@ namespace GoC.Arena
         private IStorageBehaviour _storageBehaviour;
         private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
 
-        public void Setup(Team team)
-        {
-            _team = team;
-        }
-
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         
@@ -51,6 +46,26 @@ namespace GoC.Arena
             return Result.NotEnoughSubstance;
         }
 
+        public void Setup(Team team) => _team = team;
+        
+        public void BeforeTick() { }
+
+        public void AfterTick() { }
+
+        void OnEnable()
+        {
+            if (_team != null)
+                _team.Register(this);
+            else
+                Debug.LogWarning("A factory without a team", this);
+        }
+
+        void OnDisable()
+        {
+            if (_team != null)
+                _team.Unregister(this);
+        }
+
         void Update()
         {
             if (_cooldown > 0 && (_cooldown -= Time.deltaTime) <= 0)
@@ -62,8 +77,15 @@ namespace GoC.Arena
 
         private void Fabricate()
         {
+            // NOTE: temporarily disable UnitBehaviour on prefab so we can call Setup() before unit's OnEnable() is triggered
+            bool savedPrototypeEnabled = _fabricatedUnitPrototype.enabled;
+            _fabricatedUnitPrototype.enabled = false;
+
             UnitBehaviour unitBehaviour = Instantiate(_fabricatedUnitPrototype, transform.position, transform.rotation);
             unitBehaviour.Setup(_team);
+
+            _fabricatedUnitPrototype.enabled = savedPrototypeEnabled;
+            unitBehaviour.enabled = savedPrototypeEnabled;
         }
     }
 }

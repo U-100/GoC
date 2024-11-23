@@ -7,6 +7,8 @@ namespace GoC.Arena
 {
     public static class UnityExtensions
     {
-        public static int2 ToArenaPos(this Vector3 transformPosition) => (int2)round(float2(transformPosition.x, transformPosition.z));
+        public static int2 ToArenaPos(this Vector3 unityPos) => (int2)round(float2(unityPos.x, unityPos.z));
+
+        public static Vector3 ToUnityPos(this int2 arenaPos) => new Vector3(arenaPos.x, 0, arenaPos.y);
     }
 }

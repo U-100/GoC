@@ -2,7 +2,8 @@ function tick()
 {
     let myUnitsCount = 0;
 
-    let deposit = model.deposits.find(_ => true);
+    let deposit = undefined;
+    for(d of model.deposits) { deposit = d; break; }        
     
     for(let myUnit of model.myUnits)
     {

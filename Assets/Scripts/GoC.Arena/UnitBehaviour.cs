@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
@@ -23,12 +24,6 @@ namespace GoC.Arena
         private IStorageBehaviour _storageBehaviour;
         private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
         
-        // to set up upon instantiation
-        public void Setup(Team team)
-        {
-            _team = team;
-        }
-
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         public int2 dir => transform.forward.ToArenaPos();
@@ -116,8 +111,6 @@ namespace GoC.Arena
 
         public Result MoveTo(int x, int y)
         {
-            Settle();
-
             int2 delta = (int2)round(int2(x, y) - transform.position.ToArenaPos());
             int2 absDelta = abs(delta);
             if (all(absDelta == 0))
@@ -145,54 +138,27 @@ namespace GoC.Arena
         
         public Result Move()
         {
-            // TODO: implement busy-ness
-            //if (_targetPosition.HasValue)
-              //  return Result.Busy;
-            
-            Settle();
             _targetPosition = transform.position + transform.forward;
             _exhaust.Play();
-
             return Result.Ok;
         }
 
         public Result TurnLeft()
         {
-            Settle();
             _targetRotation = Quaternion.Euler(0, -90, 0) * transform.rotation;
-
             return Result.Ok;
         }
 
         public Result TurnRight()
         {
-            Settle();
             _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;
-
             return Result.Ok;
         }
 
-        private void OnEnable()
-        {
-            _exhaust.Stop();
-        }
+        // to set up upon instantiation
+        public void Setup(Team team) => _team = team;
 
-        void Update()
-        {
-            if(_targetPosition.HasValue)
-            {
-                float linearSpeed = 1 / Tick.TIME; // units per tick
-                transform.position = Vector3.MoveTowards(transform.position, _targetPosition.Value, linearSpeed * Time.deltaTime);
-            }
-
-            if(_targetRotation.HasValue)
-            {
-                float rotationSpeed = 90 / Tick.TIME; // degrees per tick
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation.Value, rotationSpeed * Time.deltaTime);
-            }
-        }
-
-        private void Settle()
+        public void BeforeTick()
         {
             if (_targetPosition.HasValue)
             {
@@ -209,6 +175,37 @@ namespace GoC.Arena
             }
 
             _exhaust.Stop(); // stop engine emission
+        }
+
+        public void AfterTick() { }
+
+        void OnEnable()
+        {
+            if (_team != null)
+                _team.Register(this);
+            else
+                Debug.LogWarning("A unit without a team", this);
+        }
+
+        void OnDisable()
+        {
+            if (_team != null)
+                _team.Unregister(this);
+        }
+
+        void Update()
+        {
+            if(_targetPosition.HasValue)
+            {
+                float linearSpeed = 1 / Tick.TIME; // units per tick
+                transform.position = Vector3.MoveTowards(transform.position, _targetPosition.Value, linearSpeed * Time.deltaTime);
+            }
+
+            if(_targetRotation.HasValue)
+            {
+                float rotationSpeed = 90 / Tick.TIME; // degrees per tick
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation.Value, rotationSpeed * Time.deltaTime);
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using GoC.ScriptingApi;
 using Jint;
 using Jint.Native;
 using UnityEngine;
@@ -21,8 +23,20 @@ namespace GoC.Arena
 
         public uint currentTick { get; private set; } 
         public int executingTeamId => _executingTeam.teamId;
+
+        private IEnumerable<IUnit> _units;
+        public IEnumerable<IUnit> units => _units ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myUnits);
         
-        public void TeamEnabled(Team team)
+        private IEnumerable<IFactory> _factories;
+        public IEnumerable<IFactory> factories => _factories ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.factories);
+        
+        private readonly HashSet<DepositBehaviour> _deposits = new();
+        public IEnumerable<IDeposit> deposits => _deposits;
+        
+        public void Register(DepositBehaviour deposit) => _deposits.Add(deposit);
+        public void Unregister(DepositBehaviour deposit) => _deposits.Remove(deposit);
+
+        public void Register(Team team)
         {
             Engine engine = EngineFactory.Create();
             engine.SetValue("model", team);
@@ -41,16 +55,31 @@ namespace GoC.Arena
             );
         }
 
-        private void OnDisable()
+        public void Unregister(Team team)
+        {
+            int index = _teamRecords.FindIndex(tr => tr.team == team);
+            if (index >= 0)
+            {
+                _teamRecords[index].engine.Dispose();
+                _teamRecords.RemoveAt(index);
+            }
+        }
+
+        void OnDisable()
         {
             foreach (TeamRecord teamRecord in _teamRecords)
                 teamRecord.engine.Dispose();
+            
+            _teamRecords.Clear();
         }
 
-        private void Update()
+        void Update()
         {
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
+                foreach (TeamRecord teamRecord in _teamRecords)
+                    teamRecord.team.BeforeTick();
+                
                 foreach (TeamRecord teamRecord in _teamRecords)
                 {
                     try
@@ -66,6 +95,9 @@ namespace GoC.Arena
 
                 _tickCooldown += Tick.TIME;
                 ++currentTick;
+                
+                foreach (TeamRecord teamRecord in _teamRecords)
+                    teamRecord.team.AfterTick();
             }
         }
     }

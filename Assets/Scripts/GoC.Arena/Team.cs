@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using GoC.ScriptingApi;
 using UnityEngine;
 
@@ -11,27 +9,57 @@ namespace GoC.Arena
         [SerializeField] private Arena _arena;
         [SerializeField] private string _scriptFilePath;
 
+        private readonly HashSet<UnitBehaviour> _myUnits = new();
+        private readonly HashSet<FactoryBehaviour> _myFactories = new();
+
+        public void Register(UnitBehaviour unit) => _myUnits.Add(unit);
+        public void Unregister(UnitBehaviour unit) => _myUnits.Remove(unit);
+
+        public void Register(FactoryBehaviour factory) => _myFactories.Add(factory);
+        public void Unregister(FactoryBehaviour factory) => _myFactories.Remove(factory);
+
         public IArenaContext arena => _arena;
         public string scriptFilePath => _scriptFilePath;
 
         public int teamId => GetInstanceID();
 
-        private Func<IFactory, bool> _factoryIsMine; // for delegate caching
-        public IEnumerable<IFactory> myFactories => factories.Where(_factoryIsMine ??= f => f.teamId == teamId);
+        public IEnumerable<IFactory> myFactories => _myFactories;
+        public IEnumerable<IUnit> myUnits => _myUnits;
 
-        private Func<IUnit, bool> _unitIsMine; // for delegate caching
-        public IEnumerable<IUnit> myUnits => units.Where(_unitIsMine ??= u => u.teamId == teamId);
+        public IEnumerable<IFactory> factories => _arena.factories;
+        public IEnumerable<IUnit> units => _arena.units;
+        public IEnumerable<IDeposit> deposits => _arena.deposits;
 
-        public IEnumerable<IFactory> factories => FindObjectsByType<FactoryBehaviour>(FindObjectsSortMode.None);
-        public IEnumerable<IUnit> units => FindObjectsByType<UnitBehaviour>(FindObjectsSortMode.None);
-        public IEnumerable<IDeposit> deposits => FindObjectsByType<DepositBehaviour>(FindObjectsSortMode.None);
+        public void BeforeTick()
+        {
+            foreach (UnitBehaviour unit in _myUnits)
+                unit.BeforeTick();
 
-        private void OnEnable()
+            foreach (FactoryBehaviour factory in _myFactories)
+                factory.BeforeTick();
+        }
+
+        public void AfterTick()
+        {
+            foreach (UnitBehaviour unit in _myUnits)
+                unit.AfterTick();
+
+            foreach (FactoryBehaviour factory in _myFactories)
+                factory.AfterTick();
+        }
+        
+        void OnEnable()
         {
             if(_arena != null)
-                _arena.TeamEnabled(this);
+                _arena.Register(this);
             else
-                Debug.LogWarning("Arena must be set for a team", this);
+                Debug.LogWarning("A team without arena", this);
+        }
+
+        void OnDisable()
+        {
+            if(_arena != null)
+                _arena.Unregister(this);
         }
     }
 }
