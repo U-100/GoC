@@ -15,6 +15,7 @@ namespace GoC.Arena
         [SerializeField] private Team _team;
         [Space]
         [SerializeField] private VisualEffect _exhaust;
+        [SerializeField] private VisualEffect _mine;
         
         private Vector3? _targetPosition;
         private Quaternion? _targetRotation;
@@ -64,6 +65,8 @@ namespace GoC.Arena
             DepositBehaviour targetDepositBehaviour = ((MonoBehaviour)targetObject).GetComponent<DepositBehaviour>();
             DepositExtractionOutcome depositExtractionOutcome = targetDepositBehaviour.Extract();
             storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
+            
+            _mine.Play();
             
             return Result.Ok;
         }
@@ -205,8 +208,7 @@ namespace GoC.Arena
                 _targetRotation = null;
             }
 
-            // stop engine emission
-            _exhaust.Stop();
+            _exhaust.Stop(); // stop engine emission
         }
     }
 }
