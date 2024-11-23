@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
@@ -13,16 +12,100 @@ namespace GoC.Arena
     [RequireComponent(typeof(UnitControlBehaviour))]
     public class UnitBehaviour : MonoBehaviour, IUnit
     {
+        private readonly struct MineCommand
+        {
+            private readonly UnitBehaviour _unit;
+            private readonly DepositBehaviour _depositBehaviour;
+            
+            public MineCommand(UnitBehaviour unit, DepositBehaviour depositBehaviour)
+            {
+                _unit = unit;
+                _depositBehaviour = depositBehaviour;
+            }
+
+            public void BeforeTick() { }
+            
+            public void AfterTick()
+            {
+                DepositExtractionOutcome depositExtractionOutcome = _depositBehaviour.Extract();
+                _unit.storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
+            
+                _unit._mine.Play();
+            }
+
+            public void Update() => _unit.RotateTowards(_depositBehaviour.transform.position);
+        }
+
+        private readonly struct GiveCommand
+        {
+            private readonly UnitBehaviour _unit;
+            private readonly StorageBehaviour _targetStorageBehaviour;
+            private readonly Substance.Type _substanceType;
+            private readonly int _amount;
+            
+            public GiveCommand(UnitBehaviour unit, StorageBehaviour targetStorageBehaviour, Substance.Type substanceType, int amount)
+            {
+                _unit = unit;
+                _targetStorageBehaviour = targetStorageBehaviour;
+                _substanceType = substanceType;
+                _amount = amount;
+            }
+
+            public void BeforeTick() { }
+            
+            public void AfterTick()
+            {
+                if (_unit.storageBehaviour.Withdraw(_substanceType, _amount))
+                    _targetStorageBehaviour.Deposit(_substanceType, _amount);
+            }
+
+            public void Update() => _unit.RotateTowards(_targetStorageBehaviour.transform.position);
+        }
+
+        private readonly struct MoveCommand
+        {
+            private readonly UnitBehaviour _unit;
+            private readonly Vector3 _position;
+
+            public MoveCommand(UnitBehaviour unit, Vector3 position)
+            {
+                _unit = unit;
+                _position = position;
+            }
+
+            public void BeforeTick()
+            {
+                // eliminate rounding errors in position
+                _unit.transform.position = new Vector3(Mathf.Round(_position.x), Mathf.Round(_position.y), Mathf.Round(_position.z));
+                _unit._exhaust.Stop();
+            }
+            
+            public void AfterTick() { }
+
+            public void Update()
+            {
+                if (_unit.RotateTowards(_position))
+                {
+                    if(distance(_unit.transform.position, _position) > float.Epsilon)
+                    {
+                        float linearSpeed = 2 / Tick.TIME; // units per tick
+                        _unit.transform.position = Vector3.MoveTowards(_unit.transform.position, _position, linearSpeed * Time.deltaTime);
+                        _unit._exhaust.Play();
+                    }
+                    else
+                        _unit._exhaust.Stop();
+                }
+            }
+        }
+
         [SerializeField] private Team _team;
         [Space]
         [SerializeField] private VisualEffect _exhaust;
         [SerializeField] private VisualEffect _mine;
         
-        private Vector3? _movePosition;
-        private DepositBehaviour _mineDepositBehaviour;
-        private StorageBehaviour _giveStorageBehaviour;
-        private Substance.Type? _giveSubstanceType;
-        private int? _giveAmount;
+        private MineCommand? _mineCommand;
+        private GiveCommand? _giveCommand;
+        private MoveCommand? _moveCommand;
 
         private IStorageBehaviour _storageBehaviour;
         private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
@@ -53,14 +136,14 @@ namespace GoC.Arena
 
             return Result.Ok;
         }
-        
+
         public Result Mine(object targetObject)
         {
             Result canMine = CanMine(targetObject);
             if (canMine != Result.Ok)
                 return canMine;
-            
-            _mineDepositBehaviour = ((MonoBehaviour)targetObject).GetComponent<DepositBehaviour>();
+        
+            _mineCommand = new MineCommand(this, ((MonoBehaviour)targetObject).GetComponent<DepositBehaviour>());
             
             return Result.Ok;
         }
@@ -83,9 +166,7 @@ namespace GoC.Arena
             if (storageBehaviour.content[(int)substanceType] < amount)
                 return Result.NotEnoughSubstance;
 
-            _giveStorageBehaviour = targetStorageBehaviour;
-            _giveSubstanceType = substanceType;
-            _giveAmount = amount;
+            _giveCommand = new GiveCommand(this, targetStorageBehaviour, substanceType, amount);
             
             return Result.Ok;
         }
@@ -123,8 +204,7 @@ namespace GoC.Arena
             else
                 dirTo.x = 0;
 
-            _movePosition = transform.position + dirTo.ToUnityPos();
-            _exhaust.Play();
+            _moveCommand = new MoveCommand(this, transform.position + dirTo.ToUnityPos());
             
             return Result.Ok;
         }
@@ -134,35 +214,24 @@ namespace GoC.Arena
 
         public void BeforeTick()
         {
-            if (_movePosition.HasValue)
-            {
-                // eliminate rounding errors in position
-                transform.position = new Vector3(Mathf.Round(_movePosition.Value.x), Mathf.Round(_movePosition.Value.y), Mathf.Round(_movePosition.Value.z));
-                _movePosition = null;
-            }
+            _mineCommand?.BeforeTick();
+            _mineCommand = null;
 
-            _exhaust.Stop(); // stop engine emission
-
-            _mineDepositBehaviour = null;
-            _giveStorageBehaviour = null;
-            _giveSubstanceType = null;
-            _giveAmount = null;
+            _giveCommand?.BeforeTick();
+            _giveCommand = null;
+            
+            _moveCommand?.BeforeTick();
+            _moveCommand = null;
         }
 
         public void AfterTick()
         {
-            if (_mineDepositBehaviour != null)
-            {
-                DepositExtractionOutcome depositExtractionOutcome = _mineDepositBehaviour.Extract();
-                storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
-            
-                _mine.Play();
-            }
-            else if (_giveStorageBehaviour != null && _giveSubstanceType != null && _giveAmount != null)
-            {
-                if (storageBehaviour.Withdraw(_giveSubstanceType.Value, _giveAmount.Value))
-                    _giveStorageBehaviour.Deposit(_giveSubstanceType.Value, _giveAmount.Value);
-            }
+            if (_mineCommand != null)
+                _mineCommand.Value.AfterTick();
+            else if (_giveCommand != null)
+                _giveCommand.Value.AfterTick();
+            else if (_moveCommand != null)
+                _moveCommand.Value.AfterTick();
         }
 
         void OnEnable()
@@ -181,22 +250,12 @@ namespace GoC.Arena
 
         void Update()
         {
-            if (_movePosition.HasValue)
-            {
-                if (RotateTowards(_movePosition.Value))
-                {
-                    float linearSpeed = 2 / Tick.TIME; // units per tick
-                    transform.position = Vector3.MoveTowards(transform.position, _movePosition.Value, linearSpeed * Time.deltaTime);
-                }
-            }
-            else if (_mineDepositBehaviour != null)
-            {
-                RotateTowards(_mineDepositBehaviour.transform.position);
-            }
-            else if (_giveStorageBehaviour != null)
-            {
-                RotateTowards(_giveStorageBehaviour.transform.position);
-            }
+            if (_mineCommand != null)
+                _mineCommand.Value.Update();
+            else if (_giveCommand != null)
+                _giveCommand.Value.Update();
+            else if (_moveCommand != null)
+                _moveCommand.Value.Update();
         }
 
         private bool RotateTowards(Vector3 position)
