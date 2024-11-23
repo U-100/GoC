@@ -12,8 +12,5 @@ namespace GoC.Arena
         public Result Give(object target, Substance.Type substanceType, int count) => unitBehaviour.Give(target, substanceType, count);
         public Result MoveTo(object target) => unitBehaviour.MoveTo(target);
         public Result MoveTo(int x, int y) => unitBehaviour.MoveTo(x, y);
-        public Result Move() => unitBehaviour.Move();
-        public Result TurnLeft() => unitBehaviour.TurnLeft();
-        public Result TurnRight() => unitBehaviour.TurnRight();
     }
 }

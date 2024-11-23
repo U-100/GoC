@@ -32,9 +32,6 @@ namespace GoC.ScriptingApi
         Result Give(object target, Substance.Type substanceType, int amount);
         Result MoveTo(object target);
         Result MoveTo(int x, int y);
-        Result Move();
-        Result TurnLeft();
-        Result TurnRight();
     }
     
     public interface IUnit

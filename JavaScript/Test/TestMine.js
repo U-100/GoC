@@ -13,12 +13,17 @@ function tick()
         {
             if(myUnit.CanMine(deposit) == Result.Ok)
             {
+                log("Have " + myUnit.storage[Substance.Type.Energy] + " Energy, mining");
                 myUnit.control.Mine(deposit);
-                log("Have " + myUnit.storage[Substance.Type.Energy] + " Energy");
             }
             else
+            {
+                log("Have " + myUnit.storage[Substance.Type.Energy] + " Energy, moving to deposit");
                 myUnit.control.MoveTo(deposit.pos);
+            }
         }
+        else
+            log("See no deposits");
     }
 
     if(myUnitsCount < 1)

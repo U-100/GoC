@@ -1290,10 +1290,15 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1741534829373596047, guid: 5382fd2146412a34fb0d37aa8d869939,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3621413765074378116, guid: 5382fd2146412a34fb0d37aa8d869939,
         type: 3}
       propertyPath: '_content.Array.data[0]'
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6816330614459917673, guid: 5382fd2146412a34fb0d37aa8d869939,
         type: 3}
@@ -1349,6 +1354,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: RedFactory
+      objectReference: {fileID: 0}
+    - target: {fileID: 6991883633332805110, guid: 5382fd2146412a34fb0d37aa8d869939,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8277746951006310841, guid: 5382fd2146412a34fb0d37aa8d869939,
         type: 3}

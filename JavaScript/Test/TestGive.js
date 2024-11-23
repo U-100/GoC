@@ -11,7 +11,7 @@ function tick()
 
     if (myUnitsCount == 1)
         for(let myUnit of model.myUnits)
-            myUnit.control.Move();
+            myUnit.control.MoveTo(myUnit.pos.x, myUnit.pos.y + 1);
 
     if (myUnitsCount >= 2)
     {

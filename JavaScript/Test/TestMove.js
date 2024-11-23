@@ -5,22 +5,9 @@ function tick()
     for(let myUnit of model.myUnits)
     {
         ++myUnitsCount;
-        
-        if (myUnit.moved)
-        {
-            myUnit.moved = false;
 
-            let r = Math.floor(Math.random() * 2);
-            if (r)
-                myUnit.control.TurnLeft();
-            else
-                myUnit.control.TurnRight();
-        }
-        else
-        {
-            myUnit.moved = true;
-            myUnit.control.Move();
-        }
+        let destination = [myUnit.pos.x - 1 + Math.floor(Math.random() * 3), myUnit.pos.y - 1 + Math.floor(Math.random() * 3)];
+        myUnit.control.MoveTo(destination);
     }
 
     if(myUnitsCount < 4)

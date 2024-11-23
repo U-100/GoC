@@ -18,8 +18,11 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _exhaust;
         [SerializeField] private VisualEffect _mine;
         
-        private Vector3? _targetPosition;
-        private Quaternion? _targetRotation;
+        private Vector3? _movePosition;
+        private DepositBehaviour _mineDepositBehaviour;
+        private StorageBehaviour _giveStorageBehaviour;
+        private Substance.Type? _giveSubstanceType;
+        private int? _giveAmount;
 
         private IStorageBehaviour _storageBehaviour;
         private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
@@ -45,7 +48,7 @@ namespace GoC.Arena
             if (targetDepositBehaviour == null)
                 return Result.InvalidTarget;
 
-            if (!all(pos + dir == targetDepositBehaviour.pos)) 
+            if (distance(pos, targetDepositBehaviour.pos) > 1) 
                 return Result.InvalidPosition;
 
             return Result.Ok;
@@ -57,11 +60,7 @@ namespace GoC.Arena
             if (canMine != Result.Ok)
                 return canMine;
             
-            DepositBehaviour targetDepositBehaviour = ((MonoBehaviour)targetObject).GetComponent<DepositBehaviour>();
-            DepositExtractionOutcome depositExtractionOutcome = targetDepositBehaviour.Extract();
-            storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
-            
-            _mine.Play();
+            _mineDepositBehaviour = ((MonoBehaviour)targetObject).GetComponent<DepositBehaviour>();
             
             return Result.Ok;
         }
@@ -77,17 +76,18 @@ namespace GoC.Arena
             if (distance(pos, target.transform.position.ToArenaPos()) > 1)
                 return Result.InvalidPosition;
 
-            IStorageBehaviour targetStorageBehaviour = target.GetComponent<IStorageBehaviour>();
+            StorageBehaviour targetStorageBehaviour = target.GetComponent<StorageBehaviour>();
             if (targetStorageBehaviour == null)
                 return Result.InvalidTarget;
             
-            if (storageBehaviour.Withdraw(substanceType, amount))
-            {
-                targetStorageBehaviour.Deposit(substanceType, amount);
-                return Result.Ok;
-            } 
+            if (storageBehaviour.content[(int)substanceType] < amount)
+                return Result.NotEnoughSubstance;
 
-            return Result.NotEnoughSubstance;
+            _giveStorageBehaviour = targetStorageBehaviour;
+            _giveSubstanceType = substanceType;
+            _giveAmount = amount;
+            
+            return Result.Ok;
         }
 
         public Result MoveTo(object target)
@@ -123,61 +123,47 @@ namespace GoC.Arena
             else
                 dirTo.x = 0;
 
-            if (all(dirTo == dir))
-                Move();
-            else
-            {
-                if (cross(transform.forward, float3(dirTo.x, 0, dirTo.y)).y < 0)
-                    TurnLeft();
-                else
-                    TurnRight();
-            }
+            _movePosition = transform.position + dirTo.ToUnityPos();
+            _exhaust.Play();
             
             return Result.Ok;
         }
         
-        public Result Move()
-        {
-            _targetPosition = transform.position + transform.forward;
-            _exhaust.Play();
-            return Result.Ok;
-        }
-
-        public Result TurnLeft()
-        {
-            _targetRotation = Quaternion.Euler(0, -90, 0) * transform.rotation;
-            return Result.Ok;
-        }
-
-        public Result TurnRight()
-        {
-            _targetRotation = Quaternion.Euler(0, 90, 0) * transform.rotation;
-            return Result.Ok;
-        }
-
         // to set up upon instantiation
         public void Setup(Team team) => _team = team;
 
         public void BeforeTick()
         {
-            if (_targetPosition.HasValue)
+            if (_movePosition.HasValue)
             {
                 // eliminate rounding errors in position
-                transform.position = new Vector3(Mathf.Round(_targetPosition.Value.x), Mathf.Round(_targetPosition.Value.y), Mathf.Round(_targetPosition.Value.z));
-                _targetPosition = null;
-            }
-
-            if (_targetRotation.HasValue)
-            {
-                // eliminate rounding errors in rotation
-                transform.rotation = Quaternion.Euler(0, Mathf.Round(_targetRotation.Value.eulerAngles.y / 90) * 90, 0);
-                _targetRotation = null;
+                transform.position = new Vector3(Mathf.Round(_movePosition.Value.x), Mathf.Round(_movePosition.Value.y), Mathf.Round(_movePosition.Value.z));
+                _movePosition = null;
             }
 
             _exhaust.Stop(); // stop engine emission
+
+            _mineDepositBehaviour = null;
+            _giveStorageBehaviour = null;
+            _giveSubstanceType = null;
+            _giveAmount = null;
         }
 
-        public void AfterTick() { }
+        public void AfterTick()
+        {
+            if (_mineDepositBehaviour != null)
+            {
+                DepositExtractionOutcome depositExtractionOutcome = _mineDepositBehaviour.Extract();
+                storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
+            
+                _mine.Play();
+            }
+            else if (_giveStorageBehaviour != null && _giveSubstanceType != null && _giveAmount != null)
+            {
+                if (storageBehaviour.Withdraw(_giveSubstanceType.Value, _giveAmount.Value))
+                    _giveStorageBehaviour.Deposit(_giveSubstanceType.Value, _giveAmount.Value);
+            }
+        }
 
         void OnEnable()
         {
@@ -195,17 +181,35 @@ namespace GoC.Arena
 
         void Update()
         {
-            if(_targetPosition.HasValue)
+            if (_movePosition.HasValue)
             {
-                float linearSpeed = 1 / Tick.TIME; // units per tick
-                transform.position = Vector3.MoveTowards(transform.position, _targetPosition.Value, linearSpeed * Time.deltaTime);
+                if (RotateTowards(_movePosition.Value))
+                {
+                    float linearSpeed = 2 / Tick.TIME; // units per tick
+                    transform.position = Vector3.MoveTowards(transform.position, _movePosition.Value, linearSpeed * Time.deltaTime);
+                }
+            }
+            else if (_mineDepositBehaviour != null)
+            {
+                RotateTowards(_mineDepositBehaviour.transform.position);
+            }
+            else if (_giveStorageBehaviour != null)
+            {
+                RotateTowards(_giveStorageBehaviour.transform.position);
+            }
+        }
+
+        private bool RotateTowards(Vector3 position)
+        {
+            if (distancesq(position, transform.position) > float.Epsilon)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(position - transform.position, Vector3.up);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 360 * Time.deltaTime);
+
+                return Quaternion.Angle(transform.rotation, targetRotation) < 10;
             }
 
-            if(_targetRotation.HasValue)
-            {
-                float rotationSpeed = 90 / Tick.TIME; // degrees per tick
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, _targetRotation.Value, rotationSpeed * Time.deltaTime);
-            }
+            return true;
         }
     }
 }
