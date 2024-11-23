@@ -19,6 +19,7 @@ namespace GoC.Arena
         private float _tickCooldown;
         private Team _executingTeam;
 
+        public uint currentTick { get; private set; } 
         public int executingTeamId => _executingTeam.teamId;
         
         public void TeamEnabled(Team team)
@@ -64,6 +65,7 @@ namespace GoC.Arena
                 }
 
                 _tickCooldown += Tick.TIME;
+                ++currentTick;
             }
         }
     }

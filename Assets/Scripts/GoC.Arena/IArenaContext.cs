@@ -2,6 +2,7 @@
 {
     public interface IArenaContext
     {
+        uint currentTick { get; }
         int executingTeamId { get; }
     }
 }
