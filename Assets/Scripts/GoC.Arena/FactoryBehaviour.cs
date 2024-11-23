@@ -40,12 +40,15 @@ namespace GoC.Arena
         {
             if (_cooldown > 0)
                 return Result.Busy;
+
+            if (storageBehaviour.Withdraw(Substance.Type.Energy, 1))
+            {
+                _cooldown = Tick.TIME - Time.deltaTime; // slightly less than a tick
+                _spawn.Play();
+                return Result.Ok;
+            }
             
-            _cooldown = Tick.TIME - Time.deltaTime; // slightly less than a tick
-            
-            _spawn.Play();
-            
-            return Result.Ok;
+            return Result.NotEnoughSubstance;
         }
 
         void Update()
