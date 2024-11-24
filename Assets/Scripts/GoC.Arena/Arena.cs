@@ -28,7 +28,7 @@ namespace GoC.Arena
         public IEnumerable<IUnit> units => _units ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myUnits);
         
         private IEnumerable<IFactory> _factories;
-        public IEnumerable<IFactory> factories => _factories ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.factories);
+        public IEnumerable<IFactory> factories => _factories ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myFactories);
         
         private readonly HashSet<DepositBehaviour> _deposits = new();
         public IEnumerable<IDeposit> deposits => _deposits;

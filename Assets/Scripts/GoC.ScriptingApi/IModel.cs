@@ -10,7 +10,7 @@ namespace GoC.ScriptingApi
         Busy,
         AccessDenied,
         InvalidArgument,
-        InvalidPosition,
+        OutOfRange,
         InvalidTarget,
         NotEnoughSubstance,
     }
@@ -28,6 +28,7 @@ namespace GoC.ScriptingApi
 
     public interface IUnitControl
     {
+        Result Attack(object target);
         Result Mine(object target);
         Result Give(object target, Substance.Type substanceType, int amount);
         Result MoveTo(object target);

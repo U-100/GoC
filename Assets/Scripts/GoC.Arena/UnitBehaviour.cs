@@ -12,6 +12,30 @@ namespace GoC.Arena
     [RequireComponent(typeof(UnitControlBehaviour))]
     public class UnitBehaviour : MonoBehaviour, IUnit
     {
+        private readonly struct AttackCommand
+        {
+            private readonly UnitBehaviour _unit;
+            private readonly MonoBehaviour _target;
+            
+            public AttackCommand(UnitBehaviour unit, MonoBehaviour target)
+            {
+                _unit = unit;
+                _target = target;
+            }
+
+            public void BeforeTick()
+            {
+                _unit._attackEffect.Stop();
+            }
+
+            public void AfterTick()
+            {
+                _unit._attackEffect.Play();
+            }
+
+            public void Update() => _unit.RotateTowards(_target.transform.position);
+        }
+        
         private readonly struct MineCommand
         {
             private readonly UnitBehaviour _unit;
@@ -23,14 +47,17 @@ namespace GoC.Arena
                 _depositBehaviour = depositBehaviour;
             }
 
-            public void BeforeTick() { }
+            public void BeforeTick()
+            {
+                _unit._mineEffect.Stop();
+            }
             
             public void AfterTick()
             {
                 DepositExtractionOutcome depositExtractionOutcome = _depositBehaviour.Extract();
                 _unit.storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
             
-                _unit._mine.Play();
+                _unit._mineEffect.Play();
             }
 
             public void Update() => _unit.RotateTowards(_depositBehaviour.transform.position);
@@ -77,7 +104,7 @@ namespace GoC.Arena
             {
                 // eliminate rounding errors in position
                 _unit.transform.position = new Vector3(Mathf.Round(_position.x), Mathf.Round(_position.y), Mathf.Round(_position.z));
-                _unit._exhaust.Stop();
+                _unit._moveEffect.Stop();
             }
             
             public void AfterTick() { }
@@ -90,19 +117,21 @@ namespace GoC.Arena
                     {
                         float linearSpeed = 2 / Tick.TIME; // units per tick
                         _unit.transform.position = Vector3.MoveTowards(_unit.transform.position, _position, linearSpeed * Time.deltaTime);
-                        _unit._exhaust.Play();
+                        _unit._moveEffect.Play();
                     }
                     else
-                        _unit._exhaust.Stop();
+                        _unit._moveEffect.Stop();
                 }
             }
         }
 
         [SerializeField] private Team _team;
         [Space]
-        [SerializeField] private VisualEffect _exhaust;
-        [SerializeField] private VisualEffect _mine;
+        [SerializeField] private VisualEffect _attackEffect;
+        [SerializeField] private VisualEffect _mineEffect;
+        [SerializeField] private VisualEffect _moveEffect;
         
+        private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
         private GiveCommand? _giveCommand;
         private MoveCommand? _moveCommand;
@@ -117,6 +146,7 @@ namespace GoC.Arena
         public IReadOnlyList<int> storage => storageBehaviour.content;
 
         private UnitControlBehaviour _unitControlBehaviour;
+
         public IUnitControl control =>
             _team.arena.executingTeamId == teamId
                 ? _unitControlBehaviour ??= GetComponent<UnitControlBehaviour>()
@@ -132,11 +162,24 @@ namespace GoC.Arena
                 return Result.InvalidTarget;
 
             if (distance(pos, targetDepositBehaviour.pos) > 1) 
-                return Result.InvalidPosition;
+                return Result.OutOfRange;
 
             return Result.Ok;
         }
 
+        public Result Attack(object targetObject)
+        {
+            if (targetObject is not MonoBehaviour target)
+                return Result.InvalidTarget;
+
+            if (distance(pos, target.transform.position.ToArenaPos()) > 3) 
+                return Result.OutOfRange;
+
+            _attackCommand = new AttackCommand(this, target);
+
+            return Result.Ok;
+        }
+        
         public Result Mine(object targetObject)
         {
             Result canMine = CanMine(targetObject);
@@ -157,7 +200,7 @@ namespace GoC.Arena
                 return Result.InvalidTarget;
 
             if (distance(pos, target.transform.position.ToArenaPos()) > 1)
-                return Result.InvalidPosition;
+                return Result.OutOfRange;
 
             StorageBehaviour targetStorageBehaviour = target.GetComponent<StorageBehaviour>();
             if (targetStorageBehaviour == null)
@@ -214,6 +257,9 @@ namespace GoC.Arena
 
         public void BeforeTick()
         {
+            _attackCommand?.BeforeTick();
+            _attackCommand = null;
+            
             _mineCommand?.BeforeTick();
             _mineCommand = null;
 
@@ -226,7 +272,9 @@ namespace GoC.Arena
 
         public void AfterTick()
         {
-            if (_mineCommand != null)
+            if (_attackCommand != null)
+                _attackCommand.Value.AfterTick();
+            else if (_mineCommand != null)
                 _mineCommand.Value.AfterTick();
             else if (_giveCommand != null)
                 _giveCommand.Value.AfterTick();
@@ -250,7 +298,9 @@ namespace GoC.Arena
 
         void Update()
         {
-            if (_mineCommand != null)
+            if (_attackCommand != null)
+                _attackCommand.Value.Update();
+            else if (_mineCommand != null)
                 _mineCommand.Value.Update();
             else if (_giveCommand != null)
                 _giveCommand.Value.Update();
