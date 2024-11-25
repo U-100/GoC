@@ -1,4 +1,4 @@
-function tick()
+export function tick()
 {
     let myUnitsCount = 0;
 

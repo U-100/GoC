@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using GoC.Attributes;
 using GoC.ScriptingApi;
@@ -18,8 +19,16 @@ namespace GoC.Arena
             Engine engine = new Engine(Configure);
 
             engine.SetValue("log", new Action<object>(Debug.Log));
-            engine.SetValue("Result", TypeReference.CreateTypeReference<Result>(engine));
+
+            engine.SetValue(nameof(Result), TypeReference.CreateTypeReference<Result>(engine));
+            
             engine.SetValue(nameof(Substance), TypeReference.CreateTypeReference<Substance>(engine));
+            
+            engine.SetValue(nameof(int2), TypeReference.CreateTypeReference<int2>(engine));
+            engine.SetValue("distance", new Func<int2, int2, float>((lhs, rhs) => math.distance(lhs, rhs)));
+            engine.SetValue("dot", new Func<int2, int2, float>((lhs, rhs) => math.dot(lhs, rhs)));
+            engine.SetValue("length", new Func<int2, float>(lhs => math.length(lhs)));
+
             return engine;
         }
         
@@ -33,6 +42,9 @@ namespace GoC.Arena
                     MemberFilter = MEMBER_FILTER
                 }
             );
+            options.EnableModules(Path.Combine(Directory.GetCurrentDirectory(), "JavaScript"));
+            options.AllowClr(typeof(math).Assembly);
+            options.Interop.AllowOperatorOverloading = true;
         }
 
         private static readonly HashSet<Type> ENABLED_TYPES = new()
@@ -52,11 +64,9 @@ namespace GoC.Arena
             if(declaringType != null)
             {
                 if (declaringType.IsGenericType)
-                {
-                    if (ENABLED_TYPES.Contains(declaringType.GetGenericTypeDefinition()))
-                        return true;
-                }
-                else if (ENABLED_TYPES.Contains(declaringType))
+                    declaringType = declaringType.GetGenericTypeDefinition();
+
+                if (ENABLED_TYPES.Contains(declaringType))
                     return true;
                 
                 if (declaringType.GetCustomAttribute<ScriptingApiAttribute>() != null)

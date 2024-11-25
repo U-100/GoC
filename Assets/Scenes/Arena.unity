@@ -787,7 +787,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _arena: {fileID: 245116313}
-  _scriptFilePath: JavaScript/Test/TestMove.js
+  _scriptFile: ./TestMove.js
 --- !u!4 &785360196
 Transform:
   m_ObjectHideFlags: 0
@@ -833,7 +833,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _arena: {fileID: 245116313}
-  _scriptFilePath: JavaScript/Test/TestAttack.js
+  _scriptFile: ./TestAttack.js
 --- !u!4 &918850139
 Transform:
   m_ObjectHideFlags: 0

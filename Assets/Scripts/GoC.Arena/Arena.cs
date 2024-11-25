@@ -4,6 +4,7 @@ using System.Linq;
 using GoC.ScriptingApi;
 using Jint;
 using Jint.Native;
+using Jint.Native.Object;
 using UnityEngine;
 
 namespace GoC.Arena
@@ -40,19 +41,21 @@ namespace GoC.Arena
         {
             Engine engine = EngineFactory.Create();
             engine.SetValue("model", team);
+            
+            ObjectInstance teamModule = engine.Modules.Import(team.scriptFile);
+            JsValue tickFunction = teamModule.Get("tick");
 
-            string script = File.ReadAllText(team.scriptFilePath);
-            engine.Execute(script);
-            JsValue tickFunction = engine.GetValue("tick");
-
-            _teamRecords.Add(
-                new TeamRecord
-                {
-                    team = team,
-                    engine = engine,
-                    tickFunction = tickFunction
-                }
-            );
+            if (tickFunction.IsObject())
+                _teamRecords.Add(
+                    new TeamRecord
+                    {
+                        team = team,
+                        engine = engine,
+                        tickFunction = tickFunction
+                    }
+                );
+            else
+                Debug.LogWarning("Team script doesn't export the tick() function", team);
         }
 
         public void Unregister(Team team)

@@ -1,16 +1,16 @@
 function findEnemyNearby(p) {
     let enemy = undefined;
-    let manhattanDistanceToEnemy = 100000;
+    let distanceToEnemy = 100000;
     for (let unit of model.units) {
         if (unit.teamId != model.teamId) {
             if (!enemy) {
                 enemy = unit;
-                manhattanDistanceToEnemy = Math.abs(unit.pos.x - p.x) + Math.abs(unit.pos.y - p.y);
+                distanceToEnemy = distance(unit.pos, p);
             } else {
-                let manhattanDistanceToUnit = Math.abs(unit.pos.x - p.x) + Math.abs(unit.pos.y - p.y);
-                if (manhattanDistanceToEnemy > manhattanDistanceToUnit) {
+                let distanceToUnit = distance(unit.pos, p);
+                if (distanceToEnemy > distanceToUnit) {
                     enemy = unit;
-                    manhattanDistanceToEnemy = manhattanDistanceToUnit;
+                    distanceToEnemy = distanceToUnit;
                 }
             }
         }
@@ -19,7 +19,7 @@ function findEnemyNearby(p) {
     return enemy;
 }
 
-function tick() {
+export function tick() {
     let myUnitsCount = 0;
 
     for (let myUnit of model.myUnits) {
@@ -39,4 +39,3 @@ function tick() {
         for (let myFactory of model.myFactories)
             myFactory.control.Produce();
 }
-

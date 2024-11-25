@@ -7,7 +7,7 @@ namespace GoC.Arena
     public class Team : MonoBehaviour, IModel
     {
         [SerializeField] private Arena _arena;
-        [SerializeField] private string _scriptFilePath;
+        [SerializeField] private string _scriptFile;
 
         private readonly HashSet<UnitBehaviour> _myUnits = new();
         private readonly HashSet<FactoryBehaviour> _myFactories = new();
@@ -19,7 +19,7 @@ namespace GoC.Arena
         public void Unregister(FactoryBehaviour factory) => _myFactories.Remove(factory);
 
         public IArenaContext arena => _arena;
-        public string scriptFilePath => _scriptFilePath;
+        public string scriptFile => _scriptFile;
 
         public int teamId => GetInstanceID();
 
