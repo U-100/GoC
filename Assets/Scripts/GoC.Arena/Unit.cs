@@ -132,6 +132,7 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
         [SerializeField] private VisualEffect _moveEffect;
+        [SerializeField] private VisualEffect _dyingEffect;
         
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
@@ -305,6 +306,8 @@ namespace GoC.Arena
                 _team.Register(this);
             else
                 Debug.LogWarning("A unit without a team", this);
+
+            _dyingEffect.enabled = false;
         }
 
         private void OnDisable()
@@ -323,11 +326,14 @@ namespace GoC.Arena
                 _giveCommand.Value.Update();
             else if (_moveCommand != null)
                 _moveCommand.Value.Update();
+            
+            if (myHull.dead)
+                _dyingEffect.enabled = true;
         }
 
         private bool RotateTowards(Vector3 position)
         {
-            if (Vector3.Distance(position, transform.position) > Mathf.Epsilon)
+            if (Vector3.Distance(position, transform.position) > 0.5f)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(position - transform.position, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 360 * Time.deltaTime);
