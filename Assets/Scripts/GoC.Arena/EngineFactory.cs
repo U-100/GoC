@@ -55,12 +55,32 @@ namespace GoC.Arena
             typeof(IReadOnlyList<>),
             typeof(IReadOnlyDictionary<,>),
         };
+
+        private static readonly HashSet<Type> DISABLED_TYPES = new();
         
         // member filter decides which apis should be exposed to javascript by jint engine.
         // We expose apis of ENABLED_TYPES plus apis from assemblies and types marked with ScriptingApiAttribute
         private static readonly Predicate<MemberInfo> MEMBER_FILTER = delegate(MemberInfo memberInfo)
         {
             Type declaringType = memberInfo.DeclaringType;
+
+            if (ENABLED_TYPES.Contains(declaringType))
+                return true;
+
+            if (DISABLED_TYPES.Contains(declaringType))
+                return false;
+
+            bool checkResult = CheckType(declaringType);
+            if (checkResult)
+                ENABLED_TYPES.Add(declaringType);
+            else
+                DISABLED_TYPES.Add(declaringType);
+
+            return checkResult;
+        };
+        
+        private static bool CheckType(Type declaringType)
+        {
             if(declaringType != null)
             {
                 if (declaringType.IsGenericType)
@@ -78,6 +98,6 @@ namespace GoC.Arena
             }
 
             return false;
-        };
+        }
     }
 }
