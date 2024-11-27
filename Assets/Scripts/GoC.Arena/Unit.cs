@@ -133,6 +133,7 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _mineEffect;
         [SerializeField] private VisualEffect _moveEffect;
         [SerializeField] private VisualEffect _dyingEffect;
+        [SerializeField] private GameObject _destructionEffectPrefab;
         
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
@@ -284,7 +285,11 @@ namespace GoC.Arena
             _moveCommand = null;
 
             if (myHull.dead)
+            {
                 Destroy(gameObject);
+                GameObject destructionEffect = Instantiate(_destructionEffectPrefab, transform.position, transform.rotation);
+                Destroy(destructionEffect, 1);
+            }
         }
 
         public void AfterTick()
