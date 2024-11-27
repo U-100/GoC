@@ -465,6 +465,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _team: {fileID: 0}
+  _damage: 1
   _attackEffect: {fileID: 5868796379976398687}
   _mineEffect: {fileID: 3597055597159338398}
   _moveEffect: {fileID: 2655816745955894041}

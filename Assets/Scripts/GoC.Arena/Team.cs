@@ -10,8 +10,10 @@ namespace GoC.Arena
         [SerializeField] private string _scriptFile;
 
         private readonly HashSet<Unit> _myUnits = new();
+        private readonly List<Unit> _myUnitsCache = new();
+        
         private readonly HashSet<Factory> _myFactories = new();
-
+        private readonly List<Factory> _myFactoriesCache = new();
         
         public IArenaContext arena => _arena;
         public string scriptFile => _scriptFile;
@@ -29,20 +31,40 @@ namespace GoC.Arena
         
         public void BeforeTick()
         {
-            foreach (Unit unit in _myUnits)
-                unit.BeforeTick();
+            try
+            {
+                _myUnitsCache.AddRange(_myUnits);
+                foreach (Unit unit in _myUnitsCache)
+                    unit.BeforeTick();
 
-            foreach (Factory factory in _myFactories)
-                factory.BeforeTick();
+                _myFactoriesCache.AddRange(_myFactories);
+                foreach (Factory factory in _myFactoriesCache)
+                    factory.BeforeTick();
+            }
+            finally
+            {
+                _myUnitsCache.Clear();
+                _myFactoriesCache.Clear();
+            }
         }
 
         public void AfterTick()
         {
-            foreach (Unit unit in _myUnits)
-                unit.AfterTick();
+            try
+            {
+                _myUnitsCache.AddRange(_myUnits);
+                foreach (Unit unit in _myUnitsCache)
+                    unit.AfterTick();
 
-            foreach (Factory factory in _myFactories)
-                factory.AfterTick();
+                _myFactoriesCache.AddRange(_myFactories);
+                foreach (Factory factory in _myFactoriesCache)
+                    factory.AfterTick();
+            }
+            finally
+            {
+                _myUnitsCache.Clear();
+                _myFactoriesCache.Clear();
+            }
         }
 
         public void Register(Unit unit) => _myUnits.Add(unit);

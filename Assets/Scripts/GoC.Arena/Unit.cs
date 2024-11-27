@@ -30,6 +30,7 @@ namespace GoC.Arena
 
             public void AfterTick()
             {
+                _targetHull.Absorb(_unit._damage);
                 _unit._attackEffect.Play();
             }
 
@@ -113,7 +114,7 @@ namespace GoC.Arena
             {
                 if (_unit.RotateTowards(_position))
                 {
-                    if(distance(_unit.transform.position, _position) > float.Epsilon)
+                    if(distance(_unit.transform.position, _position) > Mathf.Epsilon)
                     {
                         float linearSpeed = 2 / Tick.TIME; // units per tick
                         _unit.transform.position = Vector3.MoveTowards(_unit.transform.position, _position, linearSpeed * Time.deltaTime);
@@ -126,6 +127,7 @@ namespace GoC.Arena
         }
 
         [SerializeField] private Team _team;
+        [SerializeField] private int _damage;
         [Space]
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
@@ -243,6 +245,9 @@ namespace GoC.Arena
         public Result MoveTo(int x, int y)
         {
             int2 delta = (int2)round(int2(x, y) - transform.position.ToArenaPos());
+            if (all(delta == 0))
+                return Result.Ok;
+            
             int2 absDelta = abs(delta);
             if (all(absDelta == 0))
                 return Result.Ok;
@@ -276,6 +281,9 @@ namespace GoC.Arena
             
             _moveCommand?.BeforeTick();
             _moveCommand = null;
+
+            if (myHull.dead)
+                Destroy(gameObject);
         }
 
         public void AfterTick()
@@ -319,7 +327,7 @@ namespace GoC.Arena
 
         private bool RotateTowards(Vector3 position)
         {
-            if (distancesq(position, transform.position) > Mathf.Epsilon)
+            if (Vector3.Distance(position, transform.position) > Mathf.Epsilon)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(position - transform.position, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 360 * Time.deltaTime);
