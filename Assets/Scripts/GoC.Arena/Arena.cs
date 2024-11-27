@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using GoC.ScriptingApi;
 using Jint;
@@ -22,20 +21,19 @@ namespace GoC.Arena
         private float _tickCooldown;
         private Team _executingTeam;
 
+        private IEnumerable<IUnit> _units;
+        private IEnumerable<IFactory> _factories;
+        private readonly HashSet<Deposit> _deposits = new();
+
+        
         public uint currentTick { get; private set; } 
         public int executingTeamId => _executingTeam.teamId;
 
-        private IEnumerable<IUnit> _units;
         public IEnumerable<IUnit> units => _units ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myUnits);
         
-        private IEnumerable<IFactory> _factories;
         public IEnumerable<IFactory> factories => _factories ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myFactories);
         
-        private readonly HashSet<Deposit> _deposits = new();
         public IEnumerable<IDeposit> deposits => _deposits;
-        
-        public void Register(Deposit deposit) => _deposits.Add(deposit);
-        public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
         public void Register(Team team)
         {
@@ -67,8 +65,12 @@ namespace GoC.Arena
                 _teamRecords.RemoveAt(index);
             }
         }
+        
+        public void Register(Deposit deposit) => _deposits.Add(deposit);
+        public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
-        void OnDisable()
+        
+        private void OnDisable()
         {
             foreach (TeamRecord teamRecord in _teamRecords)
                 teamRecord.engine.Dispose();
@@ -76,7 +78,7 @@ namespace GoC.Arena
             _teamRecords.Clear();
         }
 
-        void Update()
+        private void Update()
         {
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {

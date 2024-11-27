@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GoC.ScriptingApi;
+﻿using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -17,19 +16,19 @@ namespace GoC.Arena
 
         private float _cooldown;
 
-        private IStorage _storage;
-        private IStorage myStorage => _storage ??= GetComponent<IStorage>();
+        private Storage _myStorage;
+        private Storage myStorage => _myStorage ??= GetComponent<Storage>();
 
+        private FactoryControl _myFactoryControl;
+        private FactoryControl myFactoryControl => _myFactoryControl ??= GetComponent<FactoryControl>();
+
+        
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
+
+        public IStorage storage => myStorage;
+        public IFactoryControl control => _team.arena.executingTeamId == teamId ? myFactoryControl : null;
         
-        public IReadOnlyList<int> storage => myStorage.content;
-        
-        private FactoryControl _factoryControl;
-        public IFactoryControl control =>
-            _team.arena.executingTeamId == teamId
-                ? _factoryControl ??= GetComponent<FactoryControl>()
-                : null;
 
         public Result Produce()
         {
@@ -46,13 +45,15 @@ namespace GoC.Arena
             return Result.NotEnoughSubstance;
         }
 
+        
         public void Setup(Team team) => _team = team;
         
         public void BeforeTick() { }
 
         public void AfterTick() { }
 
-        void OnEnable()
+        
+        private void OnEnable()
         {
             if (_team != null)
                 _team.Register(this);
@@ -60,13 +61,13 @@ namespace GoC.Arena
                 Debug.LogWarning("A factory without a team", this);
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             if (_team != null)
                 _team.Unregister(this);
         }
 
-        void Update()
+        private void Update()
         {
             if (_cooldown > 0 && (_cooldown -= Time.deltaTime) <= 0)
             {

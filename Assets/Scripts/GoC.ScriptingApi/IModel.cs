@@ -26,6 +26,11 @@ namespace GoC.ScriptingApi
         public static readonly int TYPES_COUNT = Enum.GetValues(typeof(Type)).Length;
     }
 
+    public interface IStorage
+    {
+        public IReadOnlyList<int> content { get; }
+    }
+    
     public interface IUnitControl
     {
         Result Attack(object target);
@@ -40,11 +45,10 @@ namespace GoC.ScriptingApi
         int teamId { get; } // owner team id
         int2 pos { get; }
         int2 dir { get; }
-
-        public IReadOnlyList<int> storage { get; }
         
         Result CanMine(object target);
-        
+
+        public IStorage storage { get; }
         public IUnitControl control { get; }
     }
     
@@ -58,8 +62,7 @@ namespace GoC.ScriptingApi
         int teamId { get; } // owner team id
         int2 pos { get; }
 
-        public IReadOnlyList<int> storage { get; }
-        
+        public IStorage storage { get; }
         public IFactoryControl control { get; }
     }
 

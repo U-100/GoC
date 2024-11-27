@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GoC.ScriptingApi;
+﻿using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -136,21 +135,16 @@ namespace GoC.Arena
         private GiveCommand? _giveCommand;
         private MoveCommand? _moveCommand;
 
-        private IStorage _storage;
-        private IStorage myStorage => _storage ??= GetComponent<IStorage>();
+        private Storage _myStorage;
+        private Storage myStorage => _myStorage ??= GetComponent<Storage>();
+        
+        private UnitControl _myUnitControl;
+        private UnitControl myUnitControl => _myUnitControl ??= GetComponent<UnitControl>();
+
         
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         public int2 dir => transform.forward.ToArenaPos();
-
-        public IReadOnlyList<int> storage => myStorage.content;
-
-        private UnitControl _unitControl;
-
-        public IUnitControl control =>
-            _team.arena.executingTeamId == teamId
-                ? _unitControl ??= GetComponent<UnitControl>()
-                : null;
 
         public Result CanMine(object targetObject)
         {
@@ -167,6 +161,10 @@ namespace GoC.Arena
             return Result.Ok;
         }
 
+        public IStorage storage => _myStorage ??= GetComponent<Storage>();
+        public IUnitControl control => _team.arena.executingTeamId == teamId ? myUnitControl : null;
+
+        
         public Result Attack(object targetObject)
         {
             if (targetObject is not MonoBehaviour target)
@@ -252,6 +250,7 @@ namespace GoC.Arena
             return Result.Ok;
         }
         
+        
         // to set up upon instantiation
         public void Setup(Team team) => _team = team;
 
@@ -282,7 +281,8 @@ namespace GoC.Arena
                 _moveCommand.Value.AfterTick();
         }
 
-        void OnEnable()
+        
+        private void OnEnable()
         {
             if (_team != null)
                 _team.Register(this);
@@ -290,13 +290,13 @@ namespace GoC.Arena
                 Debug.LogWarning("A unit without a team", this);
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             if (_team != null)
                 _team.Unregister(this);
         }
 
-        void Update()
+        private void Update()
         {
             if (_attackCommand != null)
                 _attackCommand.Value.Update();

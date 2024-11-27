@@ -12,15 +12,11 @@ namespace GoC.Arena
         private readonly HashSet<Unit> _myUnits = new();
         private readonly HashSet<Factory> _myFactories = new();
 
-        public void Register(Unit unit) => _myUnits.Add(unit);
-        public void Unregister(Unit unit) => _myUnits.Remove(unit);
-
-        public void Register(Factory factory) => _myFactories.Add(factory);
-        public void Unregister(Factory factory) => _myFactories.Remove(factory);
-
+        
         public IArenaContext arena => _arena;
         public string scriptFile => _scriptFile;
 
+        
         public int teamId => GetInstanceID();
 
         public IEnumerable<IFactory> myFactories => _myFactories;
@@ -30,6 +26,7 @@ namespace GoC.Arena
         public IEnumerable<IUnit> units => _arena.units;
         public IEnumerable<IDeposit> deposits => _arena.deposits;
 
+        
         public void BeforeTick()
         {
             foreach (Unit unit in _myUnits)
@@ -47,8 +44,15 @@ namespace GoC.Arena
             foreach (Factory factory in _myFactories)
                 factory.AfterTick();
         }
+
+        public void Register(Unit unit) => _myUnits.Add(unit);
+        public void Unregister(Unit unit) => _myUnits.Remove(unit);
+
+        public void Register(Factory factory) => _myFactories.Add(factory);
+        public void Unregister(Factory factory) => _myFactories.Remove(factory);
         
-        void OnEnable()
+        
+        private void OnEnable()
         {
             if(_arena != null)
                 _arena.Register(this);
@@ -56,7 +60,7 @@ namespace GoC.Arena
                 Debug.LogWarning("A team without arena", this);
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             if(_arena != null)
                 _arena.Unregister(this);

@@ -5,13 +5,6 @@ using UnityEngine;
 
 namespace GoC.Arena
 {
-    public interface IStorage
-    {
-        public IReadOnlyList<int> content { get; }
-        bool Deposit(Substance.Type substanceType, int amount);
-        bool Withdraw(Substance.Type substanceType, int amount);
-    }
-
     public class Storage : MonoBehaviour, IStorage
     {
         [SerializeField]
