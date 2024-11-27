@@ -8,16 +8,16 @@ using static Unity.Mathematics.math;
 
 namespace GoC.Arena
 {
-    [RequireComponent(typeof(StorageBehaviour))]
-    [RequireComponent(typeof(UnitControlBehaviour))]
-    public class UnitBehaviour : MonoBehaviour, IUnit
+    [RequireComponent(typeof(Storage))]
+    [RequireComponent(typeof(UnitControl))]
+    public class Unit : MonoBehaviour, IUnit
     {
         private readonly struct AttackCommand
         {
-            private readonly UnitBehaviour _unit;
+            private readonly Unit _unit;
             private readonly MonoBehaviour _target;
             
-            public AttackCommand(UnitBehaviour unit, MonoBehaviour target)
+            public AttackCommand(Unit unit, MonoBehaviour target)
             {
                 _unit = unit;
                 _target = target;
@@ -38,13 +38,13 @@ namespace GoC.Arena
         
         private readonly struct MineCommand
         {
-            private readonly UnitBehaviour _unit;
-            private readonly DepositBehaviour _depositBehaviour;
+            private readonly Unit _unit;
+            private readonly Deposit _deposit;
             
-            public MineCommand(UnitBehaviour unit, DepositBehaviour depositBehaviour)
+            public MineCommand(Unit unit, Deposit deposit)
             {
                 _unit = unit;
-                _depositBehaviour = depositBehaviour;
+                _deposit = deposit;
             }
 
             public void BeforeTick()
@@ -54,26 +54,26 @@ namespace GoC.Arena
             
             public void AfterTick()
             {
-                DepositExtractionOutcome depositExtractionOutcome = _depositBehaviour.Extract();
-                _unit.storageBehaviour.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
+                DepositExtractionOutcome depositExtractionOutcome = _deposit.Extract();
+                _unit.myStorage.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
             
                 _unit._mineEffect.Play();
             }
 
-            public void Update() => _unit.RotateTowards(_depositBehaviour.transform.position);
+            public void Update() => _unit.RotateTowards(_deposit.transform.position);
         }
 
         private readonly struct GiveCommand
         {
-            private readonly UnitBehaviour _unit;
-            private readonly StorageBehaviour _targetStorageBehaviour;
+            private readonly Unit _unit;
+            private readonly Storage _targetStorage;
             private readonly Substance.Type _substanceType;
             private readonly int _amount;
             
-            public GiveCommand(UnitBehaviour unit, StorageBehaviour targetStorageBehaviour, Substance.Type substanceType, int amount)
+            public GiveCommand(Unit unit, Storage targetStorage, Substance.Type substanceType, int amount)
             {
                 _unit = unit;
-                _targetStorageBehaviour = targetStorageBehaviour;
+                _targetStorage = targetStorage;
                 _substanceType = substanceType;
                 _amount = amount;
             }
@@ -82,19 +82,19 @@ namespace GoC.Arena
             
             public void AfterTick()
             {
-                if (_unit.storageBehaviour.Withdraw(_substanceType, _amount))
-                    _targetStorageBehaviour.Deposit(_substanceType, _amount);
+                if (_unit.myStorage.Withdraw(_substanceType, _amount))
+                    _targetStorage.Deposit(_substanceType, _amount);
             }
 
-            public void Update() => _unit.RotateTowards(_targetStorageBehaviour.transform.position);
+            public void Update() => _unit.RotateTowards(_targetStorage.transform.position);
         }
 
         private readonly struct MoveCommand
         {
-            private readonly UnitBehaviour _unit;
+            private readonly Unit _unit;
             private readonly Vector3 _position;
 
-            public MoveCommand(UnitBehaviour unit, Vector3 position)
+            public MoveCommand(Unit unit, Vector3 position)
             {
                 _unit = unit;
                 _position = position;
@@ -136,20 +136,20 @@ namespace GoC.Arena
         private GiveCommand? _giveCommand;
         private MoveCommand? _moveCommand;
 
-        private IStorageBehaviour _storageBehaviour;
-        private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
+        private IStorage _storage;
+        private IStorage myStorage => _storage ??= GetComponent<IStorage>();
         
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         public int2 dir => transform.forward.ToArenaPos();
 
-        public IReadOnlyList<int> storage => storageBehaviour.content;
+        public IReadOnlyList<int> storage => myStorage.content;
 
-        private UnitControlBehaviour _unitControlBehaviour;
+        private UnitControl _unitControl;
 
         public IUnitControl control =>
             _team.arena.executingTeamId == teamId
-                ? _unitControlBehaviour ??= GetComponent<UnitControlBehaviour>()
+                ? _unitControl ??= GetComponent<UnitControl>()
                 : null;
 
         public Result CanMine(object targetObject)
@@ -157,11 +157,11 @@ namespace GoC.Arena
             if (targetObject is not MonoBehaviour target)
                 return Result.InvalidTarget;
 
-            DepositBehaviour targetDepositBehaviour = target.GetComponent<DepositBehaviour>();
-            if (targetDepositBehaviour == null)
+            Deposit targetDeposit = target.GetComponent<Deposit>();
+            if (targetDeposit == null)
                 return Result.InvalidTarget;
 
-            if (distance(pos, targetDepositBehaviour.pos) > 1) 
+            if (distance(pos, targetDeposit.pos) > 1) 
                 return Result.OutOfRange;
 
             return Result.Ok;
@@ -186,7 +186,7 @@ namespace GoC.Arena
             if (canMine != Result.Ok)
                 return canMine;
         
-            _mineCommand = new MineCommand(this, ((MonoBehaviour)targetObject).GetComponent<DepositBehaviour>());
+            _mineCommand = new MineCommand(this, ((MonoBehaviour)targetObject).GetComponent<Deposit>());
             
             return Result.Ok;
         }
@@ -202,14 +202,14 @@ namespace GoC.Arena
             if (distance(pos, target.transform.position.ToArenaPos()) > 1)
                 return Result.OutOfRange;
 
-            StorageBehaviour targetStorageBehaviour = target.GetComponent<StorageBehaviour>();
-            if (targetStorageBehaviour == null)
+            Storage targetStorage = target.GetComponent<Storage>();
+            if (targetStorage == null)
                 return Result.InvalidTarget;
             
-            if (storageBehaviour.content[(int)substanceType] < amount)
+            if (myStorage.content[(int)substanceType] < amount)
                 return Result.NotEnoughSubstance;
 
-            _giveCommand = new GiveCommand(this, targetStorageBehaviour, substanceType, amount);
+            _giveCommand = new GiveCommand(this, targetStorage, substanceType, amount);
             
             return Result.Ok;
         }

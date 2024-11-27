@@ -10,7 +10,7 @@ namespace GoC.Arena
         public int amount;
     }
 
-    public class DepositBehaviour : MonoBehaviour, IDeposit
+    public class Deposit : MonoBehaviour, IDeposit
     {
         [SerializeField] private Arena _arena;
 

@@ -31,11 +31,11 @@ namespace GoC.Arena
         private IEnumerable<IFactory> _factories;
         public IEnumerable<IFactory> factories => _factories ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myFactories);
         
-        private readonly HashSet<DepositBehaviour> _deposits = new();
+        private readonly HashSet<Deposit> _deposits = new();
         public IEnumerable<IDeposit> deposits => _deposits;
         
-        public void Register(DepositBehaviour deposit) => _deposits.Add(deposit);
-        public void Unregister(DepositBehaviour deposit) => _deposits.Remove(deposit);
+        public void Register(Deposit deposit) => _deposits.Add(deposit);
+        public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
         public void Register(Team team)
         {

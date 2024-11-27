@@ -6,29 +6,29 @@ using UnityEngine.VFX;
 
 namespace GoC.Arena
 {
-    [RequireComponent(typeof(StorageBehaviour))]
-    [RequireComponent(typeof(FactoryControlBehaviour))]
-    public class FactoryBehaviour : MonoBehaviour, IFactory
+    [RequireComponent(typeof(Storage))]
+    [RequireComponent(typeof(FactoryControl))]
+    public class Factory : MonoBehaviour, IFactory
     {
         [SerializeField] private Team _team;
-        [SerializeField] private UnitBehaviour _fabricatedUnitPrototype;
+        [SerializeField] private Unit _fabricatedUnitPrototype;
         [Space]
         [SerializeField] private VisualEffect _spawn;
 
         private float _cooldown;
 
-        private IStorageBehaviour _storageBehaviour;
-        private IStorageBehaviour storageBehaviour => _storageBehaviour ??= GetComponent<IStorageBehaviour>();
+        private IStorage _storage;
+        private IStorage myStorage => _storage ??= GetComponent<IStorage>();
 
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         
-        public IReadOnlyList<int> storage => storageBehaviour.content;
+        public IReadOnlyList<int> storage => myStorage.content;
         
-        private FactoryControlBehaviour _factoryControlBehaviour;
+        private FactoryControl _factoryControl;
         public IFactoryControl control =>
             _team.arena.executingTeamId == teamId
-                ? _factoryControlBehaviour ??= GetComponent<FactoryControlBehaviour>()
+                ? _factoryControl ??= GetComponent<FactoryControl>()
                 : null;
 
         public Result Produce()
@@ -36,7 +36,7 @@ namespace GoC.Arena
             if (_cooldown > 0)
                 return Result.Busy;
 
-            if (storageBehaviour.Withdraw(Substance.Type.Energy, 1))
+            if (myStorage.Withdraw(Substance.Type.Energy, 1))
             {
                 _cooldown = Tick.TIME - Time.deltaTime; // slightly less than a tick
                 _spawn.Play();
@@ -81,11 +81,11 @@ namespace GoC.Arena
             bool savedPrototypeEnabled = _fabricatedUnitPrototype.enabled;
             _fabricatedUnitPrototype.enabled = false;
 
-            UnitBehaviour unitBehaviour = Instantiate(_fabricatedUnitPrototype, transform.position, transform.rotation);
-            unitBehaviour.Setup(_team);
+            Unit unit = Instantiate(_fabricatedUnitPrototype, transform.position, transform.rotation);
+            unit.Setup(_team);
 
             _fabricatedUnitPrototype.enabled = savedPrototypeEnabled;
-            unitBehaviour.enabled = savedPrototypeEnabled;
+            unit.enabled = savedPrototypeEnabled;
         }
     }
 }

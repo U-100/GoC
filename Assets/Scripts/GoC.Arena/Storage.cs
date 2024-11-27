@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace GoC.Arena
 {
-    public interface IStorageBehaviour
+    public interface IStorage
     {
         public IReadOnlyList<int> content { get; }
         bool Deposit(Substance.Type substanceType, int amount);
         bool Withdraw(Substance.Type substanceType, int amount);
     }
 
-    public class StorageBehaviour : MonoBehaviour, IStorageBehaviour
+    public class Storage : MonoBehaviour, IStorage
     {
         [SerializeField]
         private int[] _content = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();

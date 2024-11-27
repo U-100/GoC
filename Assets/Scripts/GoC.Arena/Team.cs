@@ -9,14 +9,14 @@ namespace GoC.Arena
         [SerializeField] private Arena _arena;
         [SerializeField] private string _scriptFile;
 
-        private readonly HashSet<UnitBehaviour> _myUnits = new();
-        private readonly HashSet<FactoryBehaviour> _myFactories = new();
+        private readonly HashSet<Unit> _myUnits = new();
+        private readonly HashSet<Factory> _myFactories = new();
 
-        public void Register(UnitBehaviour unit) => _myUnits.Add(unit);
-        public void Unregister(UnitBehaviour unit) => _myUnits.Remove(unit);
+        public void Register(Unit unit) => _myUnits.Add(unit);
+        public void Unregister(Unit unit) => _myUnits.Remove(unit);
 
-        public void Register(FactoryBehaviour factory) => _myFactories.Add(factory);
-        public void Unregister(FactoryBehaviour factory) => _myFactories.Remove(factory);
+        public void Register(Factory factory) => _myFactories.Add(factory);
+        public void Unregister(Factory factory) => _myFactories.Remove(factory);
 
         public IArenaContext arena => _arena;
         public string scriptFile => _scriptFile;
@@ -32,19 +32,19 @@ namespace GoC.Arena
 
         public void BeforeTick()
         {
-            foreach (UnitBehaviour unit in _myUnits)
+            foreach (Unit unit in _myUnits)
                 unit.BeforeTick();
 
-            foreach (FactoryBehaviour factory in _myFactories)
+            foreach (Factory factory in _myFactories)
                 factory.BeforeTick();
         }
 
         public void AfterTick()
         {
-            foreach (UnitBehaviour unit in _myUnits)
+            foreach (Unit unit in _myUnits)
                 unit.AfterTick();
 
-            foreach (FactoryBehaviour factory in _myFactories)
+            foreach (Factory factory in _myFactories)
                 factory.AfterTick();
         }
         
