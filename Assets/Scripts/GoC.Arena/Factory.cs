@@ -52,10 +52,16 @@ namespace GoC.Arena
 
         
         public void Setup(Team team) => _team = team;
-        
-        public void BeforeTick() { }
 
-        public void AfterTick() { }
+        public void BeforeTick()
+        {
+            myHull.BeforeTick();
+        }
+
+        public void AfterTick()
+        {
+            myHull.AfterTick();
+        }
 
         
         private void OnEnable()

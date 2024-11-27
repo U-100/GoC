@@ -545,6 +545,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _integrity: 1
+  _dyingEffect: {fileID: 6388900570547497513}
+  _destructionEffectPrefab: {fileID: 2428393347250931738, guid: 5a73548db2650fb43bd3f4405b992aa1,
+    type: 3}
 --- !u!114 &6731172558570355454
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -557,7 +560,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e206bb5d4bd4891be91d5fd0d3ea62f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _content: 0500000000000000
+  _content: 0000000000000000
 --- !u!114 &8826672916308196837
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -587,9 +590,6 @@ MonoBehaviour:
   _attackEffect: {fileID: 5868796379976398687}
   _mineEffect: {fileID: 3597055597159338398}
   _moveEffect: {fileID: 2655816745955894041}
-  _dyingEffect: {fileID: 6388900570547497513}
-  _destructionEffectPrefab: {fileID: 2428393347250931738, guid: 5a73548db2650fb43bd3f4405b992aa1,
-    type: 3}
 --- !u!4 &2957492940002964636 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,

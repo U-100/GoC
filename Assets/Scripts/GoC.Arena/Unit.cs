@@ -132,8 +132,6 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
         [SerializeField] private VisualEffect _moveEffect;
-        [SerializeField] private VisualEffect _dyingEffect;
-        [SerializeField] private GameObject _destructionEffectPrefab;
         
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
@@ -284,12 +282,7 @@ namespace GoC.Arena
             _moveCommand?.BeforeTick();
             _moveCommand = null;
 
-            if (myHull.dead)
-            {
-                Destroy(gameObject);
-                GameObject destructionEffect = Instantiate(_destructionEffectPrefab, transform.position, transform.rotation);
-                Destroy(destructionEffect, 1);
-            }
+            myHull.BeforeTick();
         }
 
         public void AfterTick()
@@ -302,6 +295,8 @@ namespace GoC.Arena
                 _giveCommand.Value.AfterTick();
             else if (_moveCommand != null)
                 _moveCommand.Value.AfterTick();
+            
+            myHull.AfterTick();
         }
 
         
@@ -311,8 +306,6 @@ namespace GoC.Arena
                 _team.Register(this);
             else
                 Debug.LogWarning("A unit without a team", this);
-
-            _dyingEffect.enabled = false;
         }
 
         private void OnDisable()
@@ -331,9 +324,6 @@ namespace GoC.Arena
                 _giveCommand.Value.Update();
             else if (_moveCommand != null)
                 _moveCommand.Value.Update();
-            
-            if (myHull.dead)
-                _dyingEffect.enabled = true;
         }
 
         private bool RotateTowards(Vector3 position)
