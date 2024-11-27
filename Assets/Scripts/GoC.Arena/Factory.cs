@@ -5,6 +5,7 @@ using UnityEngine.VFX;
 
 namespace GoC.Arena
 {
+    [RequireComponent(typeof(Hull))]
     [RequireComponent(typeof(Storage))]
     [RequireComponent(typeof(FactoryControl))]
     public class Factory : MonoBehaviour, IFactory
@@ -16,6 +17,9 @@ namespace GoC.Arena
 
         private float _cooldown;
 
+        private Hull _myHull;
+        private Hull myHull => _myHull ??= GetComponent<Hull>();
+        
         private Storage _myStorage;
         private Storage myStorage => _myStorage ??= GetComponent<Storage>();
 
@@ -26,6 +30,7 @@ namespace GoC.Arena
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
 
+        public IHull hull => myHull;
         public IStorage storage => myStorage;
         public IFactoryControl control => _team.arena.executingTeamId == teamId ? myFactoryControl : null;
         

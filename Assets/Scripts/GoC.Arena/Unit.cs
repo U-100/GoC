@@ -7,6 +7,7 @@ using static Unity.Mathematics.math;
 
 namespace GoC.Arena
 {
+    [RequireComponent(typeof(Hull))]
     [RequireComponent(typeof(Storage))]
     [RequireComponent(typeof(UnitControl))]
     public class Unit : MonoBehaviour, IUnit
@@ -14,12 +15,12 @@ namespace GoC.Arena
         private readonly struct AttackCommand
         {
             private readonly Unit _unit;
-            private readonly MonoBehaviour _target;
+            private readonly Hull _targetHull;
             
-            public AttackCommand(Unit unit, MonoBehaviour target)
+            public AttackCommand(Unit unit, Hull targetHull)
             {
                 _unit = unit;
-                _target = target;
+                _targetHull = targetHull;
             }
 
             public void BeforeTick()
@@ -32,7 +33,7 @@ namespace GoC.Arena
                 _unit._attackEffect.Play();
             }
 
-            public void Update() => _unit.RotateTowards(_target.transform.position);
+            public void Update() => _unit.RotateTowards(_targetHull.transform.position);
         }
         
         private readonly struct MineCommand
@@ -135,6 +136,9 @@ namespace GoC.Arena
         private GiveCommand? _giveCommand;
         private MoveCommand? _moveCommand;
 
+        private Hull _myHull;
+        private Hull myHull => _myHull ??= GetComponent<Hull>();
+        
         private Storage _myStorage;
         private Storage myStorage => _myStorage ??= GetComponent<Storage>();
         
@@ -161,6 +165,7 @@ namespace GoC.Arena
             return Result.Ok;
         }
 
+        public IHull hull => myHull;
         public IStorage storage => _myStorage ??= GetComponent<Storage>();
         public IUnitControl control => _team.arena.executingTeamId == teamId ? myUnitControl : null;
 
@@ -170,10 +175,14 @@ namespace GoC.Arena
             if (targetObject is not MonoBehaviour target)
                 return Result.InvalidTarget;
 
+            Hull targetHull = target.GetComponent<Hull>();
+            if (targetHull == null)
+                return Result.InvalidTarget;
+            
             if (distance(pos, target.transform.position.ToArenaPos()) > 3) 
                 return Result.OutOfRange;
 
-            _attackCommand = new AttackCommand(this, target);
+            _attackCommand = new AttackCommand(this, targetHull);
 
             return Result.Ok;
         }
@@ -310,7 +319,7 @@ namespace GoC.Arena
 
         private bool RotateTowards(Vector3 position)
         {
-            if (distancesq(position, transform.position) > float.Epsilon)
+            if (distancesq(position, transform.position) > Mathf.Epsilon)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(position - transform.position, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 360 * Time.deltaTime);

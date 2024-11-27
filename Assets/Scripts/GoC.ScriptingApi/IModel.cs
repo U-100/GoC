@@ -30,6 +30,11 @@ namespace GoC.ScriptingApi
     {
         public IReadOnlyList<int> content { get; }
     }
+
+    public interface IHull
+    {
+        public int integrity { get; }
+    }
     
     public interface IUnitControl
     {
@@ -48,6 +53,7 @@ namespace GoC.ScriptingApi
         
         Result CanMine(object target);
 
+        public IHull hull { get; }
         public IStorage storage { get; }
         public IUnitControl control { get; }
     }
@@ -62,6 +68,7 @@ namespace GoC.ScriptingApi
         int teamId { get; } // owner team id
         int2 pos { get; }
 
+        public IHull hull { get; }
         public IStorage storage { get; }
         public IFactoryControl control { get; }
     }
