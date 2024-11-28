@@ -7,26 +7,18 @@ namespace GoC.Arena
 {
     public class Storage : MonoBehaviour, IStorage
     {
-        [SerializeField]
-        private int[] _content = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
+        [SerializeField] private int _capacityPerSubstance;
+        [SerializeField] private int[] _content = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
+
         
+        public int capacityPerSubstance => _capacityPerSubstance;
         public IReadOnlyList<int> content => _content;
         
-        public bool Deposit(Substance.Type substanceType, int amount)
-        {
-            _content[(int)substanceType] += amount;
-            return true;
-        }
+        
+        public void Setup(int initialCapacityPerSubstance) => _capacityPerSubstance = initialCapacityPerSubstance;
 
-        public bool Withdraw(Substance.Type substanceType, int amount)
-        {
-            if(_content[(int)substanceType] >= amount)
-            {
-                _content[(int)substanceType] -= amount;
-                return true;
-            }
+        public void Deposit(Substance.Type substanceType, int amount) => _content[(int)substanceType] += amount;
 
-            return false;
-        }
+        public void Withdraw(Substance.Type substanceType, int amount) => _content[(int)substanceType] -= amount;
     }
 }

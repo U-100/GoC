@@ -396,7 +396,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03e8727dc627465fb2f20441c7f20f79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _integrity: 10
+  _integrity: 0
   _dyingEffect: {fileID: 8655522014889742710}
   _destructionEffectPrefab: {fileID: 2428393347250931738, guid: 5a73548db2650fb43bd3f4405b992aa1,
     type: 3}
@@ -412,6 +412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e206bb5d4bd4891be91d5fd0d3ea62f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _capacityPerSubstance: 0
   _content: 0000000000000000
 --- !u!114 &5355071952317212009
 MonoBehaviour:
@@ -438,6 +439,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _team: {fileID: 0}
+  _config: {fileID: 0}
   _fabricatedUnitPrototype: {fileID: 8391022737454312585, guid: 08fb3a1303a359648b32627116f743aa,
     type: 3}
   _spawn: {fileID: 2210560471988874357}

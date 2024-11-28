@@ -30,7 +30,7 @@ namespace GoC.Arena
 
             public void AfterTick()
             {
-                _targetHull.Absorb(_unit._damage);
+                _targetHull.Absorb(_unit._config.damage);
                 _unit._attackEffect.Play();
             }
 
@@ -55,8 +55,8 @@ namespace GoC.Arena
             
             public void AfterTick()
             {
-                DepositExtractionOutcome depositExtractionOutcome = _deposit.Extract();
-                _unit.myStorage.Deposit(depositExtractionOutcome.substanceType, depositExtractionOutcome.amount);
+                DepositMiningOutcome depositMiningOutcome = _deposit.Mine();
+                _unit.myStorage.Deposit(depositMiningOutcome.substanceType, depositMiningOutcome.amount);
             
                 _unit._mineEffect.Play();
             }
@@ -83,8 +83,8 @@ namespace GoC.Arena
             
             public void AfterTick()
             {
-                if (_unit.myStorage.Withdraw(_substanceType, _amount))
-                    _targetStorage.Deposit(_substanceType, _amount);
+                _unit.myStorage.Withdraw(_substanceType, _amount);
+                _targetStorage.Deposit(_substanceType, _amount);
             }
 
             public void Update() => _unit.RotateTowards(_targetStorage.transform.position);
@@ -127,7 +127,7 @@ namespace GoC.Arena
         }
 
         [SerializeField] private Team _team;
-        [SerializeField] private int _damage;
+        [SerializeField] private UnitConfig _config;
         [Space]
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
@@ -164,11 +164,14 @@ namespace GoC.Arena
             if (distance(pos, targetDeposit.pos) > 1) 
                 return Result.OutOfRange;
 
+            if (myStorage.content[(int)targetDeposit.substanceType] + targetDeposit.miningSpeed > myStorage.capacityPerSubstance)
+                return Result.NotEnoughStorageCapacity;
+
             return Result.Ok;
         }
 
         public IHull hull => myHull;
-        public IStorage storage => _myStorage ??= GetComponent<Storage>();
+        public IStorage storage => myStorage;
         public IUnitControl control => _team.arena.executingTeamId == teamId ? myUnitControl : null;
 
         
@@ -218,6 +221,9 @@ namespace GoC.Arena
             if (myStorage.content[(int)substanceType] < amount)
                 return Result.NotEnoughSubstance;
 
+            if (targetStorage.content[(int)substanceType] + amount > targetStorage.capacityPerSubstance)
+                return Result.NotEnoughStorageCapacity;
+
             _giveCommand = new GiveCommand(this, targetStorage, substanceType, amount);
             
             return Result.Ok;
@@ -266,7 +272,14 @@ namespace GoC.Arena
         
         
         // to set up upon instantiation
-        public void Setup(Team team) => _team = team;
+        public void Setup(Team team, UnitConfig unitConfig)
+        {
+            _team = team;
+            _config = unitConfig;
+            
+            myHull.Setup(_config.integrity);
+            myStorage.Setup(_config.storageCapacityPerSubstance);
+        }
 
         public void BeforeTick()
         {

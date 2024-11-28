@@ -58,8 +58,11 @@ export function tick() {
         if (myUnitsCount <= 4) {
             let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
             if (nearbyDeposit) {
-                if (myUnit.control.Mine(nearbyDeposit) != Result.Ok)
+                let miningResult = myUnit.control.Mine(nearbyDeposit);
+                if (miningResult != Result.Ok) {
                     myUnit.control.MoveTo(nearbyDeposit);
+                    //log(miningResult);
+                }
                 continue;
             }
         }

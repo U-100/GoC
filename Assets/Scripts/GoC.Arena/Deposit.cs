@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GoC.Arena
 {
-    public struct DepositExtractionOutcome
+    public struct DepositMiningOutcome
     {
         public Substance.Type substanceType;
         public int amount;
@@ -13,11 +13,22 @@ namespace GoC.Arena
     public class Deposit : MonoBehaviour, IDeposit
     {
         [SerializeField] private Arena _arena;
+        [SerializeField] private DepositConfig _config;
+
 
         public int2 pos => transform.position.ToArenaPos();
+        public Substance.Type substanceType => _config.substanceType;
+        public int miningSpeed => _config.miningSpeed;
 
-        public DepositExtractionOutcome Extract() => new DepositExtractionOutcome { substanceType = Substance.Type.Energy, amount = 1 };
         
+        public void Setup(DepositConfig depositConfig)
+        {
+            _config = depositConfig;
+        }
+        
+        public DepositMiningOutcome Mine() => new DepositMiningOutcome { substanceType = substanceType, amount = miningSpeed };
+
+
         void OnEnable()
         {
             if(_arena != null)

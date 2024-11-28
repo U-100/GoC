@@ -380,7 +380,7 @@ PrefabInstance:
     - target: {fileID: 8127725535345949726, guid: 41d586a321035634f8b217a8f868ee01,
         type: 3}
       propertyPath: m_Name
-      value: Deposit (1)
+      value: Deposit (for Blue)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1049,7 +1049,7 @@ PrefabInstance:
     - target: {fileID: 8127725535345949726, guid: 41d586a321035634f8b217a8f868ee01,
         type: 3}
       propertyPath: m_Name
-      value: Deposit
+      value: Deposit (for Red)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1064,6 +1064,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 398291603221183964, guid: d5495ec574c06354ea8abf38de2cc3a9,
+        type: 3}
+      propertyPath: _integrity
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 568149737256906398, guid: d5495ec574c06354ea8abf38de2cc3a9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1119,6 +1124,12 @@ PrefabInstance:
       propertyPath: _team
       value: 
       objectReference: {fileID: 785360195}
+    - target: {fileID: 3141954840320596558, guid: d5495ec574c06354ea8abf38de2cc3a9,
+        type: 3}
+      propertyPath: _config
+      value: 
+      objectReference: {fileID: 11400000, guid: c58f8f994c6f4094c95c63bcea50c90d,
+        type: 2}
     - target: {fileID: 4067358115040220673, guid: d5495ec574c06354ea8abf38de2cc3a9,
         type: 3}
       propertyPath: m_Name
@@ -1133,6 +1144,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7727008285154006643, guid: d5495ec574c06354ea8abf38de2cc3a9,
+        type: 3}
+      propertyPath: _capacityPerSubstance
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 7727008285154006643, guid: d5495ec574c06354ea8abf38de2cc3a9,
         type: 3}
@@ -1370,8 +1386,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3621413765074378116, guid: 5382fd2146412a34fb0d37aa8d869939,
         type: 3}
+      propertyPath: _capacityPerSubstance
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3621413765074378116, guid: 5382fd2146412a34fb0d37aa8d869939,
+        type: 3}
       propertyPath: '_content.Array.data[0]'
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6700518018267084331, guid: 5382fd2146412a34fb0d37aa8d869939,
+        type: 3}
+      propertyPath: _integrity
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 6816330614459917673, guid: 5382fd2146412a34fb0d37aa8d869939,
         type: 3}
@@ -1438,6 +1464,12 @@ PrefabInstance:
       propertyPath: _team
       value: 
       objectReference: {fileID: 918850138}
+    - target: {fileID: 8277746951006310841, guid: 5382fd2146412a34fb0d37aa8d869939,
+        type: 3}
+      propertyPath: _config
+      value: 
+      objectReference: {fileID: 11400000, guid: c58f8f994c6f4094c95c63bcea50c90d,
+        type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

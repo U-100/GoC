@@ -11,11 +11,12 @@ namespace GoC.Arena
     public class Factory : MonoBehaviour, IFactory
     {
         [SerializeField] private Team _team;
-        [SerializeField] private Unit _fabricatedUnitPrototype;
+        [SerializeField] private FactoryConfig _config;
         [Space]
+        [SerializeField] private Unit _fabricatedUnitPrototype;
         [SerializeField] private VisualEffect _spawn;
 
-        private float _cooldown;
+        private int _ticksLeft;
 
         private Hull _myHull;
         private Hull myHull => _myHull ??= GetComponent<Hull>();
@@ -37,29 +38,47 @@ namespace GoC.Arena
 
         public Result Produce()
         {
-            if (_cooldown > 0)
+            if (_ticksLeft > 0)
                 return Result.Busy;
 
-            if (myStorage.Withdraw(Substance.Type.Energy, 1))
+            for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
             {
-                _cooldown = Tick.TIME - Time.deltaTime; // slightly less than a tick
-                _spawn.Play();
-                return Result.Ok;
+                int cost = _config.productionCost[substanceIndex];
+                if (myStorage.content[substanceIndex] < cost)
+                    return Result.NotEnoughSubstance;
             }
-            
-            return Result.NotEnoughSubstance;
+
+            _ticksLeft = _config.productionTime;
+            return Result.Ok;
         }
 
         
-        public void Setup(Team team) => _team = team;
+        public void Setup(Team team, FactoryConfig factoryConfig)
+        {
+            _team = team;
+
+            _config = factoryConfig;
+            
+            myHull.Setup(_config.integrity);
+            myStorage.Setup(_config.storageCapacityPerSubstance);
+        }
 
         public void BeforeTick()
         {
+            if (_ticksLeft > 0 && --_ticksLeft == 0)
+                Fabricate();
+            
             myHull.BeforeTick();
         }
 
         public void AfterTick()
         {
+            if(_ticksLeft == _config.productionTime)
+            {
+                for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
+                    myStorage.Withdraw((Substance.Type)substanceIndex, _config.productionCost[substanceIndex]);
+            }
+
             myHull.AfterTick();
         }
 
@@ -78,15 +97,6 @@ namespace GoC.Arena
                 _team.Unregister(this);
         }
 
-        private void Update()
-        {
-            if (_cooldown > 0 && (_cooldown -= Time.deltaTime) <= 0)
-            {
-                _cooldown = 0;
-                Fabricate();
-            }
-        }
-
         private void Fabricate()
         {
             // NOTE: temporarily disable UnitBehaviour on prefab so we can call Setup() before unit's OnEnable() is triggered
@@ -94,7 +104,7 @@ namespace GoC.Arena
             _fabricatedUnitPrototype.enabled = false;
 
             Unit unit = Instantiate(_fabricatedUnitPrototype, transform.position, transform.rotation);
-            unit.Setup(_team);
+            unit.Setup(_team, _config.product);
 
             _fabricatedUnitPrototype.enabled = savedPrototypeEnabled;
             unit.enabled = savedPrototypeEnabled;

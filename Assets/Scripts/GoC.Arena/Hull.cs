@@ -14,9 +14,11 @@ namespace GoC.Arena
 
         public int integrity => _integrity;
 
+
+        public void Setup(int initialIntegrity) => _integrity = initialIntegrity;
         
         public void Absorb(int damage) => _integrity -= damage;
-
+        
         public void BeforeTick()
         {
             if (_integrity <= 0)
@@ -29,6 +31,7 @@ namespace GoC.Arena
 
         public void AfterTick() { }
 
+        
         private void OnEnable()
         {
             _dyingEffect.enabled = false;

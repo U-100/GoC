@@ -13,6 +13,7 @@ namespace GoC.ScriptingApi
         OutOfRange,
         InvalidTarget,
         NotEnoughSubstance,
+        NotEnoughStorageCapacity
     }
 
     public class Substance
@@ -28,6 +29,7 @@ namespace GoC.ScriptingApi
 
     public interface IStorage
     {
+        public int capacityPerSubstance { get; }
         public IReadOnlyList<int> content { get; }
     }
 
@@ -76,6 +78,8 @@ namespace GoC.ScriptingApi
     public interface IDeposit
     {
         int2 pos { get; }
+        public Substance.Type substanceType { get; }
+        public int miningSpeed { get; }
     }
     
     public interface IModel
