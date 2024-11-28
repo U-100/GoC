@@ -2,6 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
+using UnityEngine.VFX.Utility;
 
 namespace GoC.Arena
 {
@@ -14,9 +15,11 @@ namespace GoC.Arena
         [SerializeField] private FactoryConfig _config;
         [Space]
         [SerializeField] private Unit _fabricatedUnitPrototype;
-        [SerializeField] private VisualEffect _spawn;
+        [SerializeField] private VisualEffect _productionEffect;
+        
 
         private int _ticksLeft;
+        private ExposedProperty _productionEffectDurationProperty;
 
         private Hull _myHull;
         private Hull myHull => _myHull ??= GetComponent<Hull>();
@@ -77,6 +80,9 @@ namespace GoC.Arena
             {
                 for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
                     myStorage.Withdraw((Substance.Type)substanceIndex, _config.productionCost[substanceIndex]);
+                
+                _productionEffect.SetFloat(_productionEffectDurationProperty ??= "duration", _config.productionTime * Tick.TIME);
+                _productionEffect.Play();
             }
 
             myHull.AfterTick();

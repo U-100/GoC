@@ -442,4 +442,4 @@ MonoBehaviour:
   _config: {fileID: 0}
   _fabricatedUnitPrototype: {fileID: 8391022737454312585, guid: 08fb3a1303a359648b32627116f743aa,
     type: 3}
-  _spawn: {fileID: 2210560471988874357}
+  _productionEffect: {fileID: 2210560471988874357}
