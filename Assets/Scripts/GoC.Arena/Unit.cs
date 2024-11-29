@@ -107,8 +107,12 @@ namespace GoC.Arena
                 _unit.transform.position = new Vector3(Mathf.Round(_position.x), Mathf.Round(_position.y), Mathf.Round(_position.z));
                 _unit._moveEffect.Stop();
             }
-            
-            public void AfterTick() { }
+
+            public void AfterTick()
+            {
+                _unit._team.arena.grid[_unit.pos]--;
+                _unit._team.arena.grid[_position.ToArenaPos()]++;
+            }
 
             public void Update()
             {
@@ -319,10 +323,14 @@ namespace GoC.Arena
                 _team.Register(this);
             else
                 Debug.LogWarning("A unit without a team", this);
+            
+            _team.arena.grid[pos]++;
         }
 
         private void OnDisable()
         {
+            _team.arena.grid[pos]--;
+            
             if (_team != null)
                 _team.Unregister(this);
         }

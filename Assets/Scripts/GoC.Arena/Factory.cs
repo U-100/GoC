@@ -81,13 +81,18 @@ namespace GoC.Arena
                 for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
                     myStorage.Withdraw((Substance.Type)substanceIndex, _config.productionCost[substanceIndex]);
                 
-                _productionEffect.SetFloat(_productionEffectDurationProperty ??= "duration", _config.productionTime * Tick.TIME);
+                _productionEffect.SetFloat(_productionEffectDurationProperty, _config.productionTime * Tick.TIME);
                 _productionEffect.Play();
             }
 
             myHull.AfterTick();
         }
 
+
+        private void Awake()
+        {
+            _productionEffectDurationProperty = "duration";
+        }
         
         private void OnEnable()
         {

@@ -15,7 +15,7 @@ namespace GoC.Arena
         private readonly HashSet<Factory> _myFactories = new();
         private readonly List<Factory> _myFactoriesCache = new();
         
-        public IArenaContext arena => _arena;
+        public Arena arena => _arena;
         public string scriptFile => _scriptFile;
 
         

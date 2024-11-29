@@ -153,7 +153,6 @@ Transform:
   - {fileID: 290885710}
   - {fileID: 278531547}
   - {fileID: 582264391}
-  - {fileID: 263261946}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &245116310
@@ -185,7 +184,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 263261946}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &245116313
@@ -200,6 +200,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af1e62ed9942425d82ec1578b7ac6695, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _config: {fileID: 11400000, guid: 710568fee22ecde4583d404871ab22e3, type: 2}
+  _gridEffect: {fileID: 263261945}
+  _quad: {fileID: 6923727984794021838, guid: 9beb1a7a32ba4eb41a935356af39657d, type: 3}
 --- !u!1 &263261943
 GameObject:
   m_ObjectHideFlags: 0
@@ -270,8 +273,8 @@ VisualEffect:
   m_GameObject: {fileID: 263261943}
   m_Enabled: 1
   m_Asset: {fileID: 8926484042661614526, guid: 724d29cfcd3442f48a264df546a6fbfd, type: 3}
-  m_InitialEventName: OnPlay
-  m_InitialEventNameOverriden: 0
+  m_InitialEventName: 
+  m_InitialEventNameOverriden: 1
   m_StartSeed: 0
   m_ResetSeedOnPlay: 1
   m_AllowInstancing: 1
@@ -312,7 +315,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 144735886}
+  m_Father: {fileID: 245116312}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &266151581
 PrefabInstance:

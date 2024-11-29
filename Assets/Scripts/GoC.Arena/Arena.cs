@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GoC.ScriptingApi;
 using Jint;
 using Jint.Native;
 using Jint.Native.Object;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.VFX;
 
 namespace GoC.Arena
 {
@@ -15,8 +18,13 @@ namespace GoC.Arena
         public JsValue tickFunction;
     }
     
-    public class Arena : MonoBehaviour, IArenaContext
+    public class Arena : MonoBehaviour
     {
+        [SerializeField] private ArenaConfig _config;
+        [Space]
+        [SerializeField] private VisualEffect _gridEffect;
+        [SerializeField] private GameObject _quad;
+        
         private readonly List<TeamRecord> _teamRecords = new();
         private float _tickCooldown;
         private Team _executingTeam;
@@ -25,10 +33,16 @@ namespace GoC.Arena
         private IEnumerable<IFactory> _factories;
         private readonly HashSet<Deposit> _deposits = new();
 
+        private Grid<int> _grid;
+
+        private GameObject[] _quads;
+
         
         public uint currentTick { get; private set; } 
         public int executingTeamId => _executingTeam.teamId;
 
+        public IGrid<int> grid => _grid;
+        
         public IEnumerable<IUnit> units => _units ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myUnits);
         
         public IEnumerable<IFactory> factories => _factories ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myFactories);
@@ -69,7 +83,20 @@ namespace GoC.Arena
         public void Register(Deposit deposit) => _deposits.Add(deposit);
         public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
-        
+
+        private void OnEnable()
+        {
+            _grid = new Grid<int>(_config.size / -2, (_config.size - 1) / 2);
+            
+            _gridEffect.SetFloat("mapSize", _config.size.x - 1);
+            _gridEffect.Play();
+
+            _quads = new GameObject[grid.size.x * grid.size.y];
+            for(int2 p = grid.min; p.y <= grid.max.y; ++p.y)
+                for (p.x = grid.min.x; p.x <= grid.max.x; ++p.x)
+                    _quads[p.x - grid.min.x + (p.y - grid.min.y) * grid.size.y] = Instantiate(_quad, p.ToUnityPos(), _quad.transform.rotation, transform);
+        }
+
         private void OnDisable()
         {
             foreach (TeamRecord teamRecord in _teamRecords)
@@ -80,6 +107,10 @@ namespace GoC.Arena
 
         private void Update()
         {
+            for(int2 p = grid.min; p.y <= grid.max.y; ++p.y)
+                for (p.x = grid.min.x; p.x <= grid.max.x; ++p.x)
+                    _quads[p.x - grid.min.x + (p.y - grid.min.y) * grid.size.y].SetActive(grid[p] > 0);
+
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
                 foreach (TeamRecord teamRecord in _teamRecords)
