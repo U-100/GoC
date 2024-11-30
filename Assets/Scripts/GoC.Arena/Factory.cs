@@ -44,6 +44,9 @@ namespace GoC.Arena
             if (_ticksLeft > 0)
                 return Result.Busy;
 
+            if (_team.arena.grid[pos] > 0)
+                return Result.PathBlocked;
+            
             for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
             {
                 int cost = _config.productionCost[substanceIndex];
@@ -51,6 +54,7 @@ namespace GoC.Arena
                     return Result.NotEnoughSubstance;
             }
 
+            _team.arena.grid[pos]++;
             _ticksLeft = _config.productionTime;
             return Result.Ok;
         }
@@ -69,7 +73,19 @@ namespace GoC.Arena
         public void BeforeTick()
         {
             if (_ticksLeft > 0 && --_ticksLeft == 0)
-                Fabricate();
+            {
+                _team.arena.grid[pos]--;
+
+                // NOTE: temporarily disable UnitBehaviour on prefab so we can call Setup() before unit's OnEnable() is triggered
+                bool savedPrototypeEnabled = _fabricatedUnitPrototype.enabled;
+                _fabricatedUnitPrototype.enabled = false;
+
+                Unit unit = Instantiate(_fabricatedUnitPrototype, transform.position, transform.rotation);
+                unit.Setup(_team, _config.product);
+
+                _fabricatedUnitPrototype.enabled = savedPrototypeEnabled;
+                unit.enabled = savedPrototypeEnabled;
+            }
             
             myHull.BeforeTick();
         }
@@ -106,19 +122,6 @@ namespace GoC.Arena
         {
             if (_team != null)
                 _team.Unregister(this);
-        }
-
-        private void Fabricate()
-        {
-            // NOTE: temporarily disable UnitBehaviour on prefab so we can call Setup() before unit's OnEnable() is triggered
-            bool savedPrototypeEnabled = _fabricatedUnitPrototype.enabled;
-            _fabricatedUnitPrototype.enabled = false;
-
-            Unit unit = Instantiate(_fabricatedUnitPrototype, transform.position, transform.rotation);
-            unit.Setup(_team, _config.product);
-
-            _fabricatedUnitPrototype.enabled = savedPrototypeEnabled;
-            unit.enabled = savedPrototypeEnabled;
         }
     }
 }

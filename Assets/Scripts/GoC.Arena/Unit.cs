@@ -194,6 +194,10 @@ namespace GoC.Arena
             _team = team;
             _config = unitConfig;
 
+            _team.Register(this);
+
+            _team.arena.grid[pos]++;
+
             myHull.Setup(_config.integrity);
             myStorage.Setup(_config.storageCapacityPerSubstance);
         }
@@ -255,15 +259,7 @@ namespace GoC.Arena
         }
 
 
-        private void OnEnable()
-        {
-            if (_team != null)
-                _team.Register(this);
-            else
-                Debug.LogWarning("A unit without a team", this);
-
-            _team.arena.grid[pos]++;
-        }
+        private void OnEnable() { }
 
         private void OnDisable()
         {
