@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using GoC.ScriptingApi;
 using Jint;
@@ -7,6 +8,7 @@ using Jint.Native.Object;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
+using Debug = UnityEngine.Debug;
 
 namespace GoC.Arena
 {
@@ -112,27 +114,35 @@ namespace GoC.Arena
         {
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
-                foreach (TeamRecord teamRecord in _teamRecords)
-                    teamRecord.team.BeforeTick();
-                
-                foreach (TeamRecord teamRecord in _teamRecords)
+                Stopwatch tickStopwatch = Stopwatch.StartNew();
+                try
                 {
-                    try
-                    {
-                        _executingTeam = teamRecord.team;
-                        teamRecord.engine.Invoke(teamRecord.tickFunction);
-                    }
-                    finally
-                    {
-                        _executingTeam = null;
-                    }
-                }
+                    foreach (TeamRecord teamRecord in _teamRecords)
+                        teamRecord.team.BeforeTick();
 
-                _tickCooldown += Tick.TIME;
-                ++currentTick;
-                
-                foreach (TeamRecord teamRecord in _teamRecords)
-                    teamRecord.team.AfterTick();
+                    foreach (TeamRecord teamRecord in _teamRecords)
+                    {
+                        try
+                        {
+                            _executingTeam = teamRecord.team;
+                            teamRecord.engine.Invoke(teamRecord.tickFunction);
+                        }
+                        finally
+                        {
+                            _executingTeam = null;
+                        }
+                    }
+
+                    _tickCooldown += Tick.TIME;
+                    ++currentTick;
+
+                    foreach (TeamRecord teamRecord in _teamRecords)
+                        teamRecord.team.AfterTick();
+                }
+                finally
+                {
+                    //Debug.Log($"Arena tick: {tickStopwatch.ElapsedMilliseconds} ms");
+                }
             }
         }
     }
