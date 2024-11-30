@@ -13,7 +13,9 @@ namespace GoC.ScriptingApi
         OutOfRange,
         InvalidTarget,
         NotEnoughSubstance,
-        NotEnoughStorageCapacity
+        NotEnoughStorageCapacity,
+        AlreadyThere,
+        PathBlocked
     }
 
     public class Substance

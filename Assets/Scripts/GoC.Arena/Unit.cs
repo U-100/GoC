@@ -2,7 +2,6 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
-
 using static Unity.Mathematics.math;
 
 namespace GoC.Arena
@@ -12,131 +11,34 @@ namespace GoC.Arena
     [RequireComponent(typeof(UnitControl))]
     public class Unit : MonoBehaviour, IUnit
     {
-        private readonly struct AttackCommand
+        private struct AttackCommand
         {
-            private readonly Unit _unit;
-            private readonly Hull _targetHull;
-            
-            public AttackCommand(Unit unit, Hull targetHull)
-            {
-                _unit = unit;
-                _targetHull = targetHull;
-            }
-
-            public void BeforeTick()
-            {
-                _unit._attackEffect.Stop();
-            }
-
-            public void AfterTick()
-            {
-                _targetHull.Absorb(_unit._config.damage);
-                _unit._attackEffect.Play();
-            }
-
-            public void Update() => _unit.RotateTowards(_targetHull.transform.position);
-        }
-        
-        private readonly struct MineCommand
-        {
-            private readonly Unit _unit;
-            private readonly Deposit _deposit;
-            
-            public MineCommand(Unit unit, Deposit deposit)
-            {
-                _unit = unit;
-                _deposit = deposit;
-            }
-
-            public void BeforeTick()
-            {
-                _unit._mineEffect.Stop();
-            }
-            
-            public void AfterTick()
-            {
-                DepositMiningOutcome depositMiningOutcome = _deposit.Mine();
-                _unit.myStorage.Deposit(depositMiningOutcome.substanceType, depositMiningOutcome.amount);
-            
-                _unit._mineEffect.Play();
-            }
-
-            public void Update() => _unit.RotateTowards(_deposit.transform.position);
+            public Hull targetHull;
         }
 
-        private readonly struct GiveCommand
+        private struct MineCommand
         {
-            private readonly Unit _unit;
-            private readonly Storage _targetStorage;
-            private readonly Substance.Type _substanceType;
-            private readonly int _amount;
-            
-            public GiveCommand(Unit unit, Storage targetStorage, Substance.Type substanceType, int amount)
-            {
-                _unit = unit;
-                _targetStorage = targetStorage;
-                _substanceType = substanceType;
-                _amount = amount;
-            }
-
-            public void BeforeTick() { }
-            
-            public void AfterTick()
-            {
-                _unit.myStorage.Withdraw(_substanceType, _amount);
-                _targetStorage.Deposit(_substanceType, _amount);
-            }
-
-            public void Update() => _unit.RotateTowards(_targetStorage.transform.position);
+            public Deposit deposit;
         }
 
-        private readonly struct MoveCommand
+        private struct GiveCommand
         {
-            private readonly Unit _unit;
-            private readonly Vector3 _position;
+            public Storage targetStorage;
+            public Substance.Type substanceType;
+            public int amount;
+        }
 
-            public MoveCommand(Unit unit, Vector3 position)
-            {
-                _unit = unit;
-                _position = position;
-            }
-
-            public void BeforeTick()
-            {
-                // eliminate rounding errors in position
-                _unit.transform.position = new Vector3(Mathf.Round(_position.x), Mathf.Round(_position.y), Mathf.Round(_position.z));
-                _unit._moveEffect.Stop();
-            }
-
-            public void AfterTick()
-            {
-                _unit._team.arena.grid[_unit.pos]--;
-                _unit._team.arena.grid[_position.ToArenaPos()]++;
-            }
-
-            public void Update()
-            {
-                if (_unit.RotateTowards(_position))
-                {
-                    if(distance(_unit.transform.position, _position) > Mathf.Epsilon)
-                    {
-                        float linearSpeed = 2 / Tick.TIME; // units per tick
-                        _unit.transform.position = Vector3.MoveTowards(_unit.transform.position, _position, linearSpeed * Time.deltaTime);
-                        _unit._moveEffect.Play();
-                    }
-                    else
-                        _unit._moveEffect.Stop();
-                }
-            }
+        private struct MoveCommand
+        {
+            public int2 targetPosition;
         }
 
         [SerializeField] private Team _team;
         [SerializeField] private UnitConfig _config;
-        [Space]
-        [SerializeField] private VisualEffect _attackEffect;
+        [Space] [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
         [SerializeField] private VisualEffect _moveEffect;
-        
+
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
         private GiveCommand? _giveCommand;
@@ -144,14 +46,14 @@ namespace GoC.Arena
 
         private Hull _myHull;
         private Hull myHull => _myHull ??= GetComponent<Hull>();
-        
+
         private Storage _myStorage;
         private Storage myStorage => _myStorage ??= GetComponent<Storage>();
-        
+
         private UnitControl _myUnitControl;
         private UnitControl myUnitControl => _myUnitControl ??= GetComponent<UnitControl>();
 
-        
+
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         public int2 dir => transform.forward.ToArenaPos();
@@ -165,7 +67,7 @@ namespace GoC.Arena
             if (targetDeposit == null)
                 return Result.InvalidTarget;
 
-            if (distance(pos, targetDeposit.pos) > 1) 
+            if (distance(pos, targetDeposit.pos) > 1)
                 return Result.OutOfRange;
 
             if (myStorage.content[(int)targetDeposit.substanceType] + targetDeposit.miningSpeed > myStorage.capacityPerSubstance)
@@ -178,7 +80,7 @@ namespace GoC.Arena
         public IStorage storage => myStorage;
         public IUnitControl control => _team.arena.executingTeamId == teamId ? myUnitControl : null;
 
-        
+
         public Result Attack(object targetObject)
         {
             if (targetObject is not MonoBehaviour target)
@@ -187,31 +89,31 @@ namespace GoC.Arena
             Hull targetHull = target.GetComponent<Hull>();
             if (targetHull == null)
                 return Result.InvalidTarget;
-            
-            if (distance(pos, target.transform.position.ToArenaPos()) > 3) 
+
+            if (distance(pos, target.transform.position.ToArenaPos()) > 3)
                 return Result.OutOfRange;
 
-            _attackCommand = new AttackCommand(this, targetHull);
+            _attackCommand = new AttackCommand { targetHull = targetHull };
 
             return Result.Ok;
         }
-        
+
         public Result Mine(object targetObject)
         {
             Result canMine = CanMine(targetObject);
             if (canMine != Result.Ok)
                 return canMine;
-        
-            _mineCommand = new MineCommand(this, ((MonoBehaviour)targetObject).GetComponent<Deposit>());
-            
+
+            _mineCommand = new MineCommand { deposit = ((MonoBehaviour)targetObject).GetComponent<Deposit>() };
+
             return Result.Ok;
         }
-        
+
         public Result Give(object targetObject, Substance.Type substanceType, int amount)
         {
             if (amount <= 0)
                 return Result.InvalidArgument;
-            
+
             if (targetObject is not MonoBehaviour target)
                 return Result.InvalidTarget;
 
@@ -221,15 +123,20 @@ namespace GoC.Arena
             Storage targetStorage = target.GetComponent<Storage>();
             if (targetStorage == null)
                 return Result.InvalidTarget;
-            
+
             if (myStorage.content[(int)substanceType] < amount)
                 return Result.NotEnoughSubstance;
 
             if (targetStorage.content[(int)substanceType] + amount > targetStorage.capacityPerSubstance)
                 return Result.NotEnoughStorageCapacity;
 
-            _giveCommand = new GiveCommand(this, targetStorage, substanceType, amount);
-            
+            _giveCommand = new GiveCommand
+            {
+                targetStorage = targetStorage,
+                substanceType = substanceType,
+                amount = amount
+            };
+
             return Result.Ok;
         }
 
@@ -238,99 +145,130 @@ namespace GoC.Arena
             switch (target)
             {
                 case int2 targetPos:
-                    return MoveTo(targetPos.x, targetPos.y);
-                
+                    return MoveTo(targetPos);
+
                 case MonoBehaviour targetMonoBehaviour:
                     int2 targetMonoBehaviourPos = targetMonoBehaviour.transform.position.ToArenaPos();
-                    return MoveTo(targetMonoBehaviourPos.x, targetMonoBehaviourPos.y);
-                
-                case object[] {Length: 2} targetObjArr:
+                    return MoveTo(targetMonoBehaviourPos);
+
+                case object[] { Length: 2 } targetObjArr:
                     if (targetObjArr[0] is double x && targetObjArr[1] is double y)
-                        return MoveTo((int)x, (int)y);
+                        return MoveTo(int2((int)x, (int)y));
                     break;
             }
+
             return Result.InvalidTarget;
         }
 
-        public Result MoveTo(int x, int y)
+        public Result MoveTo(int2 p)
         {
-            int2 delta = (int2)round(int2(x, y) - transform.position.ToArenaPos());
+            int2 delta = (int2)round(p - transform.position.ToArenaPos());
             if (all(delta == 0))
-                return Result.Ok;
-            
+                return Result.AlreadyThere;
+
+            if (any(p < _team.arena.grid.min | _team.arena.grid.max < p))
+                return Result.OutOfRange;
+
             int2 absDelta = abs(delta);
-            if (all(absDelta == 0))
-                return Result.Ok;
 
             int2 dirTo = sign(delta);
+            int2 dir1 = absDelta.x > absDelta.y ? int2(dirTo.x, 0) : int2(0, dirTo.y);
+            int2 dir2 = absDelta.x > absDelta.y ? int2(0, dirTo.y) : int2(dirTo.x, 0);
 
-            if (absDelta.x > absDelta.y)
-                dirTo.y = 0;
+            if (_team.arena.grid[pos + dir1] == 0)
+                _moveCommand = new MoveCommand { targetPosition = pos + dir1 };
+            else if (_team.arena.grid[pos + dir2] == 0)
+                _moveCommand = new MoveCommand { targetPosition = pos + dir2 };
             else
-                dirTo.x = 0;
+                return Result.PathBlocked;
 
-            _moveCommand = new MoveCommand(this, transform.position + dirTo.ToUnityPos());
-            
+            _team.arena.grid[pos]--;
+            _team.arena.grid[_moveCommand.Value.targetPosition]++;
+
             return Result.Ok;
         }
-        
-        
+
         // to set up upon instantiation
         public void Setup(Team team, UnitConfig unitConfig)
         {
             _team = team;
             _config = unitConfig;
-            
+
             myHull.Setup(_config.integrity);
             myStorage.Setup(_config.storageCapacityPerSubstance);
         }
 
         public void BeforeTick()
         {
-            _attackCommand?.BeforeTick();
-            _attackCommand = null;
-            
-            _mineCommand?.BeforeTick();
-            _mineCommand = null;
+            if (_attackCommand != null)
+            {
+                _attackEffect.Stop();
+                _attackCommand = null;
+            }
 
-            _giveCommand?.BeforeTick();
-            _giveCommand = null;
-            
-            _moveCommand?.BeforeTick();
-            _moveCommand = null;
+            if (_mineCommand != null)
+            {
+                _mineEffect.Stop();
+                _mineCommand = null;
+            }
+
+            // ReSharper disable once RedundantCheckBeforeAssignment
+            if (_giveCommand != null)
+            {
+                _giveCommand = null;
+            }
+
+            if (_moveCommand != null)
+            {
+                transform.position = _moveCommand.Value.targetPosition.ToUnityPos();
+                _moveEffect.Stop();
+                _moveCommand = null;
+            }
 
             myHull.BeforeTick();
         }
 
         public void AfterTick()
         {
-            if (_attackCommand != null)
-                _attackCommand.Value.AfterTick();
+            if (_attackCommand.HasValue)
+            {
+                _attackCommand.Value.targetHull.Absorb(_config.damage);
+                _attackEffect.Play();
+            }
+
             else if (_mineCommand != null)
-                _mineCommand.Value.AfterTick();
+            {
+                DepositMiningOutcome depositMiningOutcome = _mineCommand.Value.deposit.Mine();
+                myStorage.Deposit(depositMiningOutcome.substanceType, depositMiningOutcome.amount);
+
+                _mineEffect.Play();
+            }
+
             else if (_giveCommand != null)
-                _giveCommand.Value.AfterTick();
-            else if (_moveCommand != null)
-                _moveCommand.Value.AfterTick();
-            
+            {
+                myStorage.Withdraw(_giveCommand.Value.substanceType, _giveCommand.Value.amount);
+                _giveCommand.Value.targetStorage.Deposit(_giveCommand.Value.substanceType, _giveCommand.Value.amount);
+            }
+            //else if (_moveCommand != null) { }
+
             myHull.AfterTick();
         }
 
-        
+
         private void OnEnable()
         {
             if (_team != null)
                 _team.Register(this);
             else
                 Debug.LogWarning("A unit without a team", this);
-            
+
             _team.arena.grid[pos]++;
         }
 
         private void OnDisable()
         {
             _team.arena.grid[pos]--;
-            
+
             if (_team != null)
                 _team.Unregister(this);
         }
@@ -338,13 +276,32 @@ namespace GoC.Arena
         private void Update()
         {
             if (_attackCommand != null)
-                _attackCommand.Value.Update();
+            {
+                RotateTowards(_attackCommand.Value.targetHull.transform.position);
+            }
             else if (_mineCommand != null)
-                _mineCommand.Value.Update();
+            {
+                RotateTowards(_mineCommand.Value.deposit.transform.position);
+            }
             else if (_giveCommand != null)
-                _giveCommand.Value.Update();
+            {
+                RotateTowards(_giveCommand.Value.targetStorage.transform.position);
+            }
             else if (_moveCommand != null)
-                _moveCommand.Value.Update();
+            {
+                Vector3 targetPosition = _moveCommand.Value.targetPosition.ToUnityPos();
+                if (distance(transform.position, targetPosition) > Mathf.Epsilon)
+                {
+                    if (RotateTowards(targetPosition))
+                    {
+                        float linearSpeed = 2 / Tick.TIME; // units per tick
+                        transform.position = Vector3.MoveTowards(transform.position, targetPosition, linearSpeed * Time.deltaTime);
+                        _moveEffect.Play();
+                    }
+                    else
+                        _moveEffect.Stop();
+                }
+            }
         }
 
         private bool RotateTowards(Vector3 position)
