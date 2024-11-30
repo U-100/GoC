@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using GoC.ScriptingApi;
 using Jint;
@@ -34,8 +33,6 @@ namespace GoC.Arena
         private readonly HashSet<Deposit> _deposits = new();
 
         private Grid<int> _grid;
-
-        private GameObject[] _quads;
 
         
         public uint currentTick { get; private set; } 
@@ -90,11 +87,6 @@ namespace GoC.Arena
             
             _gridEffect.SetFloat("mapSize", _config.size.x - 1);
             _gridEffect.Play();
-
-            _quads = new GameObject[grid.size.x * grid.size.y];
-            for(int2 p = grid.min; p.y <= grid.max.y; ++p.y)
-                for (p.x = grid.min.x; p.x <= grid.max.x; ++p.x)
-                    _quads[p.x - grid.min.x + (p.y - grid.min.y) * grid.size.y] = Instantiate(_quad, p.ToUnityPos(), _quad.transform.rotation, transform);
         }
 
         private void OnDisable()
@@ -105,12 +97,19 @@ namespace GoC.Arena
             _teamRecords.Clear();
         }
 
+        private void OnDrawGizmos()
+        {
+            if (grid == null)
+                return;
+            
+            for(int2 p = grid.min; p.y <= grid.max.y; ++p.y)
+            for (p.x = grid.min.x; p.x <= grid.max.x; ++p.x)
+                if (grid[p] > 0)
+                    Gizmos.DrawWireCube(p.ToUnityPos(), new Vector3(1, .1f, 1));
+        }
+
         private void Update()
         {
-            for(int2 p = grid.min; p.y <= grid.max.y; ++p.y)
-                for (p.x = grid.min.x; p.x <= grid.max.x; ++p.x)
-                    _quads[p.x - grid.min.x + (p.y - grid.min.y) * grid.size.y].SetActive(grid[p] > 0);
-
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
                 foreach (TeamRecord teamRecord in _teamRecords)
