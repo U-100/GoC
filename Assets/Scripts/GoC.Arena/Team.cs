@@ -28,7 +28,13 @@ namespace GoC.Arena
         public IEnumerable<IUnit> units => _arena.units;
         public IEnumerable<IDeposit> deposits => _arena.deposits;
 
-        
+
+        public void Setup(Arena initArena)
+        {
+            _arena = initArena;
+            _arena.Register(this);
+        }
+
         public void BeforeTick()
         {
             try
@@ -74,13 +80,7 @@ namespace GoC.Arena
         public void Unregister(Factory factory) => _myFactories.Remove(factory);
         
         
-        private void OnEnable()
-        {
-            if(_arena != null)
-                _arena.Register(this);
-            else
-                Debug.LogWarning("A team without arena", this);
-        }
+        private void OnEnable() { }
 
         private void OnDisable()
         {

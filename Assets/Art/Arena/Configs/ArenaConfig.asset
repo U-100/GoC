@@ -15,3 +15,6 @@ MonoBehaviour:
   _size:
     x: 31
     y: 31
+  _teamCount: 2
+  _factoryConfig: {fileID: 11400000, guid: c58f8f994c6f4094c95c63bcea50c90d, type: 2}
+  _depositConfig: {fileID: 11400000, guid: 90817da335932d145a883da181997d64, type: 2}

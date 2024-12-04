@@ -60,14 +60,14 @@ namespace GoC.Arena
         }
 
         
-        public void Setup(Team team, FactoryConfig factoryConfig)
+        public void Setup(Team initTeam, FactoryConfig initConfig)
         {
-            _team = team;
-
-            _config = factoryConfig;
+            _team = initTeam;
+            _config = initConfig;
             
             myHull.Setup(_config.integrity);
             myStorage.Setup(_config.storageCapacityPerSubstance);
+            _team.Register(this);
         }
 
         public void BeforeTick()
@@ -110,13 +110,7 @@ namespace GoC.Arena
             _productionEffectDurationProperty = "duration";
         }
         
-        private void OnEnable()
-        {
-            if (_team != null)
-                _team.Register(this);
-            else
-                Debug.LogWarning("A factory without a team", this);
-        }
+        private void OnEnable() { }
 
         private void OnDisable()
         {

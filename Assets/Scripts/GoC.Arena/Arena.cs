@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GoC.ScriptingApi;
 using Jint;
@@ -8,7 +8,8 @@ using Jint.Native.Object;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
-using Debug = UnityEngine.Debug;
+
+using static Unity.Mathematics.math;
 
 namespace GoC.Arena
 {
@@ -24,7 +25,9 @@ namespace GoC.Arena
         [SerializeField] private ArenaConfig _config;
         [Space]
         [SerializeField] private VisualEffect _gridEffect;
-        [SerializeField] private GameObject _quad;
+        [SerializeField] private Team _teamPrefab;
+        [SerializeField] private Factory _factoryPrefab;
+        [SerializeField] private Deposit _depositPrefab;
         
         private readonly List<TeamRecord> _teamRecords = new();
         private float _tickCooldown;
@@ -50,6 +53,9 @@ namespace GoC.Arena
 
         public void Register(Team team)
         {
+            if (_teamRecords.Any(teamRecord => teamRecord.team == team))
+                throw new Exception($"Team {team} is already registered in the arena {this}");
+            
             Engine engine = EngineFactory.Create();
             engine.SetValue("model", team);
             
@@ -89,6 +95,25 @@ namespace GoC.Arena
             
             _gridEffect.SetFloat("mapSize", _config.size.x - 1);
             _gridEffect.Play();
+
+            int2 baseFactoryPos = _grid.size / 4;
+            int2 baseDepositPos = _grid.size / 3;
+
+            for (int iTeam = 0; iTeam < _config.teamCount; ++iTeam)
+            {
+                Team team = Instantiate(_teamPrefab);
+                team.Setup(this);
+
+                float teamAngleRadians = 2 * iTeam * PI / _config.teamCount;
+                
+                int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
+                Factory factory = Instantiate(_factoryPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
+                factory.Setup(team, _config.factoryConfig);
+                
+                int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
+                Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
+                deposit.Setup(this, _config.depositConfig);
+            }
         }
 
         private void OnDisable()
@@ -114,9 +139,9 @@ namespace GoC.Arena
         {
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
-                Stopwatch tickStopwatch = Stopwatch.StartNew();
-                try
-                {
+                //var tickStopwatch = System.Diagnostics.Stopwatch.StartNew();
+                // try
+                // {
                     foreach (TeamRecord teamRecord in _teamRecords)
                         teamRecord.team.BeforeTick();
 
@@ -138,11 +163,11 @@ namespace GoC.Arena
 
                     foreach (TeamRecord teamRecord in _teamRecords)
                         teamRecord.team.AfterTick();
-                }
-                finally
-                {
-                    //Debug.Log($"Arena tick: {tickStopwatch.ElapsedMilliseconds} ms");
-                }
+                // }
+                // finally
+                // {
+                //     //Debug.Log($"Arena tick: {tickStopwatch.ElapsedMilliseconds} ms");
+                // }
             }
         }
     }

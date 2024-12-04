@@ -21,21 +21,17 @@ namespace GoC.Arena
         public int miningSpeed => _config.miningSpeed;
 
         
-        public void Setup(DepositConfig depositConfig)
+        public void Setup(Arena initArena, DepositConfig initConfig)
         {
-            _config = depositConfig;
+            _config = initConfig;
+            _arena = initArena;
+            _arena.Register(this);
         }
         
         public DepositMiningOutcome Mine() => new DepositMiningOutcome { substanceType = substanceType, amount = miningSpeed };
 
 
-        void OnEnable()
-        {
-            if(_arena != null)
-                _arena.Register(this);
-            else
-                Debug.LogWarning("A deposit without arena", this);
-        }
+        void OnEnable() { }
 
         void OnDisable()
         {
