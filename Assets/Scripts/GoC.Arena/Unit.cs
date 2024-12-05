@@ -1,4 +1,6 @@
-﻿using GoC.ScriptingApi;
+﻿using System.Collections.Generic;
+using System.Linq;
+using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -58,7 +60,9 @@ namespace GoC.Arena
         private UnitControl _myUnitControl;
         private UnitControl myUnitControl => _myUnitControl ??= GetComponent<UnitControl>();
 
+        private static readonly int[] EMPTY_INIT_STORAGE = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
 
+        
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         public int2 dir => transform.forward.ToArenaPos();
@@ -216,7 +220,7 @@ namespace GoC.Arena
             _config = unitConfig;
 
             myHull.Setup(_config.integrity);
-            myStorage.Setup(_config.storageCapacityPerSubstance);
+            myStorage.Setup(_config.storageCapacityPerSubstance, EMPTY_INIT_STORAGE);
 
             _team.arena.grid[pos]++;
 

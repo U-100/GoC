@@ -15,7 +15,16 @@ namespace GoC.Arena
         public IReadOnlyList<int> content => _content;
         
         
-        public void Setup(int initialCapacityPerSubstance) => _capacityPerSubstance = initialCapacityPerSubstance;
+        public void Setup(int initialCapacityPerSubstance, IReadOnlyList<int> initContent)
+        {
+            _capacityPerSubstance = initialCapacityPerSubstance;
+            
+            for (int substanceIndex = 0; substanceIndex < initContent.Count; substanceIndex++)
+            {
+                int amount = initContent[substanceIndex];
+                _content[substanceIndex] = amount;
+            }
+        }
 
         public void Deposit(Substance.Type substanceType, int amount) => _content[(int)substanceType] += amount;
 

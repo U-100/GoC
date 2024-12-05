@@ -68,7 +68,7 @@ namespace GoC.Arena
             _config = initConfig;
             
             myHull.Setup(_config.integrity);
-            myStorage.Setup(_config.storageCapacityPerSubstance);
+            myStorage.Setup(_config.storageCapacityPerSubstance, _config.initialStorage);
 
             ApplySkin(_team.skin);
         }

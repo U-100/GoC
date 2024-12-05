@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using GoC.ScriptingApi;
 using UnityEngine;
 
 namespace GoC.Arena
@@ -20,6 +22,9 @@ namespace GoC.Arena
         
         [SerializeField] private int _storageCapacityPerSubstance;
         public int storageCapacityPerSubstance => _storageCapacityPerSubstance;
+        
+        [SerializeField] private int[] _initialStorage = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
+        public IReadOnlyList<int> initialStorage => _initialStorage;
 
         [SerializeField] private int[] _productionCost;
         public IReadOnlyList<int> productionCost => _productionCost;

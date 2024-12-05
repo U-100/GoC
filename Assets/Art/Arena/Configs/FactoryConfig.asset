@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _integrity: 100
   _storageCapacityPerSubstance: 100
+  _initialStorage: 0800000000000000
   _productionCost: 0200000000000000
   _productionTime: 2
   _product: {fileID: 11400000, guid: 7a4f019c72cc23f44a626b55a14c3c84, type: 2}
