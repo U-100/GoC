@@ -2,6 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
+using UnityEngine.VFX.Utility;
 using static Unity.Mathematics.math;
 
 namespace GoC.Arena
@@ -46,6 +47,8 @@ namespace GoC.Arena
         private GiveCommand? _giveCommand;
         private MoveCommand? _moveCommand;
 
+        private ExposedProperty _attackEffectDistanceProperty;
+        
         private Hull _myHull;
         private Hull myHull => _myHull ??= GetComponent<Hull>();
 
@@ -60,6 +63,8 @@ namespace GoC.Arena
         public int2 pos => transform.position.ToArenaPos();
         public int2 dir => transform.forward.ToArenaPos();
 
+        private bool busy => _attackCommand != null || _mineCommand != null || _giveCommand != null || _moveCommand != null;
+        
         public Result CanMine(object targetObject)
         {
             if (targetObject is not MonoBehaviour target)
@@ -85,6 +90,9 @@ namespace GoC.Arena
 
         public Result Attack(object targetObject)
         {
+            if (busy)
+                return Result.Busy;
+            
             if (targetObject is not MonoBehaviour target)
                 return Result.InvalidTarget;
 
@@ -102,6 +110,9 @@ namespace GoC.Arena
 
         public Result Mine(object targetObject)
         {
+            if (busy)
+                return Result.Busy;
+            
             Result canMine = CanMine(targetObject);
             if (canMine != Result.Ok)
                 return canMine;
@@ -113,6 +124,9 @@ namespace GoC.Arena
 
         public Result Give(object targetObject, Substance.Type substanceType, int amount)
         {
+            if (busy)
+                return Result.Busy;
+            
             if (amount <= 0)
                 return Result.InvalidArgument;
 
@@ -144,6 +158,9 @@ namespace GoC.Arena
 
         public Result MoveTo(object target)
         {
+            if (busy)
+                return Result.Busy;
+            
             switch (target)
             {
                 case int2 targetPos:
@@ -164,6 +181,9 @@ namespace GoC.Arena
 
         public Result MoveTo(int2 p)
         {
+            if (busy)
+                return Result.Busy;
+            
             int2 delta = (int2)round(p - transform.position.ToArenaPos());
             if (all(delta == 0))
                 return Result.AlreadyThere;
@@ -244,10 +264,13 @@ namespace GoC.Arena
             if (_attackCommand.HasValue)
             {
                 _attackCommand.Value.targetHull.Absorb(_config.damage);
+                
+                float distance = Vector3.Distance(transform.position, _attackCommand.Value.targetHull.transform.position);
+                _attackEffect.SetFloat(_attackEffectDistanceProperty, distance);
                 _attackEffect.Play();
             }
 
-            else if (_mineCommand != null)
+            if (_mineCommand != null)
             {
                 DepositMiningOutcome depositMiningOutcome = _mineCommand.Value.deposit.Mine();
                 myStorage.Deposit(depositMiningOutcome.substanceType, depositMiningOutcome.amount);
@@ -255,16 +278,24 @@ namespace GoC.Arena
                 _mineEffect.Play();
             }
 
-            else if (_giveCommand != null)
+            if (_giveCommand != null)
             {
                 myStorage.Withdraw(_giveCommand.Value.substanceType, _giveCommand.Value.amount);
                 _giveCommand.Value.targetStorage.Deposit(_giveCommand.Value.substanceType, _giveCommand.Value.amount);
             }
-            //else if (_moveCommand != null) { }
+            
+            if (_moveCommand != null)
+            {
+            }
 
             myHull.AfterTick();
         }
 
+
+        private void Awake()
+        {
+            _attackEffectDistanceProperty = "distance";
+        }
 
         private void OnDisable()
         {
@@ -280,15 +311,18 @@ namespace GoC.Arena
             {
                 RotateTowards(_attackCommand.Value.targetHull.transform.position);
             }
-            else if (_mineCommand != null)
+            
+            if (_mineCommand != null)
             {
                 RotateTowards(_mineCommand.Value.deposit.transform.position);
             }
-            else if (_giveCommand != null)
+            
+            if (_giveCommand != null)
             {
                 RotateTowards(_giveCommand.Value.targetStorage.transform.position);
             }
-            else if (_moveCommand != null)
+            
+            if (_moveCommand != null)
             {
                 Vector3 targetPosition = _moveCommand.Value.targetPosition.ToUnityPos();
                 if (distance(transform.position, targetPosition) > Mathf.Epsilon)
