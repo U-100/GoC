@@ -586,9 +586,16 @@ MonoBehaviour:
   _attackEffect: {fileID: 5868796379976398687}
   _mineEffect: {fileID: 3597055597159338398}
   _moveEffect: {fileID: 2655816745955894041}
+  _skinColorSubjectRenderer: {fileID: 6346893525814457530}
 --- !u!4 &2957492940002964636 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7c3c0906f79369c49a47726636e12d8b,
+    type: 3}
+  m_PrefabInstance: {fileID: 3351128190979887991}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &6346893525814457530 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -678588488315902003, guid: 7c3c0906f79369c49a47726636e12d8b,
     type: 3}
   m_PrefabInstance: {fileID: 3351128190979887991}
   m_PrefabAsset: {fileID: 0}

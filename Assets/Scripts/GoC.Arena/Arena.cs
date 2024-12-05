@@ -96,24 +96,39 @@ namespace GoC.Arena
             _gridEffect.SetFloat("mapSize", _config.size.x - 1);
             _gridEffect.Play();
 
+            for (int iTeam = 0; iTeam < _config.teamConfigs.Count; iTeam++)
+            {
+                TeamConfig teamConfig = _config.teamConfigs[iTeam];
+                Team team = CreateTeam(teamConfig);
+
+                CreateTeamLandscape(team, iTeam);
+            }
+        }
+
+        private Team CreateTeam(TeamConfig teamConfig)
+        {
+            Team team = Instantiate(_teamPrefab);
+            team.Setup(this, teamConfig);
+            Register(team);
+            return team;
+        }
+
+        private void CreateTeamLandscape(Team team, int iTeam)
+        {
             int2 baseFactoryPos = _grid.size / 4;
             int2 baseDepositPos = _grid.size / 3;
 
-            for (int iTeam = 0; iTeam < _config.teamCount; ++iTeam)
-            {
-                Team team = Instantiate(_teamPrefab);
-                team.Setup(this);
+            float teamAngleRadians = 2 * iTeam * PI / _config.teamConfigs.Count;
 
-                float teamAngleRadians = 2 * iTeam * PI / _config.teamCount;
-                
-                int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
-                Factory factory = Instantiate(_factoryPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
-                factory.Setup(team, _config.factoryConfig);
-                
-                int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
-                Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
-                deposit.Setup(this, _config.depositConfig);
-            }
+            int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
+            Factory factory = Instantiate(_factoryPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
+            factory.Setup(team, _config.factoryConfig);
+            team.Register(factory);
+
+            int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
+            Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
+            deposit.Setup(this, _config.depositConfig);
+            Register(deposit);
         }
 
         private void OnDisable()

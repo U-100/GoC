@@ -35,9 +35,11 @@ namespace GoC.Arena
 
         [SerializeField] private Team _team;
         [SerializeField] private UnitConfig _config;
-        [Space] [SerializeField] private VisualEffect _attackEffect;
+        [Space]
+        [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
         [SerializeField] private VisualEffect _moveEffect;
+        [SerializeField] private Renderer _skinColorSubjectRenderer; 
 
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
@@ -194,12 +196,17 @@ namespace GoC.Arena
             _team = team;
             _config = unitConfig;
 
-            _team.Register(this);
+            myHull.Setup(_config.integrity);
+            myStorage.Setup(_config.storageCapacityPerSubstance);
 
             _team.arena.grid[pos]++;
 
-            myHull.Setup(_config.integrity);
-            myStorage.Setup(_config.storageCapacityPerSubstance);
+            ApplySkin(_team.skin);
+        }
+
+        private void ApplySkin(TeamSkin teamSkin)
+        {
+            _skinColorSubjectRenderer.material = teamSkin.mainColorMaterial;
         }
 
         public void BeforeTick()
@@ -258,8 +265,6 @@ namespace GoC.Arena
             myHull.AfterTick();
         }
 
-
-        private void OnEnable() { }
 
         private void OnDisable()
         {

@@ -25,13 +25,10 @@ namespace GoC.Arena
         {
             _config = initConfig;
             _arena = initArena;
-            _arena.Register(this);
         }
         
         public DepositMiningOutcome Mine() => new DepositMiningOutcome { substanceType = substanceType, amount = miningSpeed };
 
-
-        void OnEnable() { }
 
         void OnDisable()
         {

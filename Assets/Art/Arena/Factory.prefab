@@ -357,6 +357,7 @@ MonoBehaviour:
   _fabricatedUnitPrototype: {fileID: 8391022737454312585, guid: 08fb3a1303a359648b32627116f743aa,
     type: 3}
   _productionEffect: {fileID: 2210560471988874357}
+  _skinColorSubjectRenderer: {fileID: 4902302620765240560}
 --- !u!1001 &6037620534887260276
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -425,6 +426,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 54604af8aca995847b2f16f9491fcb3f, type: 3}
+--- !u!23 &4902302620765240560 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 54604af8aca995847b2f16f9491fcb3f,
+    type: 3}
+  m_PrefabInstance: {fileID: 6037620534887260276}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6071791960173201311 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 54604af8aca995847b2f16f9491fcb3f,

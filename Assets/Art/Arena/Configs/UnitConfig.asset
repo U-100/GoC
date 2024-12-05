@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 313d6f58d20e4dbba825dbe8f89ea872, type: 3}
   m_Name: UnitConfig
   m_EditorClassIdentifier: 
-  _integrity: 1
+  _integrity: 2
   _damage: 1
   _storageCapacityPerSubstance: 10

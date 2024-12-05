@@ -7,16 +7,17 @@ namespace GoC.Arena
     public class Team : MonoBehaviour, IModel
     {
         [SerializeField] private Arena _arena;
-        [SerializeField] private string _scriptFile;
+        [SerializeField] private TeamConfig _config;
 
         private readonly HashSet<Unit> _myUnits = new();
         private readonly List<Unit> _myUnitsCache = new();
         
         private readonly HashSet<Factory> _myFactories = new();
         private readonly List<Factory> _myFactoriesCache = new();
-        
+
         public Arena arena => _arena;
-        public string scriptFile => _scriptFile;
+        public string scriptFile => _config.scriptFile;
+        public TeamSkin skin => _config.teamSkin;
 
         
         public int teamId => GetInstanceID();
@@ -29,10 +30,10 @@ namespace GoC.Arena
         public IEnumerable<IDeposit> deposits => _arena.deposits;
 
 
-        public void Setup(Arena initArena)
+        public void Setup(Arena initArena, TeamConfig initConfig)
         {
             _arena = initArena;
-            _arena.Register(this);
+            _config = initConfig;
         }
 
         public void BeforeTick()
@@ -80,8 +81,6 @@ namespace GoC.Arena
         public void Unregister(Factory factory) => _myFactories.Remove(factory);
         
         
-        private void OnEnable() { }
-
         private void OnDisable()
         {
             if(_arena != null)

@@ -16,6 +16,7 @@ namespace GoC.Arena
         [Space]
         [SerializeField] private Unit _fabricatedUnitPrototype;
         [SerializeField] private VisualEffect _productionEffect;
+        [SerializeField] private Renderer _skinColorSubjectRenderer; 
         
 
         private int _ticksLeft;
@@ -67,7 +68,13 @@ namespace GoC.Arena
             
             myHull.Setup(_config.integrity);
             myStorage.Setup(_config.storageCapacityPerSubstance);
-            _team.Register(this);
+
+            ApplySkin(_team.skin);
+        }
+
+        private void ApplySkin(TeamSkin teamSkin)
+        {
+            _skinColorSubjectRenderer.material = teamSkin.mainColorMaterial;
         }
 
         public void BeforeTick()
@@ -76,15 +83,9 @@ namespace GoC.Arena
             {
                 _team.arena.grid[pos]--;
 
-                // NOTE: temporarily disable UnitBehaviour on prefab so we can call Setup() before unit's OnEnable() is triggered
-                bool savedPrototypeEnabled = _fabricatedUnitPrototype.enabled;
-                _fabricatedUnitPrototype.enabled = false;
-
                 Unit unit = Instantiate(_fabricatedUnitPrototype, transform.position, transform.rotation);
                 unit.Setup(_team, _config.product);
-
-                _fabricatedUnitPrototype.enabled = savedPrototypeEnabled;
-                unit.enabled = savedPrototypeEnabled;
+                _team.Register(unit);
             }
             
             myHull.BeforeTick();
@@ -110,8 +111,6 @@ namespace GoC.Arena
             _productionEffectDurationProperty = "duration";
         }
         
-        private void OnEnable() { }
-
         private void OnDisable()
         {
             if (_team != null)

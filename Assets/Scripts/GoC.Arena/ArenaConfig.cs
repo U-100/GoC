@@ -1,4 +1,5 @@
-﻿using Unity.Mathematics;
+﻿using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GoC.Arena
@@ -9,9 +10,9 @@ namespace GoC.Arena
         [SerializeField] private int2 _size;
         public int2 size => _size;
 
-        [SerializeField] private int _teamCount;
-        public int teamCount => _teamCount;
-
+        [SerializeField] private TeamConfig[] _teamConfigs;
+        public IReadOnlyList<TeamConfig> teamConfigs => _teamConfigs;
+        
         [SerializeField] private FactoryConfig _factoryConfig;
         public FactoryConfig factoryConfig => _factoryConfig;
 
