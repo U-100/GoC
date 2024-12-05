@@ -9,10 +9,10 @@ namespace GoC.Arena
         [SerializeField] private Arena _arena;
         [SerializeField] private TeamConfig _config;
 
-        private readonly HashSet<Unit> _myUnits = new();
+        private readonly List<Unit> _myUnits = new();
         private readonly List<Unit> _myUnitsCache = new();
         
-        private readonly HashSet<Factory> _myFactories = new();
+        private readonly List<Factory> _myFactories = new();
         private readonly List<Factory> _myFactoriesCache = new();
 
         public Arena arena => _arena;
@@ -22,12 +22,12 @@ namespace GoC.Arena
         
         public int teamId => GetInstanceID();
 
-        public IEnumerable<IFactory> myFactories => _myFactories;
-        public IEnumerable<IUnit> myUnits => _myUnits;
+        public IReadOnlyList<IFactory> myFactories => _myFactories;
+        public IReadOnlyList<IUnit> myUnits => _myUnits;
 
         public IEnumerable<IFactory> factories => _arena.factories;
         public IEnumerable<IUnit> units => _arena.units;
-        public IEnumerable<IDeposit> deposits => _arena.deposits;
+        public IReadOnlyList<IDeposit> deposits => _arena.deposits;
 
 
         public void Setup(Arena initArena, TeamConfig initConfig)

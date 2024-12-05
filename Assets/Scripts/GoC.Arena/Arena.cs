@@ -35,7 +35,7 @@ namespace GoC.Arena
 
         private IEnumerable<IUnit> _units;
         private IEnumerable<IFactory> _factories;
-        private readonly HashSet<Deposit> _deposits = new();
+        private readonly List<Deposit> _deposits = new();
 
         private Grid<int> _grid;
 
@@ -49,7 +49,7 @@ namespace GoC.Arena
         
         public IEnumerable<IFactory> factories => _factories ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myFactories);
         
-        public IEnumerable<IDeposit> deposits => _deposits;
+        public IReadOnlyList<IDeposit> deposits => _deposits;
 
         public void Register(Team team)
         {
@@ -154,9 +154,9 @@ namespace GoC.Arena
         {
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
-                //var tickStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                // try
-                // {
+                //System.Diagnostics.Stopwatch tickStopwatch = System.Diagnostics.Stopwatch.StartNew();
+                try
+                {
                     foreach (TeamRecord teamRecord in _teamRecords)
                         teamRecord.team.BeforeTick();
 
@@ -167,22 +167,26 @@ namespace GoC.Arena
                             _executingTeam = teamRecord.team;
                             teamRecord.engine.Invoke(teamRecord.tickFunction);
                         }
+                        catch (Exception exception)
+                        {
+                            Debug.LogException(exception, teamRecord.team);
+                        }
                         finally
                         {
                             _executingTeam = null;
                         }
                     }
 
+                    foreach (TeamRecord teamRecord in _teamRecords)
+                        teamRecord.team.AfterTick();
+                }
+                finally
+                {
                     _tickCooldown += Tick.TIME;
                     ++currentTick;
 
-                    foreach (TeamRecord teamRecord in _teamRecords)
-                        teamRecord.team.AfterTick();
-                // }
-                // finally
-                // {
-                //     //Debug.Log($"Arena tick: {tickStopwatch.ElapsedMilliseconds} ms");
-                // }
+                    //Debug.Log($"Arena tick: {tickStopwatch.ElapsedMilliseconds} ms");
+                }
             }
         }
     }

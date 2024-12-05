@@ -26,18 +26,9 @@ function wander(myUnit)
 }
 
 export function tick() {
-    let myUnitsCount = 0;
-
-    for (let myUnit of model.myUnits) {
-        ++myUnitsCount;
-
-        if(!myUnit.started || myUnit.started < 5)
-        {
-            wander(myUnit);
-            myUnit.started = (myUnit.started ?? 0) + 1;
-            continue;
-        }
-
+    for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit) {
+        let myUnit = model.myUnits[iUnit];
+        
         let nearbyEnemyUnit = findNearby(model.units, myUnit.pos, 3, isEnemy);
         if (nearbyEnemyUnit) {
             if (myUnit.control.Attack(nearbyEnemyUnit) != Result.Ok)
@@ -55,14 +46,12 @@ export function tick() {
             }
         }
 
-        if (myUnitsCount <= 4) {
+        if (iUnit < 2) {
             let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
             if (nearbyDeposit) {
                 let miningResult = myUnit.control.Mine(nearbyDeposit);
-                if (miningResult != Result.Ok) {
+                if (miningResult != Result.Ok)
                     myUnit.control.MoveTo(nearbyDeposit);
-                    //log(miningResult);
-                }
                 continue;
             }
         }

@@ -88,11 +88,12 @@ namespace GoC.ScriptingApi
     {
         int teamId { get; } // team id
 
-        IEnumerable<IFactory> myFactories { get; }
-        IEnumerable<IUnit> myUnits { get; }
+        IReadOnlyList<IFactory> myFactories { get; }
+        IReadOnlyList<IUnit> myUnits { get; }
         
         IEnumerable<IFactory> factories { get; }
         IEnumerable<IUnit> units { get; }
-        IEnumerable<IDeposit> deposits { get; }
+        
+        IReadOnlyList<IDeposit> deposits { get; }
     }
 }
