@@ -54,6 +54,7 @@ namespace GoC.ScriptingApi
         int teamId { get; } // owner team id
         int2 pos { get; }
         int2 dir { get; }
+        bool busy { get; }
         
         Result CanMine(object target);
 
@@ -71,6 +72,7 @@ namespace GoC.ScriptingApi
     {
         int teamId { get; } // owner team id
         int2 pos { get; }
+        bool busy { get; }
 
         public IHull hull { get; }
         public IStorage storage { get; }

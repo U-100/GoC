@@ -62,8 +62,7 @@ namespace GoC.Arena
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         public int2 dir => transform.forward.ToArenaPos();
-
-        private bool busy => _attackCommand != null || _mineCommand != null || _giveCommand != null || _moveCommand != null;
+        public bool busy => _attackCommand != null || _mineCommand != null || _giveCommand != null || _moveCommand != null;
         
         public Result CanMine(object targetObject)
         {

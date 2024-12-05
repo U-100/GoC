@@ -34,7 +34,8 @@ namespace GoC.Arena
         
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
-
+        public bool busy => _ticksLeft > 0;
+        
         public IHull hull => myHull;
         public IStorage storage => myStorage;
         public IFactoryControl control => _team.arena.executingTeamId == teamId ? myFactoryControl : null;
@@ -42,7 +43,7 @@ namespace GoC.Arena
 
         public Result Produce()
         {
-            if (_ticksLeft > 0)
+            if (busy)
                 return Result.Busy;
 
             if (_team.arena.grid[pos] > 0)
@@ -93,7 +94,7 @@ namespace GoC.Arena
 
         public void AfterTick()
         {
-            if(_ticksLeft == _config.productionTime)
+            if(_ticksLeft == _config.productionTime) // just started production
             {
                 for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
                     myStorage.Withdraw((Substance.Type)substanceIndex, _config.productionCost[substanceIndex]);
