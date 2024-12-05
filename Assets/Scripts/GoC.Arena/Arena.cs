@@ -18,6 +18,8 @@ namespace GoC.Arena
         public Engine engine;
         public Team team;
         public JsValue tickFunction;
+        public IEnumerable<IFactory> enemyFactories;
+        public IEnumerable<IUnit> enemyUnits;
     }
     
     public class Arena : MonoBehaviour
@@ -29,15 +31,11 @@ namespace GoC.Arena
         [SerializeField] private Factory _factoryPrefab;
         [SerializeField] private Deposit _depositPrefab;
         
-        private readonly List<TeamRecord> _teamRecords = new();
+        private Grid<int> _grid;
+        private readonly List<Deposit> _deposits = new();
+        private readonly Dictionary<Team, TeamRecord> _teamRecords = new();
         private float _tickCooldown;
         private Team _executingTeam;
-
-        private IEnumerable<IUnit> _units;
-        private IEnumerable<IFactory> _factories;
-        private readonly List<Deposit> _deposits = new();
-
-        private Grid<int> _grid;
 
         
         public uint currentTick { get; private set; } 
@@ -45,15 +43,17 @@ namespace GoC.Arena
 
         public IGrid<int> grid => _grid;
         
-        public IEnumerable<IUnit> units => _units ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myUnits);
-        
-        public IEnumerable<IFactory> factories => _factories ??= _teamRecords.SelectMany(teamRecord => teamRecord.team.myFactories);
-        
+        public IEnumerable<IUnit> units { get; private set; }
+        public IEnumerable<IFactory> factories { get; private set; }
+
         public IReadOnlyList<IDeposit> deposits => _deposits;
 
+        public IEnumerable<IFactory> GetEnemyFactories(Team team) => _teamRecords[team].enemyFactories;
+        public IEnumerable<IUnit> GetEnemyUnits(Team team) => _teamRecords[team].enemyUnits;
+        
         public void Register(Team team)
         {
-            if (_teamRecords.Any(teamRecord => teamRecord.team == team))
+            if (_teamRecords.ContainsKey(team))
                 throw new Exception($"Team {team} is already registered in the arena {this}");
             
             Engine engine = EngineFactory.Create();
@@ -64,11 +64,14 @@ namespace GoC.Arena
 
             if (tickFunction.IsObject())
                 _teamRecords.Add(
+                    team,
                     new TeamRecord
                     {
                         team = team,
                         engine = engine,
-                        tickFunction = tickFunction
+                        tickFunction = tickFunction,
+                        enemyFactories = _teamRecords.Where(kvp => kvp.Key != team).SelectMany(kvp => kvp.Value.team.myFactories),
+                        enemyUnits = _teamRecords.Where(kvp => kvp.Key != team).SelectMany(kvp => kvp.Value.team.myUnits),
                     }
                 );
             else
@@ -77,11 +80,10 @@ namespace GoC.Arena
 
         public void Unregister(Team team)
         {
-            int index = _teamRecords.FindIndex(tr => tr.team == team);
-            if (index >= 0)
+            if (_teamRecords.TryGetValue(team, out TeamRecord teamRecord))
             {
-                _teamRecords[index].engine.Dispose();
-                _teamRecords.RemoveAt(index);
+                teamRecord.engine.Dispose();
+                _teamRecords.Remove(team);
             }
         }
         
@@ -89,6 +91,12 @@ namespace GoC.Arena
         public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
 
+        private void Awake()
+        {
+            factories ??= _teamRecords.Values.SelectMany(teamRecord => teamRecord.team.myFactories);
+            units ??= _teamRecords.Values.SelectMany(teamRecord => teamRecord.team.myUnits);
+        }
+        
         private void OnEnable()
         {
             _grid = new Grid<int>(_config.size / -2, (_config.size - 1) / 2);
@@ -133,7 +141,7 @@ namespace GoC.Arena
 
         private void OnDisable()
         {
-            foreach (TeamRecord teamRecord in _teamRecords)
+            foreach (TeamRecord teamRecord in _teamRecords.Values)
                 teamRecord.engine.Dispose();
             
             _teamRecords.Clear();
@@ -157,10 +165,10 @@ namespace GoC.Arena
                 //System.Diagnostics.Stopwatch tickStopwatch = System.Diagnostics.Stopwatch.StartNew();
                 try
                 {
-                    foreach (TeamRecord teamRecord in _teamRecords)
+                    foreach (TeamRecord teamRecord in _teamRecords.Values)
                         teamRecord.team.BeforeTick();
 
-                    foreach (TeamRecord teamRecord in _teamRecords)
+                    foreach (TeamRecord teamRecord in _teamRecords.Values)
                     {
                         try
                         {
@@ -177,7 +185,7 @@ namespace GoC.Arena
                         }
                     }
 
-                    foreach (TeamRecord teamRecord in _teamRecords)
+                    foreach (TeamRecord teamRecord in _teamRecords.Values)
                         teamRecord.team.AfterTick();
                 }
                 finally

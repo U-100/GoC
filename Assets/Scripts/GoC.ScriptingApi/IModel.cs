@@ -96,6 +96,9 @@ namespace GoC.ScriptingApi
         IEnumerable<IFactory> factories { get; }
         IEnumerable<IUnit> units { get; }
         
+        IEnumerable<IFactory> enemyFactories { get; }
+        IEnumerable<IUnit> enemyUnits { get; }
+        
         IReadOnlyList<IDeposit> deposits { get; }
     }
 }

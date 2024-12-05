@@ -27,6 +27,8 @@ namespace GoC.Arena
 
         public IEnumerable<IFactory> factories => _arena.factories;
         public IEnumerable<IUnit> units => _arena.units;
+        public IEnumerable<IFactory> enemyFactories => _arena.GetEnemyFactories(this);
+        public IEnumerable<IUnit> enemyUnits => _arena.GetEnemyUnits(this);
         public IReadOnlyList<IDeposit> deposits => _arena.deposits;
 
 

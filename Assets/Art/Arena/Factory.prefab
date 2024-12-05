@@ -327,7 +327,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _capacityPerSubstance: 0
-  _content: 0200000000000000
+  _content: 0600000000000000
 --- !u!114 &5355071952317212009
 MonoBehaviour:
   m_ObjectHideFlags: 0
