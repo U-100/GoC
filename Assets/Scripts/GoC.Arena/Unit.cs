@@ -49,6 +49,7 @@ namespace GoC.Arena
         private GiveCommand? _giveCommand;
         private MoveCommand? _moveCommand;
 
+        private ExposedProperty _attackEffectColorProperty;
         private ExposedProperty _attackEffectDistanceProperty;
         
         private Hull _myHull;
@@ -230,6 +231,7 @@ namespace GoC.Arena
         private void ApplySkin(TeamSkin teamSkin)
         {
             _skinColorSubjectRenderer.material = teamSkin.mainColorMaterial;
+            _attackEffect.SetVector4(_attackEffectColorProperty, teamSkin.mainColorMaterial.color);
         }
 
         public void BeforeTick()
@@ -297,6 +299,7 @@ namespace GoC.Arena
 
         private void Awake()
         {
+            _attackEffectColorProperty = "color";
             _attackEffectDistanceProperty = "distance";
         }
 
