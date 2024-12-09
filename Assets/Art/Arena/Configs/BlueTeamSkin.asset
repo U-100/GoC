@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: BlueTeamSkin
   m_EditorClassIdentifier: 
   _mainColorMaterial: {fileID: 2100000, guid: 74b211223ec6303469fbc7e6db94362a, type: 2}
+  _vfxColorTint: {r: 0, g: 0, b: 1, a: 1}

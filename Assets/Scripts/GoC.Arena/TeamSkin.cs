@@ -7,5 +7,8 @@ namespace GoC.Arena
     {
         [SerializeField] private Material _mainColorMaterial;
         public Material mainColorMaterial => _mainColorMaterial;
+
+        [SerializeField] private Color _vfxColorTint;
+        public Color vfxColorTint => _vfxColorTint;
     }
 }

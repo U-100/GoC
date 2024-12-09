@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: RedTeamSkin
   m_EditorClassIdentifier: 
   _mainColorMaterial: {fileID: 2100000, guid: 18dcaa68376922b4e8b51168a2950639, type: 2}
+  _vfxColorTint: {r: 1, g: 0, b: 0, a: 1}

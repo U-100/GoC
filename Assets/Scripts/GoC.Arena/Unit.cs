@@ -231,7 +231,7 @@ namespace GoC.Arena
         private void ApplySkin(TeamSkin teamSkin)
         {
             _skinColorSubjectRenderer.material = teamSkin.mainColorMaterial;
-            _attackEffect.SetVector4(_attackEffectColorProperty, teamSkin.mainColorMaterial.color);
+            _attackEffect.SetVector4(_attackEffectColorProperty, teamSkin.vfxColorTint);
         }
 
         public void BeforeTick()

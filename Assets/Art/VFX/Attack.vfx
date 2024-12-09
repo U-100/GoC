@@ -19,7 +19,7 @@ MonoBehaviour:
       x: 461
       y: -1400
       width: 867
-      height: 2076
+      height: 2096
     contents:
     - model: {fileID: 8926484042661614608}
       id: 0
@@ -55,7 +55,7 @@ MonoBehaviour:
     x: 461
     y: -1400
     width: 867
-    height: 2076
+    height: 2096
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -473,8 +473,8 @@ MonoBehaviour:
   - {fileID: 8926484042661615055}
   - {fileID: 8926484042661615058}
   - {fileID: 8926484042661614830}
-  - {fileID: 8926484042661615120}
   - {fileID: 8926484042661614722}
+  - {fileID: 8926484042661615120}
   m_UIPosition: {x: 877, y: -242}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
@@ -597,7 +597,7 @@ MonoBehaviour:
   m_Disabled: 0
   m_ActivationSlot: {fileID: 8926484042661614724}
   attribute: color
-  Composition: 2
+  Composition: 0
   AlphaComposition: 0
   SampleMode: 0
   Mode: 1
@@ -2172,11 +2172,12 @@ MonoBehaviour:
   m_UISuperCollapsed: 0
   m_InputSlots:
   - {fileID: 8926484042661615121}
+  - {fileID: 8926484042661615143}
   m_OutputSlots: []
   m_Disabled: 0
   m_ActivationSlot: {fileID: 8926484042661615125}
   attribute: color
-  Composition: 0
+  Composition: 3
   Source: 0
   Random: 0
   channels: 6
@@ -2393,7 +2394,7 @@ MonoBehaviour:
     linkedSlots:
     - outputSlot: {fileID: 8926484042661615138}
       inputSlot: {fileID: 8926484042661615121}
-    position: {x: 632, y: 404.66666}
+    position: {x: 598, y: 518.6667}
     expandedSlots:
     - {fileID: 8926484042661615138}
     expanded: 1
@@ -2568,4 +2569,38 @@ MonoBehaviour:
       m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
         PublicKeyToken=b77a5c561934e089
   m_Direction: 1
+  m_LinkedSlots: []
+--- !u!114 &8926484042661615143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f780aa281814f9842a7c076d436932e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UIIgnoredErrors: []
+  m_Parent: {fileID: 0}
+  m_Children: []
+  m_UIPosition: {x: 0, y: 0}
+  m_UICollapsed: 1
+  m_UISuperCollapsed: 0
+  m_MasterSlot: {fileID: 8926484042661615143}
+  m_MasterData:
+    m_Owner: {fileID: 8926484042661615120}
+    m_Value:
+      m_Type:
+        m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089
+      m_SerializableObject: 0.925
+    m_Space: -1
+  m_Property:
+    name: Blend
+    m_serializedType:
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+  m_Direction: 0
   m_LinkedSlots: []
