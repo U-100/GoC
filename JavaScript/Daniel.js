@@ -19,11 +19,7 @@ function wander(myUnit)
 }
 
 export function tick() {
-    
-    let myFactory = undefined;
-    if (model.myFactories.Count > 0)
-        myFactory = model.myFactories[0];
-    
+    let myFactory = (model.myFactories.Count > 0) ? (model.myFactories[0]) : (undefined);
     let nearbyEnemyFactory = myFactory ? findNearby(model.enemyFactories, myFactory.pos, 100000) : undefined;
     
     for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit) {
@@ -42,7 +38,7 @@ export function tick() {
             continue;
         }
 
-        if (iUnit < 2) {
+        if (iUnit < 3) {
             let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
             if (nearbyDeposit) {
                 let miningResult = myUnit.control.Mine(nearbyDeposit);
@@ -63,8 +59,4 @@ export function tick() {
 
     for (let myFactory of model.myFactories)
         myFactory.control.Produce();
-}
-
-export function tickNew(){
-    
 }
