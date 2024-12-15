@@ -41,6 +41,7 @@ namespace GoC.Arena
         [Space]
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
+        [SerializeField] private VisualEffect _giveEffect;
         [SerializeField] private VisualEffect _moveEffect;
         [SerializeField] private Renderer _skinColorSubjectRenderer; 
 
@@ -251,6 +252,7 @@ namespace GoC.Arena
             // ReSharper disable once RedundantCheckBeforeAssignment
             if (_giveCommand != null)
             {
+                _giveEffect.Stop();
                 _giveCommand = null;
             }
 
@@ -287,6 +289,8 @@ namespace GoC.Arena
             {
                 myStorage.Withdraw(_giveCommand.Value.substanceType, _giveCommand.Value.amount);
                 _giveCommand.Value.targetStorage.Deposit(_giveCommand.Value.substanceType, _giveCommand.Value.amount);
+
+                _giveEffect.Play();
             }
             
             if (_moveCommand != null)
