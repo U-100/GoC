@@ -16,8 +16,7 @@ MonoBehaviour:
     x: 31
     y: 31
   _teamConfigs:
-  - {fileID: 11400000, guid: b30a0fdcabeb46e40bf2aa1b5459473d, type: 2}
+  - {fileID: 11400000, guid: ec6706c65be15894b9ad18a2ecd8e50a, type: 2}
   - {fileID: 11400000, guid: a1bb66bf78ddef84c93a2068d0523812, type: 2}
-  - {fileID: 11400000, guid: ca2e0570f7171af4dbb8733150349b47, type: 2}
   _factoryConfig: {fileID: 11400000, guid: c58f8f994c6f4094c95c63bcea50c90d, type: 2}
   _depositConfig: {fileID: 11400000, guid: 90817da335932d145a883da181997d64, type: 2}
