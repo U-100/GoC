@@ -37,5 +37,16 @@ namespace GoC.Arena
                 arenaPlayMenuBackButton.clicked += _viewModel.Back;
             }
         }
+
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+#else
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+#endif
+        public static void RegisterUIToolkitConverters()
+        {
+            ConverterGroups.RegisterGlobalConverter((ref bool b) => b ? new StyleEnum<DisplayStyle>(DisplayStyle.Flex) : new StyleEnum<DisplayStyle>(DisplayStyle.None));
+            ConverterGroups.RegisterGlobalConverter((ref StyleEnum<DisplayStyle> seds) => seds.value != DisplayStyle.None);
+        }
     }
 }

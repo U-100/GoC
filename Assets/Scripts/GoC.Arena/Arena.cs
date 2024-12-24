@@ -13,6 +13,12 @@ using static Unity.Mathematics.math;
 
 namespace GoC.Arena
 {
+    public interface IArena : IDisposable
+    {
+        void Setup(ArenaConfig initConfig);
+        void CreateTeams(params TeamConfig[] teamConfigs);
+    }
+
     public struct TeamRecord
     {
         public Engine engine;
@@ -22,7 +28,7 @@ namespace GoC.Arena
         public IEnumerable<IUnit> enemyUnits;
     }
     
-    public class Arena : MonoBehaviour
+    public class Arena : MonoBehaviour, IArena
     {
         [SerializeField] private ArenaConfig _config;
         [Space]
@@ -37,7 +43,33 @@ namespace GoC.Arena
         private float _tickCooldown;
         private Team _executingTeam;
 
+        public void Setup(ArenaConfig initConfig)
+        {
+            _config = initConfig;
+            
+            _grid = new Grid<int>(_config.size / -2, (_config.size - 1) / 2);
+            
+            _gridEffect.SetFloat("mapSize", _config.size.x - 1);
+            _gridEffect.Play();
+        }
         
+        public void CreateTeams(params TeamConfig[] teamConfigs)
+        {
+            for (int iTeam = 0; iTeam < teamConfigs.Length; iTeam++)
+            {
+                TeamConfig teamConfig = teamConfigs[iTeam];
+                Team team = CreateTeam(teamConfig);
+
+                CreateTeamLandscape(team, iTeam, teamConfigs.Length);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (gameObject != null)
+                Destroy(gameObject);
+        }
+
         public uint currentTick { get; private set; } 
         public int executingTeamId => _executingTeam.teamId;
 
@@ -97,22 +129,6 @@ namespace GoC.Arena
             units ??= _teamRecords.Values.SelectMany(teamRecord => teamRecord.team.myUnits);
         }
         
-        private void OnEnable()
-        {
-            _grid = new Grid<int>(_config.size / -2, (_config.size - 1) / 2);
-            
-            _gridEffect.SetFloat("mapSize", _config.size.x - 1);
-            _gridEffect.Play();
-
-            for (int iTeam = 0; iTeam < _config.teamConfigs.Count; iTeam++)
-            {
-                TeamConfig teamConfig = _config.teamConfigs[iTeam];
-                Team team = CreateTeam(teamConfig);
-
-                CreateTeamLandscape(team, iTeam);
-            }
-        }
-
         private Team CreateTeam(TeamConfig teamConfig)
         {
             Team team = Instantiate(_teamPrefab);
@@ -121,12 +137,12 @@ namespace GoC.Arena
             return team;
         }
 
-        private void CreateTeamLandscape(Team team, int iTeam)
+        private void CreateTeamLandscape(Team team, int iTeam, int teamsCount)
         {
             int2 baseFactoryPos = _grid.size / 4;
             int2 baseDepositPos = _grid.size / 3;
 
-            float teamAngleRadians = 2 * iTeam * PI / _config.teamConfigs.Count;
+            float teamAngleRadians = 2 * iTeam * PI / teamsCount;
 
             int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
             Factory factory = Instantiate(_factoryPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
@@ -160,6 +176,9 @@ namespace GoC.Arena
 
         private void Update()
         {
+            if (_teamRecords.Count == 0)
+                return; // teams haven't been created yet
+            
             if ((_tickCooldown -= Time.deltaTime) <= 0)
             {
                 //System.Diagnostics.Stopwatch tickStopwatch = System.Diagnostics.Stopwatch.StartNew();
