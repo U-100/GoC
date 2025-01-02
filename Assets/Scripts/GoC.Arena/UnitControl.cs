@@ -13,6 +13,7 @@ namespace GoC.Arena
         public Result Attack(object target) => unit.Attack(target);
         public Result Mine(object target) => unit.Mine(target);
         public Result Give(object target, Substance.Type substanceType, int count) => unit.Give(target, substanceType, count);
+        public Result Produce() => unit.Produce();
         public Result MoveTo(object target) => unit.MoveTo(target);
         public Result MoveTo(int x, int y) => unit.MoveTo(int2(x, y));
     }

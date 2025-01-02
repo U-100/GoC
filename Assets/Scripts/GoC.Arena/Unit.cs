@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using GoC.ScriptingApi;
 using Unity.Mathematics;
@@ -31,6 +31,12 @@ namespace GoC.Arena
             public int amount;
         }
 
+        private struct ProduceCommand
+        {
+            public int ticksLeft;
+            public int2 productionPos;
+        }
+
         private struct MoveCommand
         {
             public int2 targetPosition;
@@ -42,16 +48,22 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
         [SerializeField] private VisualEffect _giveEffect;
+        [Space]
+        [SerializeField] private Unit _fabricatedUnitPrototype;
+        [SerializeField] private VisualEffect _productionEffect;
+        [Space]
         [SerializeField] private VisualEffect _moveEffect;
         [SerializeField] private Renderer _skinColorSubjectRenderer; 
+
+        private ExposedProperty _attackEffectColorProperty;
+        private ExposedProperty _attackEffectDistanceProperty;
+        private ExposedProperty _productionEffectDurationProperty;
 
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
         private GiveCommand? _giveCommand;
+        private ProduceCommand? _produceCommand;
         private MoveCommand? _moveCommand;
-
-        private ExposedProperty _attackEffectColorProperty;
-        private ExposedProperty _attackEffectDistanceProperty;
         
         private Hull _myHull;
         private Hull myHull => _myHull ??= GetComponent<Hull>();
@@ -68,7 +80,7 @@ namespace GoC.Arena
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
         public int2 dir => transform.forward.ToArenaPos();
-        public bool busy => _attackCommand != null || _mineCommand != null || _giveCommand != null || _moveCommand != null;
+        public bool busy => _attackCommand != null || _mineCommand != null || _giveCommand != null || _produceCommand != null || _moveCommand != null;
         
         public Result CanMine(object targetObject)
         {
@@ -158,6 +170,26 @@ namespace GoC.Arena
                 amount = amount
             };
 
+            return Result.Ok;
+        }
+        
+        public Result Produce()
+        {
+            if (busy)
+                return Result.Busy;
+
+            for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
+            {
+                int cost = _config.productionCost[substanceIndex];
+                if (myStorage.content[substanceIndex] < cost)
+                    return Result.NotEnoughSubstance;
+            }
+
+            _produceCommand = new ProduceCommand
+            {
+                ticksLeft = _config.productionTime
+            };
+            
             return Result.Ok;
         }
 
@@ -256,6 +288,26 @@ namespace GoC.Arena
                 _giveCommand = null;
             }
 
+            if (_produceCommand != null)
+            {
+                ProduceCommand produceCommand = _produceCommand.Value;
+                if (produceCommand.ticksLeft > 0)
+                {
+                    if (--produceCommand.ticksLeft == 0)
+                    {
+                        _team.arena.grid[produceCommand.productionPos]--;
+
+                        Unit unit = Instantiate(_fabricatedUnitPrototype, produceCommand.productionPos.ToUnityPos(), Quaternion.identity);
+                        unit.Setup(_team, _config.product);
+                        _team.Register(unit);
+
+                        _produceCommand = null;
+                    }
+                    else
+                        _produceCommand = produceCommand;
+                }
+            }
+
             if (_moveCommand != null)
             {
                 transform.position = _moveCommand.Value.targetPosition.ToUnityPos();
@@ -292,6 +344,24 @@ namespace GoC.Arena
 
                 _giveEffect.Play();
             }
+
+            if (_produceCommand != null)
+            {
+                ProduceCommand produceCommand = _produceCommand.Value;
+                if(produceCommand.ticksLeft == _config.productionTime) // just started production
+                {
+                    for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
+                        myStorage.Withdraw((Substance.Type)substanceIndex, _config.productionCost[substanceIndex]);
+
+                    produceCommand.productionPos = _team.arena.grid.FindEmptyCellAround(pos);
+                    
+                    _team.arena.grid[produceCommand.productionPos]++;
+                
+                    _productionEffect.SetFloat(_productionEffectDurationProperty, _config.productionTime * Tick.TIME);
+                    _productionEffect.Play();
+                }
+                _produceCommand = produceCommand;
+            }
             
             if (_moveCommand != null)
             {
@@ -305,11 +375,15 @@ namespace GoC.Arena
         {
             _attackEffectColorProperty = "color";
             _attackEffectDistanceProperty = "distance";
+            _productionEffectDurationProperty = "duration";
         }
 
         private void OnDisable()
         {
             _team.arena.grid[pos]--;
+
+            if (_produceCommand != null)
+                _team.arena.grid[_produceCommand.Value.productionPos]--;
 
             if (_team != null)
                 _team.Unregister(this);

@@ -17,7 +17,7 @@ namespace GoC.Arena
     {
         new ref T this[int2 p] { get; }
     }
-    
+
     public class Grid<T> : IGrid<T>
     {
         private readonly T[] _grid;

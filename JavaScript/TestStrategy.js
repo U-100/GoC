@@ -25,25 +25,27 @@ export function tick() {
     for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit) {
         let myUnit = model.myUnits[iUnit];
         
+        if (myUnit.busy)
+            continue;
+        
         let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 3);
         if (nearbyEnemyUnit) {
             if (myUnit.control.Attack(nearbyEnemyUnit) != Result.Ok)
                 myUnit.control.MoveTo(nearbyEnemyUnit);
             continue;
         }
+        
+        if (myUnit.storage.content[Substance.Type.Energy] >= 2)
+            if (myUnit.control.Produce() == Result.Ok)
+                continue;
 
-        if (myUnit.storage.content[Substance.Type.Energy] >= 4 && myFactory) {
-            if (myUnit.control.Give(myFactory, Substance.Type.Energy, myUnit.storage.content[Substance.Type.Energy]) != Result.Ok)
-                myUnit.control.MoveTo(myFactory);
-            continue;
-        }
-
-        if (iUnit < 3) {
-            let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
-            if (nearbyDeposit) {
-                let miningResult = myUnit.control.Mine(nearbyDeposit);
-                if (miningResult != Result.Ok)
-                    myUnit.control.MoveTo(nearbyDeposit);
+        let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
+        if (nearbyDeposit)
+        {
+            if (myUnit.control.Mine(nearbyDeposit) == Result.Ok)
+                continue;
+            else if (iUnit < 2) {
+                myUnit.control.MoveTo(nearbyDeposit);
                 continue;
             }
         }

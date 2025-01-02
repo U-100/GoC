@@ -45,6 +45,7 @@ namespace GoC.ScriptingApi
         Result Attack(object target);
         Result Mine(object target);
         Result Give(object target, Substance.Type substanceType, int amount);
+        Result Produce();
         Result MoveTo(object target);
         Result MoveTo(int x, int y);
     }
