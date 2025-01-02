@@ -41,7 +41,7 @@ namespace GoC.Arena
         {
             Debug.Log($"Play \"{codeVsAIScript}\" vs. AI");
             TeamConfig playerTeamConfig = TeamConfig.Create(codeVsAIScript, _playerTeamSkin);
-            TeamConfig aiTeamConfig = TeamConfig.Create("./TestStrategy.js", _aiTeamSkin);
+            TeamConfig aiTeamConfig = TeamConfig.Create("./PvEBotStrategy.js", _aiTeamSkin);
             
             _currentArena.CreateTeams(playerTeamConfig, aiTeamConfig);
             
