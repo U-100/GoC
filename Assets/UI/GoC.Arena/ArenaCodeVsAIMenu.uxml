@@ -1,8 +1,7 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI/GoCStyles.uss?fileID=7433441132597879392&amp;guid=80a2e23be22fad8418ac023d59da84e2&amp;type=3#GoCStyles" />
     <engine:VisualElement data-source-type="GoC.Arena.ArenaViewModel, Assembly-CSharp" style="flex-grow: 1; top: 25%; width: 50%; height: 50%; align-self: center; position: absolute;">
-        <engine:VisualElement style="flex-grow: 1;">
-            <engine:Label text="Play Code vs. AI" style="color: rgb(80, 120, 231); font-size: 84px; -unity-text-align: lower-left; flex-grow: 1; -unity-text-outline-color: rgb(80, 120, 231); -unity-text-outline-width: 8px;" />
+        <engine:VisualElement style="flex-grow: 1; justify-content: flex-end;">
+            <engine:Label text="Play Code vs. AI" class="goc-subheader-text" style="flex-grow: 1; -unity-text-align: lower-left;" />
         </engine:VisualElement>
         <engine:TextField label="Script file:" placeholder-text="./TestStrategy.js &lt;- replace with your file name" style="font-size: 42px; color: rgb(80, 120, 231);">
             <Bindings>

@@ -22,10 +22,12 @@ namespace GoC.Arena
         }
         
         [CreateProperty] public bool isInMainMenu { get; private set; } = true;
-        [CreateProperty] public bool isInCodeVsAIMenu { get; private set; }
-        [CreateProperty] public bool isInHud { get; private set; }
 
+        [CreateProperty] public bool isInCodeVsAIMenu { get; private set; }
         [CreateProperty] public string codeVsAIScript { get; set; } = "./TestStrategy.js";
+        
+        [CreateProperty] public bool isInHud { get; private set; }
+        [CreateProperty] public bool isPaused => Time.timeScale == 0;
 
         public void PrepareCodeVsAI()
         {
@@ -69,14 +71,19 @@ namespace GoC.Arena
             _currentArena = null;
         }
 
+        public void Fast()
+        {
+            Time.timeScale = 4;
+        }
+
         public void Play()
         {
-            
+            Time.timeScale = 1;
         }
 
         public void Pause()
         {
-            
+            Time.timeScale = 0;
         }
 
         public void Stop()

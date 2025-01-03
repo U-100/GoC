@@ -6,6 +6,12 @@ namespace GoC.Arena
 {
     public class Hull : MonoBehaviour, IHull
     {
+        public enum State
+        {
+            Intact,
+            Destroyed
+        }
+        
         [SerializeField] private int _integrity;
         [Space]
         [SerializeField] private VisualEffect _dyingEffect;
@@ -19,14 +25,16 @@ namespace GoC.Arena
         
         public void Absorb(int damage) => _integrity -= damage;
         
-        public void BeforeTick()
+        public State BeforeTick()
         {
             if (_integrity <= 0)
             {
-                Destroy(gameObject);
                 GameObject destructionEffect = Instantiate(_destructionEffectPrefab, transform.position, transform.rotation);
                 Destroy(destructionEffect, 1);
+                return State.Destroyed;
             }
+
+            return State.Intact;
         }
 
         public void AfterTick() { }

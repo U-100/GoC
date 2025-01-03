@@ -54,3 +54,10 @@ TextField TextInput#unity-text-input {
     -unity-text-align: middle-center;
     -unity-font-style: bold;
 }
+
+.goc-subheader-text {
+    font-size: 84px;
+    color: rgb(80, 120, 231);
+    -unity-text-outline-color: rgb(80, 120, 231);
+    -unity-text-outline-width: 8px;
+}

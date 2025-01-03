@@ -315,7 +315,17 @@ namespace GoC.Arena
                 _moveCommand = null;
             }
 
-            myHull.BeforeTick();
+            if (myHull.BeforeTick() == Hull.State.Destroyed)
+            {
+                _team.Unregister(this);
+
+                _team.arena.grid[pos]--;
+
+                if (_produceCommand != null)
+                    _team.arena.grid[_produceCommand.Value.productionPos]--;
+
+                Destroy(gameObject);
+            }
         }
 
         public void AfterTick()
@@ -376,22 +386,6 @@ namespace GoC.Arena
             _attackEffectColorProperty = "color";
             _attackEffectDistanceProperty = "distance";
             _productionEffectDurationProperty = "duration";
-        }
-
-        private void OnDestroy()
-        {
-            if (_team != null)
-            {
-                _team.Unregister(this);
-
-                if (_team.arena != null)
-                {
-                    _team.arena.grid[pos]--;
-
-                    if (_produceCommand != null)
-                        _team.arena.grid[_produceCommand.Value.productionPos]--;
-                }
-            }
         }
 
         private void Update()

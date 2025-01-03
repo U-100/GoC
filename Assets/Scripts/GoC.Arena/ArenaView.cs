@@ -38,6 +38,9 @@ namespace GoC.Arena
 
                 VisualElement arenaHud = uiDocument.rootVisualElement.Q<VisualElement>("Hud");
 
+                Button arenaHudFastButton = arenaHud.Q<Button>("FastButton");
+                arenaHudFastButton.clicked += _viewModel.Fast;
+
                 Button arenaHudPlayButton = arenaHud.Q<Button>("PlayButton");
                 arenaHudPlayButton.clicked += _viewModel.Play;
 
