@@ -24,7 +24,6 @@ namespace GoC.Arena
         public Engine engine;
         public Team team;
         public JsValue tickFunction;
-        public IEnumerable<IFactory> enemyFactories;
         public IEnumerable<IUnit> enemyUnits;
     }
     
@@ -34,7 +33,7 @@ namespace GoC.Arena
         [Space]
         [SerializeField] private VisualEffect _gridEffect;
         [SerializeField] private Team _teamPrefab;
-        [SerializeField] private Factory _factoryPrefab;
+        [SerializeField] private Unit _unitPrefab;
         [SerializeField] private Deposit _depositPrefab;
         
         private Grid<int> _grid;
@@ -76,11 +75,9 @@ namespace GoC.Arena
         public IGrid<int> grid => _grid;
         
         public IEnumerable<IUnit> units { get; private set; }
-        public IEnumerable<IFactory> factories { get; private set; }
 
         public IReadOnlyList<IDeposit> deposits => _deposits;
 
-        public IEnumerable<IFactory> GetEnemyFactories(Team team) => _teamRecords[team].enemyFactories;
         public IEnumerable<IUnit> GetEnemyUnits(Team team) => _teamRecords[team].enemyUnits;
         
         public void Register(Team team)
@@ -102,7 +99,6 @@ namespace GoC.Arena
                         team = team,
                         engine = engine,
                         tickFunction = tickFunction,
-                        enemyFactories = _teamRecords.Where(kvp => kvp.Key != team).SelectMany(kvp => kvp.Value.team.myFactories),
                         enemyUnits = _teamRecords.Where(kvp => kvp.Key != team).SelectMany(kvp => kvp.Value.team.myUnits),
                     }
                 );
@@ -125,7 +121,6 @@ namespace GoC.Arena
 
         private void Awake()
         {
-            factories ??= _teamRecords.Values.SelectMany(teamRecord => teamRecord.team.myFactories);
             units ??= _teamRecords.Values.SelectMany(teamRecord => teamRecord.team.myUnits);
         }
         
@@ -145,9 +140,9 @@ namespace GoC.Arena
             float teamAngleRadians = 2 * iTeam * PI / teamsCount;
 
             int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
-            Factory factory = Instantiate(_factoryPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
-            factory.Setup(team, _config.factoryConfig);
-            team.Register(factory);
+            Unit unit = Instantiate(_unitPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
+            unit.Setup(team, _config.unitConfig);
+            team.Register(unit);
 
             int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
             Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);

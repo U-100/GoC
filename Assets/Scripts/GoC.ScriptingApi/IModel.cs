@@ -64,22 +64,6 @@ namespace GoC.ScriptingApi
         public IUnitControl control { get; }
     }
     
-    public interface IFactoryControl
-    {
-        Result Produce();
-    }
-
-    public interface IFactory
-    {
-        int teamId { get; } // owner team id
-        int2 pos { get; }
-        bool busy { get; }
-
-        public IHull hull { get; }
-        public IStorage storage { get; }
-        public IFactoryControl control { get; }
-    }
-
     public interface IDeposit
     {
         int2 pos { get; }
@@ -91,13 +75,8 @@ namespace GoC.ScriptingApi
     {
         int teamId { get; } // team id
 
-        IReadOnlyList<IFactory> myFactories { get; }
         IReadOnlyList<IUnit> myUnits { get; }
-        
-        IEnumerable<IFactory> factories { get; }
         IEnumerable<IUnit> units { get; }
-        
-        IEnumerable<IFactory> enemyFactories { get; }
         IEnumerable<IUnit> enemyUnits { get; }
         
         IReadOnlyList<IDeposit> deposits { get; }

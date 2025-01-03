@@ -163,7 +163,7 @@ MonoBehaviour:
   _gridEffect: {fileID: 7398389565426770519}
   _teamPrefab: {fileID: 9007627430032670072, guid: 9cd71d82197ece64e945297115889cfe,
     type: 3}
-  _factoryPrefab: {fileID: 8277746951006310841, guid: 5382fd2146412a34fb0d37aa8d869939,
+  _unitPrefab: {fileID: 8391022737454312585, guid: 08fb3a1303a359648b32627116f743aa,
     type: 3}
   _depositPrefab: {fileID: 6952737876265442335, guid: 41d586a321035634f8b217a8f868ee01,
     type: 3}

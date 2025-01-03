@@ -19,44 +19,46 @@ function wander(myUnit)
 }
 
 export function tick() {
-    let myFactory = model.myFactories.Count > 0 ? model.myFactories[0] : undefined;
-    let nearbyEnemyFactory = myFactory ? findNearby(model.enemyFactories, myFactory.pos, 100000) : undefined;
-    
-    for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit) {
+    for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
+    {
         let myUnit = model.myUnits[iUnit];
-        
-        let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 3);
-        if (nearbyEnemyUnit) {
-            if (myUnit.control.Attack(nearbyEnemyUnit) != Result.Ok)
-                myUnit.control.MoveTo(nearbyEnemyUnit);
-            continue;
-        }
 
-        if (myUnit.storage.content[Substance.Type.Energy] >= 4 && myFactory) {
-            if (myUnit.control.Give(myFactory, Substance.Type.Energy, myUnit.storage.content[Substance.Type.Energy]) != Result.Ok)
-                myUnit.control.MoveTo(myFactory);
+        if (myUnit.busy)
             continue;
-        }
 
-        if (iUnit < 3) {
-            let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
-            if (nearbyDeposit) {
-                let miningResult = myUnit.control.Mine(nearbyDeposit);
-                if (miningResult != Result.Ok)
-                    myUnit.control.MoveTo(nearbyDeposit);
+        let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 100000);
+        if (nearbyEnemyUnit)
+            if (myUnit.control.Attack(nearbyEnemyUnit) == Result.Ok)
+                continue;
+
+        if (myUnit.storage.content[Substance.Type.Energy] >= 2)
+            if (myUnit.control.Produce() == Result.Ok)
+                continue;
+
+        let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
+        if (nearbyDeposit)
+        {
+            if (iUnit == 0 && myUnit.pos !== nearbyDeposit.pos)
+            {
+                myUnit.control.MoveTo(nearbyDeposit);
+                continue;
+            }
+
+            if (myUnit.control.Mine(nearbyDeposit) == Result.Ok)
+                continue;
+            else if (iUnit < 2)
+            {
+                myUnit.control.MoveTo(nearbyDeposit);
                 continue;
             }
         }
 
-        if (nearbyEnemyFactory) {
-            if (myUnit.control.Attack(nearbyEnemyFactory) != Result.Ok)
-                myUnit.control.MoveTo(nearbyEnemyFactory);
-            continue;
-        }
-
-        wander(myUnit);
+        // if (nearbyEnemyUnit)
+        // {
+        //     myUnit.control.MoveTo(nearbyEnemyUnit);
+        //     continue;
+        // }
+        //
+        // wander(myUnit);
     }
-
-    for (let myFactory of model.myFactories)
-        myFactory.control.Produce();
 }
