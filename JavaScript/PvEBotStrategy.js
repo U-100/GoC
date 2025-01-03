@@ -53,12 +53,12 @@ export function tick() {
             }
         }
 
-        // if (nearbyEnemyUnit)
-        // {
-        //     myUnit.control.MoveTo(nearbyEnemyUnit);
-        //     continue;
-        // }
-        //
-        // wander(myUnit);
+        if (nearbyEnemyUnit && iUnit > 10)
+        {
+            myUnit.control.MoveTo(nearbyEnemyUnit);
+            continue;
+        }
+
+        //wander(myUnit);
     }
 }
