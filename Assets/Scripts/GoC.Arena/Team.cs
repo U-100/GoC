@@ -63,10 +63,21 @@ namespace GoC.Arena
         public void Unregister(Unit unit) => _myUnits.Remove(unit);
         
         
-        private void OnDisable()
+        private void OnDestroy()
         {
             if(_arena != null)
                 _arena.Unregister(this);
+
+            try
+            {
+                _myUnitsCache.AddRange(_myUnits);
+                foreach (Unit myUnit in _myUnits)
+                    Destroy(myUnit.gameObject);
+            }
+            finally
+            {
+                _myUnitsCache.Clear();
+            }
         }
     }
 }

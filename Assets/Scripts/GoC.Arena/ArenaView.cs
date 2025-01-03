@@ -35,6 +35,17 @@ namespace GoC.Arena
                 
                 Button arenaPlayMenuBackButton = arenaPlayMenu.Q<Button>("BackButton");
                 arenaPlayMenuBackButton.clicked += _viewModel.Back;
+
+                VisualElement arenaHud = uiDocument.rootVisualElement.Q<VisualElement>("Hud");
+
+                Button arenaHudPlayButton = arenaHud.Q<Button>("PlayButton");
+                arenaHudPlayButton.clicked += _viewModel.Play;
+
+                Button arenaHudPauseButton = arenaHud.Q<Button>("PauseButton");
+                arenaHudPauseButton.clicked += _viewModel.Pause;
+
+                Button arenaHudStopButton = arenaHud.Q<Button>("StopButton");
+                arenaHudStopButton.clicked += _viewModel.Stop;
             }
         }
 

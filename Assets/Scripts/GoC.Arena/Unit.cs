@@ -378,15 +378,20 @@ namespace GoC.Arena
             _productionEffectDurationProperty = "duration";
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
-            _team.arena.grid[pos]--;
-
-            if (_produceCommand != null)
-                _team.arena.grid[_produceCommand.Value.productionPos]--;
-
             if (_team != null)
+            {
                 _team.Unregister(this);
+
+                if (_team.arena != null)
+                {
+                    _team.arena.grid[pos]--;
+
+                    if (_produceCommand != null)
+                        _team.arena.grid[_produceCommand.Value.productionPos]--;
+                }
+            }
         }
 
         private void Update()

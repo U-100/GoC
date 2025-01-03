@@ -1,0 +1,9 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <engine:VisualElement style="flex-grow: 1;">
+        <engine:VisualElement style="flex-direction: row; justify-content: flex-end; padding-top: 25px; padding-right: 25px; padding-bottom: 25px; padding-left: 25px;">
+            <engine:Button name="PlayButton" class="goc-button" style="background-image: url(&quot;project://database/Assets/Art/Arena/play.png?fileID=2800000&amp;guid=ba9027ffd6dbb0646b5f6c9ac740ec6d&amp;type=3#play&quot;); width: 100px; height: 100px; background-color: rgb(255, 255, 255); -unity-background-image-tint-color: rgb(80, 120, 231); background-size: 80% 80%; margin-top: 25px; margin-right: 25px; margin-bottom: 25px; margin-left: 25px;" />
+            <engine:Button name="PauseButton" class="goc-button" style="background-image: url(&quot;project://database/Assets/Art/Arena/pause.png?fileID=2800000&amp;guid=e9d8f854042762b44b09498b58a398be&amp;type=3#pause&quot;); width: 100px; height: 100px; background-color: rgb(255, 255, 255); -unity-background-image-tint-color: rgb(80, 120, 231); background-size: 80% 80%; margin-top: 25px; margin-right: 25px; margin-bottom: 25px; margin-left: 25px;" />
+            <engine:Button name="StopButton" class="goc-button" style="background-image: url(&quot;project://database/Assets/Art/Arena/stop.png?fileID=2800000&amp;guid=2dbf2968d45a6ef49b70dc4a2a54fd20&amp;type=3#stop&quot;); width: 100px; height: 100px; background-color: rgb(255, 255, 255); -unity-background-image-tint-color: rgb(80, 120, 231); margin-top: 25px; margin-right: 25px; margin-bottom: 25px; margin-left: 25px;" />
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

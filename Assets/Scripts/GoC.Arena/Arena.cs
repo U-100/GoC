@@ -38,6 +38,7 @@ namespace GoC.Arena
         
         private Grid<int> _grid;
         private readonly List<Deposit> _deposits = new();
+        private readonly List<Deposit> _depositsCache = new();
         private readonly Dictionary<Team, TeamRecord> _teamRecords = new();
         private float _tickCooldown;
         private Team _executingTeam;
@@ -150,10 +151,24 @@ namespace GoC.Arena
             Register(deposit);
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
+            try
+            {
+                _depositsCache.AddRange(_deposits);
+                foreach (Deposit deposit in _depositsCache)
+                    Destroy(deposit.gameObject);
+            }
+            finally
+            {
+                _depositsCache.Clear();
+            }
+
             foreach (TeamRecord teamRecord in _teamRecords.Values)
+            {
                 teamRecord.engine.Dispose();
+                Destroy(teamRecord.team.gameObject);
+            }
             
             _teamRecords.Clear();
         }

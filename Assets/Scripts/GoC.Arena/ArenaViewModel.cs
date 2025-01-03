@@ -23,6 +23,7 @@ namespace GoC.Arena
         
         [CreateProperty] public bool isInMainMenu { get; private set; } = true;
         [CreateProperty] public bool isInCodeVsAIMenu { get; private set; }
+        [CreateProperty] public bool isInHud { get; private set; }
 
         [CreateProperty] public string codeVsAIScript { get; set; } = "./TestStrategy.js";
 
@@ -36,6 +37,15 @@ namespace GoC.Arena
             _currentArena = _arenaFactory();
             _currentArena.Setup(_arenaConfig);
         }
+
+        public void Quit()
+        {
+#if !UNITY_EDITOR
+            Application.Quit();
+#else
+            UnityEditor.EditorApplication.isPlaying = false; // Application.Quit() does not work in the editor so UnityEditor.EditorApplication.isPlaying need to be set to false instead
+#endif
+        }
         
         public void PlayCodeVsAI()
         {
@@ -47,6 +57,7 @@ namespace GoC.Arena
             
             isInMainMenu = false;
             isInCodeVsAIMenu = false;
+            isInHud = true;
         }
 
         public void Back()
@@ -58,13 +69,24 @@ namespace GoC.Arena
             _currentArena = null;
         }
 
-        public void Quit()
+        public void Play()
         {
-#if !UNITY_EDITOR
-            Application.Quit();
-#else
-            UnityEditor.EditorApplication.isPlaying = false; // Application.Quit() does not work in the editor so UnityEditor.EditorApplication.isPlaying need to be set to false instead
-#endif
+            
+        }
+
+        public void Pause()
+        {
+            
+        }
+
+        public void Stop()
+        {
+            isInMainMenu = true;
+            isInCodeVsAIMenu = false;
+            isInHud = false;
+            
+            _currentArena?.Dispose();
+            _currentArena = null;
         }
     }
 }
