@@ -12,13 +12,40 @@ function findNearby(set, pos, maxDistance) {
     return nearest;
 }
 
+function findNearbyNonAttackedEnemy(pos)
+{
+    let nearest = undefined;
+    let distanceToNearest = 1000000;
+    for (let enemyUnit of model.enemyUnits) 
+    {
+        if (enemyUnit.attackers >= enemyUnit.hull.integrity)
+        {
+            log("skipped");
+            continue;
+        }
+        
+        let curDist = distance(enemyUnit.pos, pos);
+        if (distanceToNearest > curDist)
+        {
+            nearest = enemyUnit;
+            distanceToNearest = curDist;
+        }
+    }
+
+    return nearest;
+}
+
 function wander(myUnit)
 {
     let destination = [myUnit.pos.x - 1 + Math.floor(Math.random() * 3), myUnit.pos.y - 1 + Math.floor(Math.random() * 3)];
     myUnit.control.MoveTo(destination);
 }
 
-export function tick() {
+export function tick()
+{
+    for (let enemyUnit of model.enemyUnits)
+        enemyUnit.attackers = 0;
+
     for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
     {
         let myUnit = model.myUnits[iUnit];
@@ -26,10 +53,14 @@ export function tick() {
         if (myUnit.busy)
             continue;
         
-        let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 100000);
+        //let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 100000);
+        let nearbyEnemyUnit = findNearbyNonAttackedEnemy(myUnit.pos);
         if (nearbyEnemyUnit)
             if (myUnit.control.Attack(nearbyEnemyUnit) == Result.Ok)
+            {
+                nearbyEnemyUnit.attackers = nearbyEnemyUnit.attackers + 1;
                 continue;
+            }
         
         if (myUnit.storage.content[Substance.Type.Energy] >= 2)
             if (myUnit.control.Produce() == Result.Ok)
