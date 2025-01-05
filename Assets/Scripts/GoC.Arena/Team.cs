@@ -71,8 +71,9 @@ namespace GoC.Arena
             try
             {
                 _myUnitsCache.AddRange(_myUnits);
-                foreach (Unit myUnit in _myUnits)
-                    Destroy(myUnit.gameObject);
+                foreach (Unit myUnit in _myUnitsCache)
+                    if (myUnit != null)
+                        Destroy(myUnit.gameObject);
             }
             finally
             {
