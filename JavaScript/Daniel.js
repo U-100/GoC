@@ -1,10 +1,53 @@
-function findNearby(set, pos, maxDistance) {
+function findNearby(set, pos, maxDistance)
+{
     let nearest = undefined;
     let distanceToNearest = maxDistance;
-    for (let elem of set) {
+    for (let elem of set)
+    {
         let curDist = distance(elem.pos, pos);
-        if (distanceToNearest > curDist) {
+        if (distanceToNearest > curDist)
+        {
             nearest = elem;
+            distanceToNearest = curDist;
+        }
+    }
+
+    return nearest;
+}
+
+
+function enemyCloudMiddle()
+{
+    let midPointX = 0;
+    let midPointY = 0;
+
+    let count = 0;
+    for (let enemyUnit of model.enemyUnits)
+    {
+        midPointX = midPointX + enemyUnit.pos.x;
+        midPointY = midPointY + enemyUnit.pos.y
+        count++;
+    }
+
+    if (count > 0)
+        return [midPointX / count, midPointY / count];
+    else
+        return [0, 0];
+}
+
+function findNearbyNonAttackedEnemy(pos)
+{
+    let nearest = undefined;
+    let distanceToNearest = 1000000;
+    for (let enemyUnit of model.enemyUnits)
+    {
+        if (enemyUnit.attackers >= enemyUnit.hull.integrity)
+            continue;
+
+        let curDist = distance(enemyUnit.pos, pos);
+        if (distanceToNearest > curDist)
+        {
+            nearest = enemyUnit;
             distanceToNearest = curDist;
         }
     }
@@ -18,45 +61,84 @@ function wander(myUnit)
     myUnit.control.MoveTo(destination);
 }
 
-export function tick() {
-    let myFactory = (model.myFactories.Count > 0) ? (model.myFactories[0]) : (undefined);
-    let nearbyEnemyFactory = myFactory ? findNearby(model.enemyFactories, myFactory.pos, 100000) : undefined;
-    
-    for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit) {
+var nearbyDeposit = undefined;
+
+let instructions =
+    [
+        /*0*/{ path: [[-1, 0]] },
+        /*1*/{ path: [[0, -1]] },
+        /*2*/{ path: [[0, 0]] },
+        /*3*/{ path: [[1, 0]] },
+        /*4*/{ path: [[0, 1]] },
+        /*5*/{ path: [[1, 1]] },
+        /*6*/{ path: [[1, -2], [-1, -2], [-1, -1]] },
+        /*7*/{ path: [[1, -1]] },
+        /*8*/{ path: [[-1, 1]] }
+    ];
+
+
+export function tick()
+{
+
+
+    let enemyCount = 0;
+    for (let enemyUnit of model.enemyUnits)
+        enemyCount++;
+    //log(enemyCount);
+
+    let midPoint = enemyCloudMiddle();
+    //log("" + midPoint[0] + ", " + midPoint[1]);
+
+    for (let enemyUnit of model.enemyUnits)
+        enemyUnit.attackers = 0;
+
+    for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
+    {
         let myUnit = model.myUnits[iUnit];
-        
-        let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 3);
-        if (nearbyEnemyUnit) {
-            if (myUnit.control.Attack(nearbyEnemyUnit) != Result.Ok)
-                myUnit.control.MoveTo(nearbyEnemyUnit);
-            continue;
-        }
 
-        if (myUnit.storage.content[Substance.Type.Energy] >= 4 && myFactory) {
-            if (myUnit.control.Give(myFactory, Substance.Type.Energy, myUnit.storage.content[Substance.Type.Energy]) != Result.Ok)
-                myUnit.control.MoveTo(myFactory);
+        if (myUnit.busy)
             continue;
-        }
 
-        if (iUnit < 3) {
-            let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
-            if (nearbyDeposit) {
-                let miningResult = myUnit.control.Mine(nearbyDeposit);
-                if (miningResult != Result.Ok)
-                    myUnit.control.MoveTo(nearbyDeposit);
+        //let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 100000);
+        let nearbyEnemyUnit = findNearbyNonAttackedEnemy(myUnit.pos);
+        if (nearbyEnemyUnit)
+            if (myUnit.control.Attack(nearbyEnemyUnit) == Result.Ok)
+            {
+                nearbyEnemyUnit.attackers = nearbyEnemyUnit.attackers + 1;
                 continue;
+            }
+
+        if (!nearbyDeposit)
+            nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
+
+        if (iUnit < instructions.length)
+        {
+            let instruction = instructions[iUnit];
+
+            let requiredPos = [nearbyDeposit.pos.x + instruction.path[instruction.path.length - 1][0], nearbyDeposit.pos.y + instruction.path[instruction.path.length - 1][1]];
+            if(myUnit.pos.x != requiredPos[0] || myUnit.pos.y != requiredPos[1])
+            {
+                let iPoint = instruction.path.length - 1;
+                for (; iPoint >= 0; --iPoint)
+                {
+                    let requiredPos = [nearbyDeposit.pos.x + instruction.path[iPoint][0], nearbyDeposit.pos.y + instruction.path[iPoint][1]];
+
+
+                    if (myUnit.control.MoveTo(requiredPos) === Result.Ok)
+                        break;
+                }
+                if(iPoint < 0)
+                    log("ohohohoh " + iUnit);
             }
         }
 
-        if (nearbyEnemyFactory) {
-            if (myUnit.control.Attack(nearbyEnemyFactory) != Result.Ok)
-                myUnit.control.MoveTo(nearbyEnemyFactory);
+        if (myUnit.control.Produce() == Result.Ok)
             continue;
-        }
 
-        wander(myUnit);
+        if (myUnit.control.Mine(nearbyDeposit) == Result.Ok)
+            continue;
+
+        if (iUnit >= instructions.length)
+            myUnit.control.MoveTo(midPoint);
     }
-
-    for (let myFactory of model.myFactories)
-        myFactory.control.Produce();
 }
