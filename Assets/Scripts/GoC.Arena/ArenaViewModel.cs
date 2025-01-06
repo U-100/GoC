@@ -19,12 +19,21 @@ namespace GoC.Arena
             _arenaConfig = arenaConfig;
             _playerTeamSkin = playerTeamSkin;
             _aiTeamSkin = aiTeamSkin;
+            _codeVsAIScript = PlayerPrefs.GetString("USER_SCRIPT_PATH", "./TestStrategy.js");
         }
         
         [CreateProperty] public bool isInMainMenu { get; private set; } = true;
 
         [CreateProperty] public bool isInCodeVsAIMenu { get; private set; }
-        [CreateProperty] public string codeVsAIScript { get; set; } = "./TestStrategy.js";
+
+        private string _codeVsAIScript;
+
+        [CreateProperty]
+        public string codeVsAIScript
+        {
+            get => _codeVsAIScript;
+            set => PlayerPrefs.SetString("USER_SCRIPT_PATH", _codeVsAIScript = value);
+        }
         
         [CreateProperty] public bool isInHud { get; private set; }
         [CreateProperty] public bool isPaused => Time.timeScale == 0;
