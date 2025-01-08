@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Arena.unity
+    path: Assets/Art/Arena.unity
     guid: 572b081b77d93d741914341f11f61e6e
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 64acf69ee1566f648b735575b5a86c8a,
