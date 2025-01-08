@@ -60,6 +60,7 @@ namespace GoC.Arena
         private ExposedProperty _mineEffectTexIndexProperty;
         private ExposedProperty _productionEffectDurationProperty;
         private ExposedProperty _productionEffectSpawnPositionProperty;
+        private ExposedProperty _productionEffectColorProperty;
 
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
@@ -267,6 +268,7 @@ namespace GoC.Arena
         {
             _skinColorSubjectRenderer.material = teamSkin.mainColorMaterial;
             _attackEffect.SetVector4(_attackEffectColorProperty, teamSkin.vfxColorTint);
+            _productionEffect.SetVector4(_productionEffectColorProperty, teamSkin.vfxColorTint);
         }
 
         public void BeforeTick()
@@ -392,6 +394,7 @@ namespace GoC.Arena
             _mineEffectTexIndexProperty = "texIndex";
             _productionEffectSpawnPositionProperty = "spawnPosition_position";
             _productionEffectDurationProperty = "duration";
+            _productionEffectColorProperty = "color";
         }
 
         private void Update()
