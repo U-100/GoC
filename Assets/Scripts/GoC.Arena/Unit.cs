@@ -59,6 +59,7 @@ namespace GoC.Arena
         private ExposedProperty _attackEffectDistanceProperty;
         private ExposedProperty _mineEffectTexIndexProperty;
         private ExposedProperty _productionEffectDurationProperty;
+        private ExposedProperty _productionEffectSpawnPositionProperty;
 
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
@@ -369,6 +370,7 @@ namespace GoC.Arena
                     
                     _team.arena.grid[produceCommand.productionPos]++;
                 
+                    _productionEffect.SetVector3(_productionEffectSpawnPositionProperty, produceCommand.productionPos.ToUnityPos());
                     _productionEffect.SetFloat(_productionEffectDurationProperty, _config.productionTime * Tick.TIME);
                     _productionEffect.Play();
                 }
@@ -388,6 +390,7 @@ namespace GoC.Arena
             _attackEffectColorProperty = "color";
             _attackEffectDistanceProperty = "distance";
             _mineEffectTexIndexProperty = "texIndex";
+            _productionEffectSpawnPositionProperty = "spawnPosition_position";
             _productionEffectDurationProperty = "duration";
         }
 
@@ -422,6 +425,11 @@ namespace GoC.Arena
                     else
                         _moveEffect.Stop();
                 }
+            }
+
+            if (_produceCommand != null)
+            {
+                RotateTowards(_produceCommand.Value.productionPos.ToUnityPos());
             }
         }
 
