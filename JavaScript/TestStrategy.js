@@ -19,10 +19,7 @@ function findNearbyNonAttackedEnemy(pos)
     for (let enemyUnit of model.enemyUnits) 
     {
         if (enemyUnit.attackers >= enemyUnit.hull.integrity)
-        {
-            log("skipped");
             continue;
-        }
         
         let curDist = distance(enemyUnit.pos, pos);
         if (distanceToNearest > curDist)
