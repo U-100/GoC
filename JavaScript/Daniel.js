@@ -18,21 +18,21 @@ function findNearby(set, pos, maxDistance)
 
 function enemyCloudMiddle()
 {
-    let midPointX = 0;
-    let midPointY = 0;
-
-    let count = 0;
-    for (let enemyUnit of model.enemyUnits)
+    if (model.enemyUnits.Count > 0)
     {
-        midPointX = midPointX + enemyUnit.pos.x;
-        midPointY = midPointY + enemyUnit.pos.y
-        count++;
-    }
+        let midPointX = 0;
+        let midPointY = 0;
 
-    if (count > 0)
-        return [midPointX / count, midPointY / count];
-    else
-        return [0, 0];
+        for (let enemyUnit of model.enemyUnits)
+        {
+            midPointX = midPointX + enemyUnit.pos.x;
+            midPointY = midPointY + enemyUnit.pos.y
+        }
+
+        return [midPointX / model.enemyUnits.Count, midPointY / model.enemyUnits.Count];
+    }
+    
+    return [0, 0];
 }
 
 function findNearbyNonAttackedEnemy(pos)
@@ -58,34 +58,27 @@ function findNearbyNonAttackedEnemy(pos)
 function wander(myUnit)
 {
     let destination = [myUnit.pos.x - 1 + Math.floor(Math.random() * 3), myUnit.pos.y - 1 + Math.floor(Math.random() * 3)];
-    myUnit.control.MoveTo(destination);
+    myUnit.MoveTo(destination);
 }
 
 var nearbyDeposit = undefined;
 
 let instructions =
     [
-        /*0*/{ path: [[-1, 0]] },
-        /*1*/{ path: [[0, -1]] },
-        /*2*/{ path: [[0, 0]] },
-        /*3*/{ path: [[1, 0]] },
-        /*4*/{ path: [[0, 1]] },
-        /*5*/{ path: [[1, 1]] },
-        /*6*/{ path: [[1, -2], [-1, -2], [-1, -1]] },
-        /*7*/{ path: [[1, -1]] },
-        /*8*/{ path: [[-1, 1]] }
+        /*0*/{path: [[-1, 0]]},
+        /*1*/{path: [[0, -1]]},
+        /*2*/{path: [[0, 0]]},
+        /*3*/{path: [[1, 0]]},
+        /*4*/{path: [[0, 1]]},
+        /*5*/{path: [[1, 1]]},
+        /*6*/{path: [[1, -2], [-1, -2], [-1, -1]]},
+        /*7*/{path: [[1, -1]]},
+        /*8*/{path: [[-1, 1]]}
     ];
 
 
 export function tick()
 {
-
-
-    let enemyCount = 0;
-    for (let enemyUnit of model.enemyUnits)
-        enemyCount++;
-    //log(enemyCount);
-
     let midPoint = enemyCloudMiddle();
     //log("" + midPoint[0] + ", " + midPoint[1]);
 
@@ -102,7 +95,7 @@ export function tick()
         //let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 100000);
         let nearbyEnemyUnit = findNearbyNonAttackedEnemy(myUnit.pos);
         if (nearbyEnemyUnit)
-            if (myUnit.control.Attack(nearbyEnemyUnit) == Result.Ok)
+            if (myUnit.Attack(nearbyEnemyUnit) == Result.Ok)
             {
                 nearbyEnemyUnit.attackers = nearbyEnemyUnit.attackers + 1;
                 continue;
@@ -116,7 +109,7 @@ export function tick()
             let instruction = instructions[iUnit];
 
             let requiredPos = [nearbyDeposit.pos.x + instruction.path[instruction.path.length - 1][0], nearbyDeposit.pos.y + instruction.path[instruction.path.length - 1][1]];
-            if(myUnit.pos.x != requiredPos[0] || myUnit.pos.y != requiredPos[1])
+            if (myUnit.pos.x != requiredPos[0] || myUnit.pos.y != requiredPos[1])
             {
                 let iPoint = instruction.path.length - 1;
                 for (; iPoint >= 0; --iPoint)
@@ -124,21 +117,21 @@ export function tick()
                     let requiredPos = [nearbyDeposit.pos.x + instruction.path[iPoint][0], nearbyDeposit.pos.y + instruction.path[iPoint][1]];
 
 
-                    if (myUnit.control.MoveTo(requiredPos) === Result.Ok)
+                    if (myUnit.MoveTo(requiredPos) === Result.Ok)
                         break;
                 }
-                if(iPoint < 0)
+                if (iPoint < 0)
                     log("ohohohoh " + iUnit);
             }
         }
 
-        if (myUnit.control.Produce() == Result.Ok)
+        if (myUnit.Produce() == Result.Ok)
             continue;
 
-        if (myUnit.control.Mine(nearbyDeposit) == Result.Ok)
+        if (myUnit.Mine(nearbyDeposit) == Result.Ok)
             continue;
 
         if (iUnit >= instructions.length)
-            myUnit.control.MoveTo(midPoint);
+            myUnit.MoveTo(midPoint);
     }
 }

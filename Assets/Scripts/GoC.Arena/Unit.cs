@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
@@ -11,8 +10,7 @@ namespace GoC.Arena
 {
     [RequireComponent(typeof(Hull))]
     [RequireComponent(typeof(Storage))]
-    [RequireComponent(typeof(UnitControl))]
-    public class Unit : MonoBehaviour, IUnit
+    public class Unit : MonoBehaviour
     {
         private struct AttackCommand
         {
@@ -42,7 +40,6 @@ namespace GoC.Arena
             public int2 targetPosition;
         }
 
-        [SerializeField] private Team _team;
         [SerializeField] private UnitConfig _config;
         [Space]
         [SerializeField] private VisualEffect _attackEffect;
@@ -62,6 +59,8 @@ namespace GoC.Arena
         private ExposedProperty _productionEffectSpawnPositionProperty;
         private ExposedProperty _productionEffectColorProperty;
 
+        private Team _team;
+        
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
         private GiveCommand? _giveCommand;
@@ -74,9 +73,6 @@ namespace GoC.Arena
         private Storage _myStorage;
         private Storage myStorage => _myStorage ??= GetComponent<Storage>();
 
-        private UnitControl _myUnitControl;
-        private UnitControl myUnitControl => _myUnitControl ??= GetComponent<UnitControl>();
-
         private static readonly int[] EMPTY_INIT_STORAGE = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
 
         
@@ -87,10 +83,9 @@ namespace GoC.Arena
         
         public Result CanMine(object targetObject)
         {
-            if (targetObject is not MonoBehaviour target)
+            if (targetObject is not Deposit targetDeposit)
                 return Result.InvalidTarget;
 
-            Deposit targetDeposit = target.GetComponent<Deposit>();
             if (targetDeposit == null)
                 return Result.InvalidTarget;
 
@@ -105,7 +100,6 @@ namespace GoC.Arena
 
         public IHull hull => myHull;
         public IStorage storage => myStorage;
-        public IUnitControl control => _team.arena.executingTeamId == teamId ? myUnitControl : null;
 
 
         public Result Attack(object targetObject)
@@ -113,14 +107,14 @@ namespace GoC.Arena
             if (busy)
                 return Result.Busy;
             
-            if (targetObject is not MonoBehaviour target)
+            if (targetObject is not ExposedUnit targetExposedUnit)
                 return Result.InvalidTarget;
 
-            Hull targetHull = target.GetComponent<Hull>();
+            Hull targetHull = targetExposedUnit.unit.GetComponent<Hull>();
             if (targetHull == null)
                 return Result.InvalidTarget;
 
-            if (distance(pos, target.transform.position.ToArenaPos()) > 3)
+            if (distance(pos, targetExposedUnit.unit.transform.position.ToArenaPos()) > 3)
                 return Result.OutOfRange;
 
             _attackCommand = new AttackCommand { targetHull = targetHull };
@@ -150,13 +144,13 @@ namespace GoC.Arena
             if (amount <= 0)
                 return Result.InvalidArgument;
 
-            if (targetObject is not MonoBehaviour target)
+            if (targetObject is not ExposedUnit targetExposedUnit)
                 return Result.InvalidTarget;
 
-            if (distance(pos, target.transform.position.ToArenaPos()) > 1)
+            if (distance(pos, targetExposedUnit.unit.transform.position.ToArenaPos()) > 1)
                 return Result.OutOfRange;
 
-            Storage targetStorage = target.GetComponent<Storage>();
+            Storage targetStorage = targetExposedUnit.unit.GetComponent<Storage>();
             if (targetStorage == null)
                 return Result.InvalidTarget;
 
@@ -194,29 +188,6 @@ namespace GoC.Arena
             };
             
             return Result.Ok;
-        }
-
-        public Result MoveTo(object target)
-        {
-            if (busy)
-                return Result.Busy;
-            
-            switch (target)
-            {
-                case int2 targetPos:
-                    return MoveTo(targetPos);
-
-                case MonoBehaviour targetMonoBehaviour:
-                    int2 targetMonoBehaviourPos = targetMonoBehaviour.transform.position.ToArenaPos();
-                    return MoveTo(targetMonoBehaviourPos);
-
-                case object[] { Length: 2 } targetObjArr:
-                    if (targetObjArr[0] is double x && targetObjArr[1] is double y)
-                        return MoveTo(int2((int)x, (int)y));
-                    break;
-            }
-
-            return Result.InvalidTarget;
         }
 
         public Result MoveTo(int2 p)
@@ -303,7 +274,7 @@ namespace GoC.Arena
 
                         Unit unit = Instantiate(_fabricatedUnitPrototype, produceCommand.productionPos.ToUnityPos(), Quaternion.identity);
                         unit.Setup(_team, _config.product);
-                        _team.Register(unit);
+                        _team.arena.Register(unit);
 
                         _produceCommand = null;
                     }
@@ -321,7 +292,7 @@ namespace GoC.Arena
 
             if (myHull.BeforeTick() == Hull.State.Destroyed)
             {
-                _team.Unregister(this);
+                _team.arena.Unregister(this);
 
                 _team.arena.grid[pos]--;
 

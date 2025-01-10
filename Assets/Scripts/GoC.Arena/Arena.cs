@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using GoC.ScriptingApi;
 using Jint;
 using Jint.Native;
@@ -21,10 +20,9 @@ namespace GoC.Arena
 
     public struct TeamRecord
     {
-        public Engine engine;
         public Team team;
+        public Engine engine;
         public JsValue tickFunction;
-        public IEnumerable<IUnit> enemyUnits;
     }
     
     public class Arena : MonoBehaviour, IArena
@@ -32,17 +30,29 @@ namespace GoC.Arena
         [SerializeField] private ArenaConfig _config;
         [Space]
         [SerializeField] private VisualEffect _gridEffect;
-        [SerializeField] private Team _teamPrefab;
         [SerializeField] private Unit _unitPrefab;
         [SerializeField] private Deposit _depositPrefab;
         
         private Grid<int> _grid;
         private readonly List<Deposit> _deposits = new();
         private readonly List<Deposit> _depositsCache = new();
-        private readonly Dictionary<Team, TeamRecord> _teamRecords = new();
+
+        private readonly List<ExposedUnit> _units = new();
+        
+        private readonly List<TeamRecord> _teamRecords = new();
         private float _tickCooldown;
         private Team _executingTeam;
 
+        
+        public uint currentTick { get; private set; } 
+        public int executingTeamId => _executingTeam.teamId;
+
+        public IGrid<int> grid => _grid;
+
+        public IReadOnlyList<IDeposit> deposits => _deposits;
+        public IReadOnlyList<IUnit> units => _units;
+
+        
         public void Setup(ArenaConfig initConfig)
         {
             _config = initConfig;
@@ -52,87 +62,47 @@ namespace GoC.Arena
             _gridEffect.SetFloat("mapSize", _config.size.x - 1);
             _gridEffect.Play();
         }
-        
-        public void CreateTeams(params TeamConfig[] teamConfigs)
-        {
-            for (int iTeam = 0; iTeam < teamConfigs.Length; iTeam++)
-            {
-                TeamConfig teamConfig = teamConfigs[iTeam];
-                Team team = CreateTeam(teamConfig);
-
-                CreateTeamLandscape(team, iTeam, teamConfigs.Length);
-            }
-        }
 
         public void Dispose()
         {
             if (gameObject != null)
                 Destroy(gameObject);
         }
-
-        public uint currentTick { get; private set; } 
-        public int executingTeamId => _executingTeam.teamId;
-
-        public IGrid<int> grid => _grid;
         
-        public IEnumerable<IUnit> units { get; private set; }
-
-        public IReadOnlyList<IDeposit> deposits => _deposits;
-
-        public IEnumerable<IUnit> GetEnemyUnits(Team team) => _teamRecords[team].enemyUnits;
-        
-        public void Register(Team team)
+        public void CreateTeams(params TeamConfig[] teamConfigs)
         {
-            if (_teamRecords.ContainsKey(team))
-                throw new Exception($"Team {team} is already registered in the arena {this}");
-            
-            Engine engine = EngineFactory.Create();
-            engine.SetValue("model", team);
-            
-            ObjectInstance teamModule = engine.Modules.Import(team.scriptFile);
-            JsValue tickFunction = teamModule.Get("tick");
-
-            if (tickFunction.IsObject())
-                _teamRecords.Add(
-                    team,
-                    new TeamRecord
-                    {
-                        team = team,
-                        engine = engine,
-                        tickFunction = tickFunction,
-                        enemyUnits = _teamRecords.Where(kvp => kvp.Key != team).SelectMany(kvp => kvp.Value.team.myUnits),
-                    }
-                );
-            else
-                Debug.LogWarning("Team script doesn't export the tick() function", team);
-        }
-
-        public void Unregister(Team team)
-        {
-            if (_teamRecords.TryGetValue(team, out TeamRecord teamRecord))
+            for (int iTeam = 0; iTeam < teamConfigs.Length; iTeam++)
             {
-                teamRecord.engine.Dispose();
-                _teamRecords.Remove(team);
+                TeamConfig teamConfig = teamConfigs[iTeam];
+                Team team = new Team(iTeam, this, teamConfig);
+
+                Engine engine = EngineFactory.Create();
+                engine.SetValue("model", team);
+            
+                ObjectInstance teamModule = engine.Modules.Import(teamConfig.scriptFile);
+                JsValue tickFunction = teamModule.Get("tick");
+
+                if (tickFunction.IsObject())
+                    _teamRecords.Add(
+                        new TeamRecord
+                        {
+                            team = team,
+                            engine = engine,
+                            tickFunction = tickFunction,
+                        }
+                    );
+                else
+                    Debug.LogWarning($"Team script {teamConfig.scriptFile} doesn't export the tick() function");
+            }
+
+            // NOTE: create all teams before adding units so that enemy unit lists get properly populated for all teams
+            for (int iTeam = 0; iTeam < _teamRecords.Count; iTeam++)
+            {
+                Team team = _teamRecords[iTeam].team;
+                CreateTeamLandscape(team, iTeam, _teamRecords.Count);
             }
         }
         
-        public void Register(Deposit deposit) => _deposits.Add(deposit);
-        public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
-
-
-        private void Awake()
-        {
-            units ??= _teamRecords.Values.SelectMany(teamRecord => teamRecord.team.myUnits);
-        }
-        
-        private Team CreateTeam(TeamConfig teamConfig)
-        {
-            Team team = Instantiate(_teamPrefab);
-            team.Setup(this, teamConfig);
-            Register(team);
-            return team;
-        }
-
         private void CreateTeamLandscape(Team team, int iTeam, int teamsCount)
         {
             int2 baseFactoryPos = _grid.size / 4;
@@ -143,12 +113,41 @@ namespace GoC.Arena
             int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
             Unit unit = Instantiate(_unitPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
             unit.Setup(team, _config.unitConfig);
-            team.Register(unit);
+            Register(unit);
 
             int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
             Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
             deposit.Setup(this, _config.depositConfig);
             Register(deposit);
+        }
+
+        public void Register(Deposit deposit) => _deposits.Add(deposit);
+        public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
+
+        public void Register(Unit unit)
+        {
+            _units.Add(new ExposedUnit(unit));
+            
+            foreach (TeamRecord teamRecord in _teamRecords)
+            {
+                if (teamRecord.team.teamId == unit.teamId)
+                    teamRecord.team.AddMyUnit(unit);
+                else
+                    teamRecord.team.AddEnemyUnit(unit);
+            }
+        }
+
+        public void Unregister(Unit unit)
+        {
+            _units.RemoveAll(exposedUnit => exposedUnit.unit == unit);
+            
+            foreach (TeamRecord teamRecord in _teamRecords)
+            {
+                if (teamRecord.team.teamId == unit.teamId)
+                    teamRecord.team.RemoveMyUnit(unit);
+                else
+                    teamRecord.team.RemoveEnemyUnit(unit);
+            }
         }
 
         private void OnDestroy()
@@ -157,17 +156,18 @@ namespace GoC.Arena
             {
                 _depositsCache.AddRange(_deposits);
                 foreach (Deposit deposit in _depositsCache)
-                    Destroy(deposit.gameObject);
+                    if (deposit != null)
+                        Destroy(deposit.gameObject);
             }
             finally
             {
                 _depositsCache.Clear();
             }
 
-            foreach (TeamRecord teamRecord in _teamRecords.Values)
+            foreach (TeamRecord teamRecord in _teamRecords)
             {
                 teamRecord.engine.Dispose();
-                Destroy(teamRecord.team.gameObject);
+                teamRecord.team.Dispose();
             }
             
             _teamRecords.Clear();
@@ -194,10 +194,10 @@ namespace GoC.Arena
                 //System.Diagnostics.Stopwatch tickStopwatch = System.Diagnostics.Stopwatch.StartNew();
                 try
                 {
-                    foreach (TeamRecord teamRecord in _teamRecords.Values)
+                    foreach (TeamRecord teamRecord in _teamRecords)
                         teamRecord.team.BeforeTick();
 
-                    foreach (TeamRecord teamRecord in _teamRecords.Values)
+                    foreach (TeamRecord teamRecord in _teamRecords)
                     {
                         try
                         {
@@ -206,7 +206,7 @@ namespace GoC.Arena
                         }
                         catch (Exception exception)
                         {
-                            Debug.LogException(exception, teamRecord.team);
+                            Debug.LogException(exception);
                         }
                         finally
                         {
@@ -214,7 +214,7 @@ namespace GoC.Arena
                         }
                     }
 
-                    foreach (TeamRecord teamRecord in _teamRecords.Values)
+                    foreach (TeamRecord teamRecord in _teamRecords)
                         teamRecord.team.AfterTick();
                 }
                 finally

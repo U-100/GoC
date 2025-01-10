@@ -1,34 +1,51 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GoC.ScriptingApi;
-using UnityEngine;
 
 namespace GoC.Arena
 {
-    public class Team : MonoBehaviour, IModel
+    public class Team : IModel, IDisposable
     {
-        [SerializeField] private Arena _arena;
-        [SerializeField] private TeamConfig _config;
+        private Arena _arena;
+        private TeamConfig _config;
 
-        private readonly List<Unit> _myUnits = new();
-        private readonly List<Unit> _myUnitsCache = new();
+        private readonly List<ExposedUnitControl> _myUnits = new(); 
+        private readonly List<ExposedUnit> _enemyUnits = new();
+
+        private readonly List<ExposedUnitControl> _myUnitsCache = new();
         
         public Arena arena => _arena;
-        public string scriptFile => _config.scriptFile;
         public TeamSkin skin => _config.teamSkin;
 
         
-        public int teamId => GetInstanceID();
+        public int teamId { get; }
 
-        public IReadOnlyList<IUnit> myUnits => _myUnits;
-        public IEnumerable<IUnit> units => _arena.units;
-        public IEnumerable<IUnit> enemyUnits => _arena.GetEnemyUnits(this);
+        public IReadOnlyList<IUnitControl> myUnits => _myUnits;
+        public IReadOnlyList<IUnit> units => _arena.units;
+        public IReadOnlyList<IUnit> enemyUnits => _enemyUnits;
         public IReadOnlyList<IDeposit> deposits => _arena.deposits;
 
 
-        public void Setup(Arena initArena, TeamConfig initConfig)
+        public Team(int initTeamId, Arena initArena, TeamConfig initConfig)
         {
+            teamId = initTeamId;
             _arena = initArena;
             _config = initConfig;
+        }
+        
+        public void Dispose()
+        {
+            try
+            {
+                _myUnitsCache.AddRange(_myUnits);
+                foreach (ExposedUnitControl myUnit in _myUnitsCache)
+                    if (myUnit.unit != null)
+                        UnityEngine.Object.Destroy(myUnit.unit.gameObject);
+            }
+            finally
+            {
+                _myUnitsCache.Clear();
+            }
         }
 
         public void BeforeTick()
@@ -36,8 +53,8 @@ namespace GoC.Arena
             try
             {
                 _myUnitsCache.AddRange(_myUnits);
-                foreach (Unit unit in _myUnitsCache)
-                    unit.BeforeTick();
+                foreach (ExposedUnitControl myUnit in _myUnitsCache)
+                    myUnit.unit.BeforeTick();
             }
             finally
             {
@@ -50,8 +67,8 @@ namespace GoC.Arena
             try
             {
                 _myUnitsCache.AddRange(_myUnits);
-                foreach (Unit unit in _myUnitsCache)
-                    unit.AfterTick();
+                foreach (ExposedUnitControl myUnit in _myUnitsCache)
+                    myUnit.unit.AfterTick();
             }
             finally
             {
@@ -59,26 +76,24 @@ namespace GoC.Arena
             }
         }
 
-        public void Register(Unit unit) => _myUnits.Add(unit);
-        public void Unregister(Unit unit) => _myUnits.Remove(unit);
-        
-        
-        private void OnDestroy()
+        public void AddMyUnit(Unit unit)
         {
-            if(_arena != null)
-                _arena.Unregister(this);
+            _myUnits.Add(new ExposedUnitControl(unit));
+        }
 
-            try
-            {
-                _myUnitsCache.AddRange(_myUnits);
-                foreach (Unit myUnit in _myUnitsCache)
-                    if (myUnit != null)
-                        Destroy(myUnit.gameObject);
-            }
-            finally
-            {
-                _myUnitsCache.Clear();
-            }
+        public void AddEnemyUnit(Unit unit)
+        {
+            _enemyUnits.Add(new ExposedUnit(unit));
+        }
+        
+        public void RemoveMyUnit(Unit unit)
+        {
+            _myUnits.RemoveAll(exposedUnitControl => exposedUnitControl.unit == unit);
+        }
+
+        public void RemoveEnemyUnit(Unit unit)
+        {
+            _enemyUnits.RemoveAll(exposedUnitControl => exposedUnitControl.unit == unit);
         }
     }
 }

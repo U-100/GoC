@@ -803,10 +803,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7c3c0906f79369c49a47726636e12d8b,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8826672916308196837}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7c3c0906f79369c49a47726636e12d8b,
-        type: 3}
-      insertIndex: -1
       addedObject: {fileID: 8391022737454312585}
   m_SourcePrefab: {fileID: 100100000, guid: 7c3c0906f79369c49a47726636e12d8b, type: 3}
 --- !u!1 &2468237046736121382 stripped
@@ -845,18 +841,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _capacityPerSubstance: 0
   _content: 0000000000000000
---- !u!114 &8826672916308196837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2468237046736121382}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 628862df53714d488d9ca8d8f7fc0f05, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8391022737454312585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -869,7 +853,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4528f46c50cb4c1a9bf2d942c5193a37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _team: {fileID: 0}
   _config: {fileID: 0}
   _attackEffect: {fileID: 5868796379976398687}
   _mineEffect: {fileID: 3597055597159338398}

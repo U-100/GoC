@@ -40,16 +40,6 @@ namespace GoC.ScriptingApi
         public int integrity { get; }
     }
     
-    public interface IUnitControl
-    {
-        Result Attack(object target);
-        Result Mine(object target);
-        Result Give(object target, Substance.Type substanceType, int amount);
-        Result Produce();
-        Result MoveTo(object target);
-        Result MoveTo(int x, int y);
-    }
-    
     public interface IUnit
     {
         int teamId { get; } // owner team id
@@ -61,7 +51,17 @@ namespace GoC.ScriptingApi
 
         public IHull hull { get; }
         public IStorage storage { get; }
-        public IUnitControl control { get; }
+    }
+    
+    public interface IUnitControl : IUnit
+    {
+        Result Attack(object target);
+        Result Mine(object target);
+        Result Give(object target, Substance.Type substanceType, int amount);
+        Result Produce();
+        Result MoveTo(int2 p);
+        Result MoveTo(int x, int y);
+        Result MoveTo(int[] p);
     }
     
     public interface IDeposit
@@ -75,9 +75,9 @@ namespace GoC.ScriptingApi
     {
         int teamId { get; } // team id
 
-        IReadOnlyList<IUnit> myUnits { get; }
-        IEnumerable<IUnit> units { get; }
-        IEnumerable<IUnit> enemyUnits { get; }
+        IReadOnlyList<IUnitControl> myUnits { get; }
+        IReadOnlyList<IUnit> units { get; }
+        IReadOnlyList<IUnit> enemyUnits { get; }
         
         IReadOnlyList<IDeposit> deposits { get; }
     }
