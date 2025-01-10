@@ -17,7 +17,7 @@ function findNearby(set, pos, maxDistance)
 
 export function tick()
 {
-    for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
+    for (let iUnit = 0; iUnit < model.myUnits.count; ++iUnit)
     {
         let myUnit = model.myUnits[iUnit];
 
@@ -26,11 +26,11 @@ export function tick()
 
         let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 100000);
         if (nearbyEnemyUnit)
-            if (myUnit.Attack(nearbyEnemyUnit) == Result.Ok)
+            if (myUnit.attack(nearbyEnemyUnit) == Result.Ok)
                 continue;
 
         if (myUnit.storage.content[Substance.Type.Energy] >= 2)
-            if (myUnit.Produce() == Result.Ok)
+            if (myUnit.produce() == Result.Ok)
                 continue;
 
         let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
@@ -38,20 +38,20 @@ export function tick()
         {
             if (iUnit == 0 && myUnit.pos !== nearbyDeposit.pos)
             {
-                myUnit.MoveTo(nearbyDeposit.pos);
+                myUnit.moveTo(nearbyDeposit.pos);
                 continue;
             }
 
-            if (myUnit.Mine(nearbyDeposit) == Result.Ok)
+            if (myUnit.mine(nearbyDeposit) == Result.Ok)
                 continue;
             else if (iUnit < 2)
             {
-                myUnit.MoveTo(nearbyDeposit.pos);
+                myUnit.moveTo(nearbyDeposit.pos);
                 continue;
             }
         }
 
         if (nearbyEnemyUnit && iUnit > 10)
-            myUnit.MoveTo(nearbyEnemyUnit.pos);
+            myUnit.moveTo(nearbyEnemyUnit.pos);
     }
 }
