@@ -9,16 +9,16 @@ namespace GoC.Arena
         private readonly Func<IArena> _arenaFactory;
         private readonly ArenaConfig _arenaConfig;
         private readonly TeamSkin _playerTeamSkin;
-        private readonly TeamSkin _aiTeamSkin;
+        private readonly TeamConfig _aiTeamConfig;
         
         private IArena _currentArena;
 
-        public ArenaViewModel(Func<IArena> arenaFactory, ArenaConfig arenaConfig, TeamSkin playerTeamSkin, TeamSkin aiTeamSkin)
+        public ArenaViewModel(Func<IArena> arenaFactory, ArenaConfig arenaConfig, TeamSkin playerTeamSkin, TeamConfig aiTeamConfig)
         {
             _arenaFactory = arenaFactory;
             _arenaConfig = arenaConfig;
             _playerTeamSkin = playerTeamSkin;
-            _aiTeamSkin = aiTeamSkin;
+            _aiTeamConfig = aiTeamConfig;
             _codeVsAIScript = PlayerPrefs.GetString("USER_SCRIPT_PATH", "./TestStrategy.js");
         }
         
@@ -27,15 +27,14 @@ namespace GoC.Arena
         [CreateProperty] public bool isInCodeVsAIMenu { get; private set; }
 
         private string _codeVsAIScript;
-
-        [CreateProperty]
-        public string codeVsAIScript
+        [CreateProperty] public string codeVsAIScript
         {
             get => _codeVsAIScript;
             set => PlayerPrefs.SetString("USER_SCRIPT_PATH", _codeVsAIScript = value);
         }
         
         [CreateProperty] public bool isInHud { get; private set; }
+
         [CreateProperty] public bool isPaused => Time.timeScale == 0;
 
         public void PrepareCodeVsAI()
@@ -60,11 +59,8 @@ namespace GoC.Arena
         
         public void PlayCodeVsAI()
         {
-            Debug.Log($"Play \"{codeVsAIScript}\" vs. AI");
             TeamConfig playerTeamConfig = TeamConfig.Create(codeVsAIScript, _playerTeamSkin);
-            TeamConfig aiTeamConfig = TeamConfig.Create("./PvEBotStrategy.js", _aiTeamSkin);
-            
-            _currentArena.CreateTeams(playerTeamConfig, aiTeamConfig);
+            _currentArena.CreateTeams(playerTeamConfig, _aiTeamConfig);
             
             isInMainMenu = false;
             isInCodeVsAIMenu = false;

@@ -8,10 +8,10 @@ namespace GoC.Arena
         [SerializeField] private Arena _arenaPrefab;
         [SerializeField] private ArenaConfig _arenaConfig;
         [SerializeField] private TeamSkin _playerTeamSkin;
-        [SerializeField] private TeamSkin _aiTeamSkin;
+        [SerializeField] private TeamConfig _aiTeamConfig;
 
         private ArenaViewModel _arenaViewModel;
-        public ArenaViewModel arenaViewModel => _arenaViewModel ??= new ArenaViewModel(CreateArena, _arenaConfig, _playerTeamSkin, _aiTeamSkin);
+        private ArenaViewModel arenaViewModel => _arenaViewModel ??= new ArenaViewModel(CreateArena, _arenaConfig, _playerTeamSkin, _aiTeamConfig);
 
         void Start()
         {

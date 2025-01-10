@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 65830c3a5c4f456d88edc10390032697, type: 3}
-  m_Name: YellowTeamConfig
+  m_Name: AiTeamConfig
   m_EditorClassIdentifier: 
-  _scriptFile: ./TestStrategy.js
+  _scriptFile: ./PvEBotStrategy.js
   _teamSkin: {fileID: 11400000, guid: 7d8021e5dcf42fb4eb8963e597729b1e, type: 2}

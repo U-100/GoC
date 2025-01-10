@@ -773,7 +773,7 @@ MonoBehaviour:
     type: 3}
   _arenaConfig: {fileID: 11400000, guid: 710568fee22ecde4583d404871ab22e3, type: 2}
   _playerTeamSkin: {fileID: 11400000, guid: be8327babe068ab4abec1b9b91a4f030, type: 2}
-  _aiTeamSkin: {fileID: 11400000, guid: 7d8021e5dcf42fb4eb8963e597729b1e, type: 2}
+  _aiTeamConfig: {fileID: 11400000, guid: ca2e0570f7171af4dbb8733150349b47, type: 2}
 --- !u!1 &1672357007
 GameObject:
   m_ObjectHideFlags: 0
