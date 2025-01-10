@@ -20,16 +20,12 @@ function enemyCloudMiddle()
 {
     if (model.enemyUnits.Count > 0)
     {
-        let midPointX = 0;
-        let midPointY = 0;
+        let midPoint = new int2(0, 0);
 
         for (let enemyUnit of model.enemyUnits)
-        {
-            midPointX = midPointX + enemyUnit.pos.x;
-            midPointY = midPointY + enemyUnit.pos.y
-        }
+            midPoint = midPoint + enemyUnit.pos;
 
-        return [midPointX / model.enemyUnits.Count, midPointY / model.enemyUnits.Count];
+        return midPoint / model.enemyUnits.Count;
     }
     
     return [0, 0];
@@ -79,9 +75,6 @@ let instructions =
 
 export function tick()
 {
-    let midPoint = enemyCloudMiddle();
-    //log("" + midPoint[0] + ", " + midPoint[1]);
-
     for (let enemyUnit of model.enemyUnits)
         enemyUnit.attackers = 0;
 
@@ -132,6 +125,9 @@ export function tick()
             continue;
 
         if (iUnit >= instructions.length)
+        {
+            let midPoint = enemyCloudMiddle();
             myUnit.MoveTo(midPoint);
+        }
     }
 }
