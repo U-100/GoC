@@ -38,11 +38,15 @@ function wander(myUnit)
     myUnit.MoveTo(destination);
 }
 
+log("This is a test log message");
+logWarning("This is a test warning");
+logError("This is a test error");
+
 export function tick()
 {
     for (let enemyUnit of model.enemyUnits)
         enemyUnit.attackers = 0;
-
+    
     for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
     {
         let myUnit = model.myUnits[iUnit];

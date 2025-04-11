@@ -19,6 +19,8 @@ namespace GoC.Arena
             Engine engine = new Engine(Configure);
 
             engine.SetValue("log", new Action<object>(Debug.Log));
+            engine.SetValue("logWarning", new Action<object>(Debug.LogWarning));
+            engine.SetValue("logError", new Action<object>(Debug.LogError));
 
             engine.SetValue(nameof(Result), TypeReference.CreateTypeReference<Result>(engine));
             

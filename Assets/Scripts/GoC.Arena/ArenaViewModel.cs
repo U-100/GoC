@@ -20,8 +20,10 @@ namespace GoC.Arena
             _playerTeamSkin = playerTeamSkin;
             _aiTeamConfig = aiTeamConfig;
             _codeVsAIScript = PlayerPrefs.GetString("USER_SCRIPT_PATH", "./TestStrategy.js");
+
+            Application.logMessageReceived += OnLogMessageReceived;
         }
-        
+
         [CreateProperty] public bool isInMainMenu { get; private set; } = true;
 
         [CreateProperty] public bool isInCodeVsAIMenu { get; private set; }
@@ -36,6 +38,8 @@ namespace GoC.Arena
         [CreateProperty] public bool isInHud { get; private set; }
 
         [CreateProperty] public bool isPaused => Time.timeScale == 0;
+
+        [CreateProperty] public string log { get; private set; }
 
         public void PrepareCodeVsAI()
         {
@@ -99,6 +103,25 @@ namespace GoC.Arena
             
             _currentArena?.Dispose();
             _currentArena = null;
+        }
+
+        private void OnLogMessageReceived(string message, string stacktrace, LogType logType)
+        {
+            if (logType == LogType.Warning)
+                log += $"<color=#FFFF00>";
+            else if (logType != LogType.Log)
+                log += $"<color=#FF0000>";
+            
+            if (_currentArena != null)
+                log += $"[{_currentArena.currentTick,4}] ";
+
+            log += message + "\n";
+
+            if (logType != LogType.Log)
+                log += $"</color>";
+            
+            if (log.Length > 2000)
+                log = log.Substring(log.Length - 2000, 2000);
         }
     }
 }

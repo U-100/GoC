@@ -14,6 +14,8 @@ namespace GoC.Arena
 {
     public interface IArena : IDisposable
     {
+        public uint currentTick { get; }
+        
         void Setup(ArenaConfig initConfig);
         void CreateTeams(params TeamConfig[] teamConfigs);
     }

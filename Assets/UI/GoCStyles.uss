@@ -22,8 +22,8 @@ TextField TextInput#unity-text-input {
 }
 
 .goc-text {
-    color: rgb(0, 0, 0);
-    font-size: 20px;
+    color: rgb(80, 120, 231);
+    font-size: 28px;
 }
 
 .goc-button {

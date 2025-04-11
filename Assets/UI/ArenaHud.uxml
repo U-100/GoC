@@ -1,8 +1,13 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <engine:VisualElement style="flex-grow: 1;">
-        <engine:Label text="Pause" class="goc-subheader-text" style="position: absolute; top: 0; left: 0; width: 100%; -unity-text-align: middle-center; height: 100%;">
+        <engine:Label text="Pause" name="PauseLabel" class="goc-subheader-text" style="position: absolute; top: 0; left: 0; width: 100%; -unity-text-align: middle-center; height: 100%;">
             <Bindings>
                 <engine:DataBinding property="style.display" data-source-path="isPaused" data-source-type="GoC.Arena.ArenaViewModel, Assembly-CSharp" binding-mode="ToTarget" />
+            </Bindings>
+        </engine:Label>
+        <engine:Label text="???Log label is unbound???" name="LogLabel" class="goc-text" style="position: absolute; width: 100%; -unity-text-align: lower-left; height: 38%; bottom: 0; left: 0; white-space: pre-wrap; background-color: rgba(0, 0, 0, 0.75); overflow: hidden;">
+            <Bindings>
+                <engine:DataBinding property="text" data-source-path="log" binding-mode="ToTarget" update-trigger="EveryUpdate" />
             </Bindings>
         </engine:Label>
         <engine:VisualElement style="flex-direction: row; justify-content: flex-end; padding-top: 25px; padding-right: 25px; padding-bottom: 25px; padding-left: 25px;">
