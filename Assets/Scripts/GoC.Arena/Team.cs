@@ -6,8 +6,8 @@ namespace GoC.Arena
 {
     public class Team : IModel, IDisposable
     {
-        private Arena _arena;
-        private TeamConfig _config;
+        private readonly Arena _arena;
+        private readonly TeamConfig _config;
 
         private readonly List<ExposedUnitControl> _myUnits = new(); 
         private readonly List<ExposedUnit> _enemyUnits = new();

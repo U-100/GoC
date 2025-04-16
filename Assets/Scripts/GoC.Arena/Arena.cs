@@ -45,6 +45,7 @@ namespace GoC.Arena
         private float _tickCooldown;
         private Team _executingTeam;
 
+        public ArenaConfig config => _config;
         
         public uint currentTick { get; private set; } 
         public int executingTeamId => _executingTeam.teamId;
