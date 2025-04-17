@@ -9,6 +9,9 @@ namespace GoC.Arena
         [SerializeField] private int2 _size;
         public int2 size => _size;
 
+        [SerializeField] private ProductionConfig _productionConfig;
+        public ProductionConfig productionConfig => _productionConfig;
+        
         [SerializeField] private UnitConfig _unitConfig;
         public UnitConfig unitConfig => _unitConfig;
 

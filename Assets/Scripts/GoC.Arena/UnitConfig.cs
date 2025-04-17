@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace GoC.Arena
 {
@@ -11,7 +10,7 @@ namespace GoC.Arena
     }
     
     [CreateAssetMenu]
-    public class UnitConfig : ScriptableObject
+    public class UnitConfig : ScriptableObject, IUnitConfig
     {
         [SerializeField] private int _integrity;
         public int integrity => _integrity;
@@ -21,9 +20,6 @@ namespace GoC.Arena
 
         [SerializeField] private int _storageCapacityPerSubstance;
         public int storageCapacityPerSubstance => _storageCapacityPerSubstance;
-
-        [SerializeField] private int[] _productionCost;
-        public IReadOnlyList<int> productionCost => _productionCost;
 
         [SerializeField] private int _productionTime;
         public int productionTime => _productionTime;

@@ -98,6 +98,30 @@ namespace GoC.Arena
             return Result.Ok;
         }
 
+        public Result CanProduce(int movementTier, int hullTier, int storageTier)
+        {
+            ProductionConfig productionConfig = _team.arena.config.productionConfig;
+            
+            for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
+            {
+                int cost = 0;
+                
+                if (productionConfig.movementTiers[movementTier].productionCost.Count > substanceIndex)
+                    cost += productionConfig.movementTiers[movementTier].productionCost[substanceIndex];
+                
+                if (productionConfig.hullTiers[hullTier].productionCost.Count > substanceIndex)
+                    cost += productionConfig.hullTiers[hullTier].productionCost[substanceIndex];
+                
+                if (productionConfig.storageTiers[storageTier].productionCost.Count > substanceIndex)
+                    cost += productionConfig.storageTiers[storageTier].productionCost[substanceIndex];
+
+                if (storage.content[substanceIndex] < cost)
+                    return Result.NotEnoughSubstance;
+            }
+            
+            return Result.Ok;
+        }
+
         public IHull hull => myHull;
         public IStorage storage => myStorage;
 
@@ -175,13 +199,10 @@ namespace GoC.Arena
             if (busy)
                 return Result.Busy;
 
-            for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
-            {
-                int cost = _config.productionCost[substanceIndex];
-                if (myStorage.content[substanceIndex] < cost)
-                    return Result.NotEnoughSubstance;
-            }
-
+            Result canProduce = CanProduce(0, 0, 0);
+            if (canProduce != Result.Ok)
+                return canProduce;
+            
             _produceCommand = new ProduceCommand
             {
                 ticksLeft = _config.productionTime
@@ -336,8 +357,22 @@ namespace GoC.Arena
                 ProduceCommand produceCommand = _produceCommand.Value;
                 if(produceCommand.ticksLeft == _config.productionTime) // just started production
                 {
-                    for (int substanceIndex = 0; substanceIndex < _config.productionCost.Count; substanceIndex++)
-                        myStorage.Withdraw((Substance.Type)substanceIndex, _config.productionCost[substanceIndex]);
+                    ProductionConfig productionConfig = _team.arena.config.productionConfig;
+
+                    int movementTierIndex = 0; // TODO: should be taken from _produceCommand
+                    MovementTier movementTier = productionConfig.movementTiers[movementTierIndex];
+                    for (int substanceIndex = 0; substanceIndex < movementTier.productionCost.Count; substanceIndex++)
+                        myStorage.Withdraw((Substance.Type)substanceIndex, movementTier.productionCost[substanceIndex]);
+
+                    int hullTierIndex = 0; // TODO: should be taken from _produceCommand
+                    HullTier hullTier = productionConfig.hullTiers[hullTierIndex];
+                    for (int substanceIndex = 0; substanceIndex < hullTier.productionCost.Count; substanceIndex++)
+                        myStorage.Withdraw((Substance.Type)substanceIndex, hullTier.productionCost[substanceIndex]);
+
+                    int storageTierIndex = 0; // TODO: should be taken from _produceCommand
+                    StorageTier storageTier = productionConfig.storageTiers[storageTierIndex];
+                    for (int substanceIndex = 0; substanceIndex < storageTier.productionCost.Count; substanceIndex++)
+                        myStorage.Withdraw((Substance.Type)substanceIndex, storageTier.productionCost[substanceIndex]);
 
                     produceCommand.productionPos = _team.arena.grid.FindEmptyCellAround(pos);
                     
