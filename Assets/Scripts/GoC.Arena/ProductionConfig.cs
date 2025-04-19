@@ -45,5 +45,26 @@ namespace GoC.Arena
         
         [SerializeField] private StorageTier[] _storageTiers;
         public IReadOnlyList<StorageTier> storageTiers => _storageTiers;
+
+        public bool CheckProductionParams(ProductionParams productionParams) =>
+            productionParams.movementTier < movementTiers.Count
+            && productionParams.hullTier < hullTiers.Count
+            && productionParams.storageTier < storageTiers.Count;
+
+        public int ProductionCost(ProductionParams productionParams, int substanceIndex)
+        {
+            int cost = 0;
+                
+            if (movementTiers[productionParams.movementTier].productionCost.Count > substanceIndex)
+                cost += movementTiers[productionParams.movementTier].productionCost[substanceIndex];
+                
+            if (hullTiers[productionParams.hullTier].productionCost.Count > substanceIndex)
+                cost += hullTiers[productionParams.hullTier].productionCost[substanceIndex];
+                
+            if (storageTiers[productionParams.storageTier].productionCost.Count > substanceIndex)
+                cost += storageTiers[productionParams.storageTier].productionCost[substanceIndex];
+
+            return cost;
+        }
     }
 }

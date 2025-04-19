@@ -15,6 +15,7 @@ namespace GoC.Arena
         public bool busy => unit.busy;
         
         public Result CanMine(object target) => unit.CanMine(target);
+        public Result CanProduce(object productionParamsObject) => unit.CanProduce(ProductionParams.FromObject(productionParamsObject));
 
         public IHull hull => unit.hull;
         public IStorage storage => unit.storage;

@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
 using UnityEngine.VFX.Utility;
+
 using static Unity.Mathematics.math;
 
 namespace GoC.Arena
@@ -33,6 +34,7 @@ namespace GoC.Arena
         {
             public int ticksLeft;
             public int2 productionPos;
+            public ProductionParams productionParams;
         }
 
         private struct MoveCommand
@@ -97,27 +99,15 @@ namespace GoC.Arena
 
             return Result.Ok;
         }
-
-        public Result CanProduce(int movementTier, int hullTier, int storageTier)
+        
+        public Result CanProduce(ProductionParams productionParams)
         {
-            ProductionConfig productionConfig = _team.arena.config.productionConfig;
+            if (!_team.arena.config.productionConfig.CheckProductionParams(productionParams))
+                return Result.InvalidArgument;
             
             for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
-            {
-                int cost = 0;
-                
-                if (productionConfig.movementTiers[movementTier].productionCost.Count > substanceIndex)
-                    cost += productionConfig.movementTiers[movementTier].productionCost[substanceIndex];
-                
-                if (productionConfig.hullTiers[hullTier].productionCost.Count > substanceIndex)
-                    cost += productionConfig.hullTiers[hullTier].productionCost[substanceIndex];
-                
-                if (productionConfig.storageTiers[storageTier].productionCost.Count > substanceIndex)
-                    cost += productionConfig.storageTiers[storageTier].productionCost[substanceIndex];
-
-                if (storage.content[substanceIndex] < cost)
+                if (storage.content[substanceIndex] < _team.arena.config.productionConfig.ProductionCost(productionParams, substanceIndex))
                     return Result.NotEnoughSubstance;
-            }
             
             return Result.Ok;
         }
@@ -194,18 +184,19 @@ namespace GoC.Arena
             return Result.Ok;
         }
         
-        public Result Produce()
+        public Result Produce(ProductionParams productionParams)
         {
             if (busy)
                 return Result.Busy;
 
-            Result canProduce = CanProduce(0, 0, 0);
+            Result canProduce = CanProduce(productionParams);
             if (canProduce != Result.Ok)
                 return canProduce;
             
             _produceCommand = new ProduceCommand
             {
-                ticksLeft = _config.productionTime
+                ticksLeft = _config.productionTime,
+                productionParams = productionParams,
             };
             
             return Result.Ok;
@@ -357,22 +348,8 @@ namespace GoC.Arena
                 ProduceCommand produceCommand = _produceCommand.Value;
                 if(produceCommand.ticksLeft == _config.productionTime) // just started production
                 {
-                    ProductionConfig productionConfig = _team.arena.config.productionConfig;
-
-                    int movementTierIndex = 0; // TODO: should be taken from _produceCommand
-                    MovementTier movementTier = productionConfig.movementTiers[movementTierIndex];
-                    for (int substanceIndex = 0; substanceIndex < movementTier.productionCost.Count; substanceIndex++)
-                        myStorage.Withdraw((Substance.Type)substanceIndex, movementTier.productionCost[substanceIndex]);
-
-                    int hullTierIndex = 0; // TODO: should be taken from _produceCommand
-                    HullTier hullTier = productionConfig.hullTiers[hullTierIndex];
-                    for (int substanceIndex = 0; substanceIndex < hullTier.productionCost.Count; substanceIndex++)
-                        myStorage.Withdraw((Substance.Type)substanceIndex, hullTier.productionCost[substanceIndex]);
-
-                    int storageTierIndex = 0; // TODO: should be taken from _produceCommand
-                    StorageTier storageTier = productionConfig.storageTiers[storageTierIndex];
-                    for (int substanceIndex = 0; substanceIndex < storageTier.productionCost.Count; substanceIndex++)
-                        myStorage.Withdraw((Substance.Type)substanceIndex, storageTier.productionCost[substanceIndex]);
+                    for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
+                        myStorage.Withdraw((Substance.Type)substanceIndex, _team.arena.config.productionConfig.ProductionCost(produceCommand.productionParams, substanceIndex));
 
                     produceCommand.productionPos = _team.arena.grid.FindEmptyCellAround(pos);
                     

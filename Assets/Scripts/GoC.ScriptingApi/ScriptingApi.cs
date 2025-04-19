@@ -48,6 +48,7 @@ namespace GoC.ScriptingApi
         bool busy { get; }
         
         Result CanMine(object target);
+        Result CanProduce(object productionParamsObject);
 
         public IHull hull { get; }
         public IStorage storage { get; }
@@ -58,7 +59,7 @@ namespace GoC.ScriptingApi
         Result Attack(object target);
         Result Mine(object target);
         Result Give(object target, Substance.Type substanceType, int amount);
-        Result Produce();
+        Result Produce(object productionParamsObject);
         Result MoveTo(int2 p);
         Result MoveTo(int x, int y);
         Result MoveTo(int[] p);

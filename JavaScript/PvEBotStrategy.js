@@ -15,6 +15,13 @@ function findNearby(set, pos, maxDistance)
     return nearest;
 }
 
+let productionParams =
+{
+    movementTier: 1,
+    hullTier: 0,
+    storageTier: 0
+}
+
 export function tick()
 {
     for (let iUnit = 0; iUnit < model.myUnits.count; ++iUnit)
@@ -30,7 +37,7 @@ export function tick()
                 continue;
 
         if (myUnit.storage.content[Substance.Type.Energy] >= 2)
-            if (myUnit.produce() == Result.Ok)
+            if (myUnit.produce(productionParams) == Result.Ok)
                 continue;
 
         let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);

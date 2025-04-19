@@ -42,6 +42,13 @@ log("This is a test log message");
 logWarning("This is a test warning");
 logError("This is a test error");
 
+let productionParams =
+{
+    movementTier: 1,
+    hullTier: 0,
+    storageTier: 0
+}
+
 export function tick()
 {
     for (let enemyUnit of model.enemyUnits)
@@ -64,7 +71,7 @@ export function tick()
             }
         
         if (myUnit.storage.content[Substance.Type.Energy] >= 2)
-            if (myUnit.Produce() == Result.Ok)
+            if (myUnit.Produce(productionParams) == Result.Ok)
                 continue;
 
         let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
