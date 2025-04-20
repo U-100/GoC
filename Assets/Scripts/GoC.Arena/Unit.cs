@@ -102,9 +102,7 @@ namespace GoC.Arena
         
         public Result CanProduce(ProductionParams productionParams)
         {
-            if (!_team.arena.config.productionConfig.CheckProductionParams(productionParams))
-                return Result.InvalidArgument;
-            
+            productionParams = _team.arena.config.productionConfig.ClampProductionParams(productionParams);
             for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
                 if (storage.content[substanceIndex] < _team.arena.config.productionConfig.ProductionCost(productionParams, substanceIndex))
                     return Result.NotEnoughSubstance;
@@ -196,7 +194,7 @@ namespace GoC.Arena
             _produceCommand = new ProduceCommand
             {
                 ticksLeft = _config.productionTime,
-                productionParams = productionParams,
+                productionParams = _team.arena.config.productionConfig.ClampProductionParams(productionParams),
             };
             
             return Result.Ok;

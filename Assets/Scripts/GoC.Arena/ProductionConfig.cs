@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using static Unity.Mathematics.math;
+
 namespace GoC.Arena
 {
     [Serializable]
@@ -46,10 +48,13 @@ namespace GoC.Arena
         [SerializeField] private StorageTier[] _storageTiers;
         public IReadOnlyList<StorageTier> storageTiers => _storageTiers;
 
-        public bool CheckProductionParams(ProductionParams productionParams) =>
-            productionParams.movementTier < movementTiers.Count
-            && productionParams.hullTier < hullTiers.Count
-            && productionParams.storageTier < storageTiers.Count;
+        public ProductionParams ClampProductionParams(ProductionParams productionParams) =>
+            new()
+            {
+                movementTier = clamp(productionParams.movementTier, 0, movementTiers.Count - 1),
+                hullTier = clamp(productionParams.hullTier, 0, hullTiers.Count - 1),
+                storageTier = clamp(productionParams.storageTier, 0, storageTiers.Count - 1),
+            };
 
         public int ProductionCost(ProductionParams productionParams, int substanceIndex)
         {
