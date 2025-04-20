@@ -34,7 +34,7 @@ namespace GoC.Arena
         {
             public int ticksLeft;
             public int2 productionPos;
-            public ProductionParams productionParams;
+            public ProductionParams clampedProductionParams;
         }
 
         private struct MoveCommand
@@ -42,7 +42,7 @@ namespace GoC.Arena
             public int2 targetPosition;
         }
 
-        [SerializeField] private UnitConfig _config;
+        [SerializeField] private int _damage;
         [Space]
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
@@ -68,14 +68,14 @@ namespace GoC.Arena
         private GiveCommand? _giveCommand;
         private ProduceCommand? _produceCommand;
         private MoveCommand? _moveCommand;
+
+        private bool _canMove;
         
         private Hull _myHull;
         private Hull myHull => _myHull ??= GetComponent<Hull>();
 
         private Storage _myStorage;
         private Storage myStorage => _myStorage ??= GetComponent<Storage>();
-
-        private static readonly int[] EMPTY_INIT_STORAGE = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
 
         
         public int teamId => _team.teamId;
@@ -109,7 +109,7 @@ namespace GoC.Arena
             
             return Result.Ok;
         }
-
+        
         public IHull hull => myHull;
         public IStorage storage => myStorage;
 
@@ -193,8 +193,8 @@ namespace GoC.Arena
             
             _produceCommand = new ProduceCommand
             {
-                ticksLeft = _config.productionTime,
-                productionParams = _team.arena.config.productionConfig.ClampProductionParams(productionParams),
+                ticksLeft = 0,
+                clampedProductionParams = _team.arena.config.productionConfig.ClampProductionParams(productionParams),
             };
             
             return Result.Ok;
@@ -204,6 +204,9 @@ namespace GoC.Arena
         {
             if (busy)
                 return Result.Busy;
+
+            if (!_canMove)
+                return Result.OperationUnavailable;
             
             int2 delta = (int2)round(p - transform.position.ToArenaPos());
             if (all(delta == 0))
@@ -232,13 +235,13 @@ namespace GoC.Arena
         }
 
         // to set up upon instantiation
-        public void Setup(Team team, UnitConfig unitConfig)
+        public void Setup(Team team, ProductionParams productionParams)
         {
             _team = team;
-            _config = unitConfig;
 
-            myHull.Setup(_config.integrity);
-            myStorage.Setup(_config.storageCapacityPerSubstance, EMPTY_INIT_STORAGE);
+            _canMove = _team.arena.config.productionConfig.movementTiers[productionParams.movementTier].canMove;
+            myHull.Setup(_team.arena.config.productionConfig.hullTiers[productionParams.hullTier].maxIntegrity);
+            myStorage.Setup(_team.arena.config.productionConfig.storageTiers[productionParams.storageTier].storageCapacityPerSubstance);
 
             _team.arena.grid[pos]++;
 
@@ -283,7 +286,7 @@ namespace GoC.Arena
                         _team.arena.grid[produceCommand.productionPos]--;
 
                         Unit unit = Instantiate(_fabricatedUnitPrototype, produceCommand.productionPos.ToUnityPos(), Quaternion.identity);
-                        unit.Setup(_team, _config.product);
+                        unit.Setup(_team, produceCommand.clampedProductionParams);
                         _team.arena.Register(unit);
 
                         _produceCommand = null;
@@ -317,7 +320,7 @@ namespace GoC.Arena
         {
             if (_attackCommand.HasValue)
             {
-                _attackCommand.Value.targetHull.Absorb(_config.damage);
+                _attackCommand.Value.targetHull.Absorb(_damage);
                 
                 float distance = Vector3.Distance(transform.position, _attackCommand.Value.targetHull.transform.position);
                 _attackEffect.SetFloat(_attackEffectDistanceProperty, distance);
@@ -344,17 +347,18 @@ namespace GoC.Arena
             if (_produceCommand != null)
             {
                 ProduceCommand produceCommand = _produceCommand.Value;
-                if(produceCommand.ticksLeft == _config.productionTime) // just started production
+                if(produceCommand.ticksLeft == 0) // just started production
                 {
+                    produceCommand.ticksLeft = _team.arena.config.productionConfig.ProductionTicks(produceCommand.clampedProductionParams);
                     for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
-                        myStorage.Withdraw((Substance.Type)substanceIndex, _team.arena.config.productionConfig.ProductionCost(produceCommand.productionParams, substanceIndex));
+                        myStorage.Withdraw((Substance.Type)substanceIndex, _team.arena.config.productionConfig.ProductionCost(produceCommand.clampedProductionParams, substanceIndex));
 
                     produceCommand.productionPos = _team.arena.grid.FindEmptyCellAround(pos);
                     
                     _team.arena.grid[produceCommand.productionPos]++;
                 
                     _productionEffect.SetVector3(_productionEffectSpawnPositionProperty, produceCommand.productionPos.ToUnityPos());
-                    _productionEffect.SetFloat(_productionEffectDurationProperty, _config.productionTime * Tick.TIME);
+                    _productionEffect.SetFloat(_productionEffectDurationProperty, produceCommand.ticksLeft * Tick.TIME);
                     _productionEffect.Play();
                 }
                 _produceCommand = produceCommand;

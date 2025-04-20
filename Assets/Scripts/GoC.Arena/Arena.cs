@@ -115,7 +115,15 @@ namespace GoC.Arena
 
             int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
             Unit unit = Instantiate(_unitPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
-            unit.Setup(team, _config.unitConfig);
+            unit.Setup(
+                team,
+                new()
+                {
+                    movementTier = 1,
+                    hullTier = 0,
+                    storageTier = 0,
+                }
+            );
             Register(unit);
 
             int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();

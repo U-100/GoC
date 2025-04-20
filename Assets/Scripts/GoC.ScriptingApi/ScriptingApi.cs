@@ -9,6 +9,7 @@ namespace GoC.ScriptingApi
         Ok,
         Busy,
         AccessDenied,
+        OperationUnavailable,
         InvalidArgument,
         OutOfRange,
         InvalidTarget,

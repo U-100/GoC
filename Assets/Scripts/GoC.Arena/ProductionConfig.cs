@@ -58,6 +58,8 @@ namespace GoC.Arena
 
         public int ProductionCost(ProductionParams productionParams, int substanceIndex)
         {
+            productionParams = ClampProductionParams(productionParams);
+            
             int cost = 0;
                 
             if (movementTiers[productionParams.movementTier].productionCost.Count > substanceIndex)
@@ -70,6 +72,17 @@ namespace GoC.Arena
                 cost += storageTiers[productionParams.storageTier].productionCost[substanceIndex];
 
             return cost;
+        }
+
+        public int ProductionTicks(ProductionParams productionParams)
+        {
+            productionParams = ClampProductionParams(productionParams);
+
+            return 
+                1
+                + productionParams.movementTier
+                + productionParams.hullTier
+                + productionParams.storageTier;
         }
     }
 }
