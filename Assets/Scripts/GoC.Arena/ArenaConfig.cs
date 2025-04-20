@@ -9,13 +9,16 @@ namespace GoC.Arena
         [SerializeField] private int2 _size;
         public int2 size => _size;
 
+        [SerializeField] private DepositConfig _depositConfig;
+        public DepositConfig depositConfig => _depositConfig;
+
+        [SerializeField] private int _depositsCount;
+        public int depositsCount => _depositsCount;
+
         [SerializeField] private ProductionConfig _productionConfig;
         public ProductionConfig productionConfig => _productionConfig;
         
-        [SerializeField] private UnitConfig _unitConfig;
-        public UnitConfig unitConfig => _unitConfig;
-
-        [SerializeField] private DepositConfig _depositConfig;
-        public DepositConfig depositConfig => _depositConfig;
+        [SerializeField] private ProductionParams _initialUnitProductionParams;
+        public ProductionParams initialUnitProductionParams => _initialUnitProductionParams;
     }
 }

@@ -15,6 +15,10 @@ MonoBehaviour:
   _size:
     x: 31
     y: 31
-  _productionConfig: {fileID: 11400000, guid: 5c3fce1033d3c87499db44a7a17f0ac7, type: 2}
-  _unitConfig: {fileID: 11400000, guid: 7a4f019c72cc23f44a626b55a14c3c84, type: 2}
   _depositConfig: {fileID: 11400000, guid: 90817da335932d145a883da181997d64, type: 2}
+  _depositsCount: 4
+  _productionConfig: {fileID: 11400000, guid: 5c3fce1033d3c87499db44a7a17f0ac7, type: 2}
+  _initialUnitProductionParams:
+    movementTier: 1
+    hullTier: 0
+    storageTier: 0

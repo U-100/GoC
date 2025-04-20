@@ -98,6 +98,8 @@ namespace GoC.Arena
                     Debug.LogWarning($"Team script {teamConfig.scriptFile} doesn't export the tick() function");
             }
 
+            CreateDeposits();
+            
             // NOTE: create all teams before adding units so that enemy unit lists get properly populated for all teams
             for (int iTeam = 0; iTeam < _teamRecords.Count; iTeam++)
             {
@@ -105,11 +107,25 @@ namespace GoC.Arena
                 CreateTeamLandscape(team, iTeam, _teamRecords.Count);
             }
         }
+
+        private void CreateDeposits()
+        {
+            int2 baseDepositPos = _grid.size / 6;
+
+            for (int iDeposit = 0; iDeposit < _config.depositsCount; ++iDeposit)
+            {
+                float depositAngleRadians = 2 * PI * iDeposit / _config.depositsCount;
+
+                int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(depositAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
+                Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
+                deposit.Setup(this, _config.depositConfig);
+                Register(deposit);
+            }
+        }
         
         private void CreateTeamLandscape(Team team, int iTeam, int teamsCount)
         {
             int2 baseFactoryPos = _grid.size / 4;
-            int2 baseDepositPos = _grid.size / 3;
 
             float teamAngleRadians = 2 * iTeam * PI / teamsCount;
 
@@ -125,11 +141,6 @@ namespace GoC.Arena
                 }
             );
             Register(unit);
-
-            int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
-            Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
-            deposit.Setup(this, _config.depositConfig);
-            Register(deposit);
         }
 
         public void Register(Deposit deposit) => _deposits.Add(deposit);

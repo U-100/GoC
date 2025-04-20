@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace GoC.Arena
 {
+    [Serializable]
     public struct ProductionParams
     {
         public int movementTier;
