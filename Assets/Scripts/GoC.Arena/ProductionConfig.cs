@@ -11,6 +11,9 @@ namespace GoC.Arena
     {
         [SerializeField] private int[] _productionCost;
         public IReadOnlyList<int> productionCost => _productionCost;
+
+        [SerializeField] private int _productionTicks;
+        public int productionTicks => _productionTicks;
         
         [SerializeField] private bool _canMove;
         public bool canMove => _canMove;
@@ -21,6 +24,9 @@ namespace GoC.Arena
     {
         [SerializeField] private int[] _productionCost;
         public IReadOnlyList<int> productionCost => _productionCost;
+
+        [SerializeField] private int _productionTicks;
+        public int productionTicks => _productionTicks;
         
         [SerializeField] private int _maxIntegrity;
         public int maxIntegrity => _maxIntegrity;
@@ -31,6 +37,9 @@ namespace GoC.Arena
     {
         [SerializeField] private int[] _productionCost;
         public IReadOnlyList<int> productionCost => _productionCost;
+
+        [SerializeField] private int _productionTicks;
+        public int productionTicks => _productionTicks;
         
         [SerializeField] private int _storageCapacityPerSubstance;
         public int storageCapacityPerSubstance => _storageCapacityPerSubstance;
@@ -78,11 +87,12 @@ namespace GoC.Arena
         {
             productionParams = ClampProductionParams(productionParams);
 
-            return 
-                1
-                + productionParams.movementTier
-                + productionParams.hullTier
-                + productionParams.storageTier;
+            int productionTicks =
+                movementTiers[productionParams.movementTier].productionTicks
+                + hullTiers[productionParams.hullTier].productionTicks
+                + storageTiers[productionParams.storageTier].productionTicks;
+
+            return max(1, productionTicks);
         }
     }
 }

@@ -21,4 +21,4 @@ MonoBehaviour:
   _initialUnitProductionParams:
     movementTier: 1
     hullTier: 0
-    storageTier: 0
+    storageTier: 1

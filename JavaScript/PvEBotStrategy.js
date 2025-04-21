@@ -19,7 +19,7 @@ let productionParams =
 {
     movementTier: 1,
     hullTier: 0,
-    storageTier: 0
+    storageTier: 1
 }
 
 export function tick()

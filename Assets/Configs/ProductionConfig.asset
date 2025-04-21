@@ -13,13 +13,23 @@ MonoBehaviour:
   m_Name: ProductionConfig
   m_EditorClassIdentifier: 
   _movementTiers:
-  - _productionCost: 01000000
+  - _productionCost: 00000000
+    _productionTicks: 0
     _canMove: 0
-  - _productionCost: 02000000
+  - _productionCost: 01000000
+    _productionTicks: 1
     _canMove: 1
   _hullTiers:
   - _productionCost: 01000000
+    _productionTicks: 1
     _maxIntegrity: 2
+  - _productionCost: 02000000
+    _productionTicks: 2
+    _maxIntegrity: 4
   _storageTiers:
+  - _productionCost: 00000000
+    _productionTicks: 0
+    _storageCapacityPerSubstance: 0
   - _productionCost: 01000000
+    _productionTicks: 1
     _storageCapacityPerSubstance: 10

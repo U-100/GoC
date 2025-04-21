@@ -45,8 +45,8 @@ logError("This is a test error");
 let productionParams =
 {
     movementTier: 1,
-    hullTier: 0,
-    storageTier: 0
+    hullTier: 1,
+    storageTier: 1
 }
 
 export function tick()
