@@ -1,4 +1,5 @@
-﻿using GoC.ScriptingApi;
+﻿using System;
+using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -202,11 +203,20 @@ namespace GoC.Arena
             return Result.Ok;
         }
         
-        public Result Produce(ProductionParams productionParams)
+        public Result Produce(ProductionParams productionParams, int2? productionPos)
         {
             if (busy)
                 return Result.Busy;
 
+            if (productionPos != null)
+            {
+                if (distance(pos, productionPos.Value) > 1)
+                    return Result.OutOfRange;
+
+                if (_team.arena.grid[productionPos.Value] > 0)
+                    return Result.PathBlocked;
+            }
+            
             Result canProduce = CanProduce(productionParams);
             if (canProduce != Result.Ok)
                 return canProduce;
@@ -214,6 +224,7 @@ namespace GoC.Arena
             _produceCommand = new ProduceCommand
             {
                 ticksLeft = 0,
+                productionPos = productionPos ?? _team.arena.grid.FindEmptyCellAround(pos),
                 clampedProductionParams = _team.arena.config.productionConfig.ClampProductionParams(productionParams),
             };
             
@@ -376,7 +387,9 @@ namespace GoC.Arena
                     for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
                         myStorage.Withdraw((Substance.Type)substanceIndex, _team.arena.config.productionConfig.ProductionCost(produceCommand.clampedProductionParams, substanceIndex));
 
-                    produceCommand.productionPos = _team.arena.grid.FindEmptyCellAround(pos);
+                    // in rare cases when two productions are targeting the same grid cell one of them will be pushed away into a nearby empty cell
+                    if (_team.arena.grid[produceCommand.productionPos] > 0)
+                        produceCommand.productionPos = _team.arena.grid.FindEmptyCellAround(produceCommand.productionPos);
                     
                     _team.arena.grid[produceCommand.productionPos]++;
                 

@@ -61,6 +61,9 @@ namespace GoC.ScriptingApi
         Result Mine(object target);
         Result Give(object target, Substance.Type substanceType, int amount);
         Result Produce(object productionParamsObject);
+        Result Produce(object productionParamsObject, int2 p);
+        Result Produce(object productionParamsObject, int x, int y);
+        Result Produce(object productionParamsObject, int[] p);
         Result MoveTo(int2 p);
         Result MoveTo(int x, int y);
         Result MoveTo(int[] p);
