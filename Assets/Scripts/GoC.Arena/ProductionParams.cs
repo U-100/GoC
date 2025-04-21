@@ -6,6 +6,9 @@ namespace GoC.Arena
     [Serializable]
     public struct ProductionParams
     {
+        public int attackTier;
+        public int miningTier;
+        public int productionTier;
         public int movementTier;
         public int hullTier;
         public int storageTier;
@@ -15,6 +18,15 @@ namespace GoC.Arena
             ProductionParams productionParams = new();
             if (productionParamsObject is IDictionary<string, object> productionParamsDictionary)
             {
+                if (productionParamsDictionary.TryGetValue("attackTier", out object attackTierObject) && attackTierObject is double attackTier)
+                    productionParams.attackTier = (int)attackTier;
+                
+                if (productionParamsDictionary.TryGetValue("miningTier", out object miningTierObject) && miningTierObject is double miningTier)
+                    productionParams.miningTier = (int)miningTier;
+                
+                if (productionParamsDictionary.TryGetValue("productionTier", out object productionTierObject) && productionTierObject is double productionTier)
+                    productionParams.productionTier = (int)productionTier;
+                
                 if (productionParamsDictionary.TryGetValue("movementTier", out object movementTierObject) && movementTierObject is double movementTier)
                     productionParams.movementTier = (int)movementTier;
                 

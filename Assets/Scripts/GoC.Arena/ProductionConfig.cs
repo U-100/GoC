@@ -7,6 +7,46 @@ using static Unity.Mathematics.math;
 namespace GoC.Arena
 {
     [Serializable]
+    public struct AttackTier
+    {
+        [SerializeField] private int[] _productionCost;
+        public IReadOnlyList<int> productionCost => _productionCost;
+
+        [SerializeField] private int _productionTicks;
+        public int productionTicks => _productionTicks;
+        
+        [SerializeField] private int _damage;
+        public int damage => _damage;
+    }
+    
+    [Serializable]
+    public struct MiningTier
+    {
+        [SerializeField] private int[] _productionCost;
+        public IReadOnlyList<int> productionCost => _productionCost;
+
+        [SerializeField] private int _productionTicks;
+        public int productionTicks => _productionTicks;
+        
+        [SerializeField] private bool _canMine;
+        public bool canMine => _canMine;
+    }
+    
+    [Serializable]
+    public struct ProductionTier
+    {
+        [SerializeField] private int[] _productionCost;
+        public IReadOnlyList<int> productionCost => _productionCost;
+
+        [SerializeField] private int _productionTicks;
+        public int productionTicks => _productionTicks;
+        
+        [Tooltip("highest tier of production params that can be produced, -1 means no production is possible")]
+        [SerializeField] private int _maxProductionTier;
+        public int maxProductionTier => _maxProductionTier;
+    }
+    
+    [Serializable]
     public struct MovementTier
     {
         [SerializeField] private int[] _productionCost;
@@ -48,6 +88,15 @@ namespace GoC.Arena
     [CreateAssetMenu]
     public class ProductionConfig : ScriptableObject
     {
+        [SerializeField] private AttackTier[] _attackTiers;
+        public IReadOnlyList<AttackTier> attackTiers => _attackTiers;
+        
+        [SerializeField] private MiningTier[] _miningTiers;
+        public IReadOnlyList<MiningTier> miningTiers => _miningTiers;
+        
+        [SerializeField] private ProductionTier[] _productionTiers;
+        public IReadOnlyList<ProductionTier> productionTiers => _productionTiers;
+        
         [SerializeField] private MovementTier[] _movementTiers;
         public IReadOnlyList<MovementTier> movementTiers => _movementTiers;
         
@@ -60,6 +109,9 @@ namespace GoC.Arena
         public ProductionParams ClampProductionParams(ProductionParams productionParams) =>
             new()
             {
+                attackTier = clamp(productionParams.attackTier, 0, attackTiers.Count - 1),
+                miningTier = clamp(productionParams.miningTier, 0, miningTiers.Count - 1),
+                productionTier = clamp(productionParams.productionTier, 0, productionTiers.Count - 1),
                 movementTier = clamp(productionParams.movementTier, 0, movementTiers.Count - 1),
                 hullTier = clamp(productionParams.hullTier, 0, hullTiers.Count - 1),
                 storageTier = clamp(productionParams.storageTier, 0, storageTiers.Count - 1),
@@ -70,6 +122,15 @@ namespace GoC.Arena
             productionParams = ClampProductionParams(productionParams);
             
             int cost = 0;
+
+            if (attackTiers[productionParams.attackTier].productionCost.Count > substanceIndex)
+                cost += attackTiers[productionParams.attackTier].productionCost[substanceIndex];
+                
+            if (miningTiers[productionParams.miningTier].productionCost.Count > substanceIndex)
+                cost += miningTiers[productionParams.miningTier].productionCost[substanceIndex];
+                
+            if (productionTiers[productionParams.productionTier].productionCost.Count > substanceIndex)
+                cost += productionTiers[productionParams.productionTier].productionCost[substanceIndex];
                 
             if (movementTiers[productionParams.movementTier].productionCost.Count > substanceIndex)
                 cost += movementTiers[productionParams.movementTier].productionCost[substanceIndex];
@@ -88,7 +149,10 @@ namespace GoC.Arena
             productionParams = ClampProductionParams(productionParams);
 
             int productionTicks =
-                movementTiers[productionParams.movementTier].productionTicks
+                attackTiers[productionParams.attackTier].productionTicks
+                + miningTiers[productionParams.miningTier].productionTicks
+                + productionTiers[productionParams.productionTier].productionTicks
+                + movementTiers[productionParams.movementTier].productionTicks
                 + hullTiers[productionParams.hullTier].productionTicks
                 + storageTiers[productionParams.storageTier].productionTicks;
 

@@ -19,6 +19,9 @@ MonoBehaviour:
   _depositsCount: 4
   _productionConfig: {fileID: 11400000, guid: 5c3fce1033d3c87499db44a7a17f0ac7, type: 2}
   _initialUnitProductionParams:
+    attackTier: 0
+    miningTier: 1
+    productionTier: 1
     movementTier: 1
     hullTier: 0
     storageTier: 1

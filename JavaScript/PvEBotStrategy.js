@@ -17,6 +17,9 @@ function findNearby(set, pos, maxDistance)
 
 let productionParams =
 {
+    attackTier: 1,
+    miningTier: 1,
+    productionTier: 1,
     movementTier: 1,
     hullTier: 0,
     storageTier: 1

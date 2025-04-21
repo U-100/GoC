@@ -44,6 +44,9 @@ logError("This is a test error");
 
 let productionParams =
 {
+    attackTier: 1,
+    miningTier: 1,
+    productionTier: 1,
     movementTier: 1,
     hullTier: 1,
     storageTier: 1

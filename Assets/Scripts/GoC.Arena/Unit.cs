@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using GoC.ScriptingApi;
+﻿using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -41,8 +40,13 @@ namespace GoC.Arena
         {
             public int2 targetPosition;
         }
-
+        
+        [Space] // the fields below are exposed in inspector for debug purposes only
         [SerializeField] private int _damage;
+        [SerializeField] private bool _canMine;
+        [SerializeField] private int _maxProductionTier;
+        [SerializeField] private bool _canMove;
+
         [Space]
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
@@ -69,7 +73,6 @@ namespace GoC.Arena
         private ProduceCommand? _produceCommand;
         private MoveCommand? _moveCommand;
 
-        private bool _canMove;
         
         private Hull _myHull;
         private Hull myHull => _myHull ??= GetComponent<Hull>();
@@ -85,6 +88,9 @@ namespace GoC.Arena
         
         public Result CanMine(object targetObject)
         {
+            if (!_canMine)
+                return Result.OperationUnavailable;
+            
             if (targetObject is not Deposit targetDeposit)
                 return Result.InvalidTarget;
 
@@ -103,6 +109,17 @@ namespace GoC.Arena
         public Result CanProduce(ProductionParams productionParams)
         {
             productionParams = _team.arena.config.productionConfig.ClampProductionParams(productionParams);
+            
+            if (
+                productionParams.attackTier > _maxProductionTier
+                || productionParams.miningTier > _maxProductionTier
+                || productionParams.productionTier > _maxProductionTier
+                || productionParams.movementTier > _maxProductionTier
+                || productionParams.hullTier > _maxProductionTier
+                || productionParams.storageTier > _maxProductionTier
+            )
+                return Result.OperationUnavailable;
+            
             for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
                 if (storage.content[substanceIndex] < _team.arena.config.productionConfig.ProductionCost(productionParams, substanceIndex))
                     return Result.NotEnoughSubstance;
@@ -118,6 +135,9 @@ namespace GoC.Arena
         {
             if (busy)
                 return Result.Busy;
+            
+            if (_damage <= 0)
+                return Result.OperationUnavailable;
             
             if (targetObject is not ExposedUnit targetExposedUnit)
                 return Result.InvalidTarget;
@@ -239,6 +259,9 @@ namespace GoC.Arena
         {
             _team = team;
 
+            _damage = _team.arena.config.productionConfig.attackTiers[productionParams.attackTier].damage;
+            _canMine = _team.arena.config.productionConfig.miningTiers[productionParams.miningTier].canMine;
+            _maxProductionTier = _team.arena.config.productionConfig.productionTiers[productionParams.productionTier].maxProductionTier;
             _canMove = _team.arena.config.productionConfig.movementTiers[productionParams.movementTier].canMove;
             myHull.Setup(_team.arena.config.productionConfig.hullTiers[productionParams.hullTier].maxIntegrity);
             myStorage.Setup(_team.arena.config.productionConfig.storageTiers[productionParams.storageTier].storageCapacityPerSubstance);
