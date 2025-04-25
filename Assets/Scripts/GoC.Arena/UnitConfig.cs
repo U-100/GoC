@@ -41,7 +41,7 @@ namespace GoC.Arena
         [SerializeField] private int _productionTicks;
         public int productionTicks => _productionTicks;
         
-        [Tooltip("highest tier of production params that can be produced, -1 means no production is possible")]
+        [Tooltip("highest tier of unit params that can be produced, -1 means no production is possible")]
         [SerializeField] private int _maxProductionTier;
         public int maxProductionTier => _maxProductionTier;
     }
@@ -106,7 +106,7 @@ namespace GoC.Arena
         [SerializeField] private StorageTier[] _storageTiers;
         public IReadOnlyList<StorageTier> storageTiers => _storageTiers;
 
-        public UnitParams ClampProductionParams(UnitParams unitParams) =>
+        public UnitParams ClampUnitParams(UnitParams unitParams) =>
             new()
             {
                 attackTier = clamp(unitParams.attackTier, 0, attackTiers.Count - 1),
@@ -119,7 +119,7 @@ namespace GoC.Arena
 
         public int ProductionCost(UnitParams unitParams, int substanceIndex)
         {
-            unitParams = ClampProductionParams(unitParams);
+            unitParams = ClampUnitParams(unitParams);
             
             int cost = 0;
 
@@ -146,7 +146,7 @@ namespace GoC.Arena
 
         public int ProductionTicks(UnitParams unitParams)
         {
-            unitParams = ClampProductionParams(unitParams);
+            unitParams = ClampUnitParams(unitParams);
 
             int productionTicks =
                 attackTiers[unitParams.attackTier].productionTicks

@@ -109,7 +109,7 @@ namespace GoC.Arena
         
         public Result CanProduce(UnitParams unitParams)
         {
-            unitParams = _team.arena.config.unitConfig.ClampProductionParams(unitParams);
+            unitParams = _team.arena.config.unitConfig.ClampUnitParams(unitParams);
             
             if (
                 unitParams.attackTier > _maxProductionTier
@@ -225,7 +225,7 @@ namespace GoC.Arena
             {
                 ticksLeft = 0,
                 productionPos = productionPos ?? _team.arena.grid.FindEmptyCellAround(pos),
-                clampedUnitParams = _team.arena.config.unitConfig.ClampProductionParams(unitParams),
+                clampedUnitParams = _team.arena.config.unitConfig.ClampUnitParams(unitParams),
             };
             
             return Result.Ok;
