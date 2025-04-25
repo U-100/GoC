@@ -38,9 +38,9 @@ function wander(myUnit)
     myUnit.MoveTo(destination);
 }
 
-log("This is a test log message");
-logWarning("This is a test warning");
-logError("This is a test error");
+// log("This is a test log message");
+// logWarning("This is a test warning");
+// logError("This is a test error");
 
 let productionParams =
 {

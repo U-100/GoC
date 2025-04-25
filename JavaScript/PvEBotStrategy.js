@@ -18,6 +18,8 @@ function findNearby(set, pos, maxDistance)
 export function tick()
 {
     let nearbyDeposit = undefined;
+    if (model.myUnits.count > 0)
+        nearbyDeposit = findNearby(model.deposits, model.myUnits[0].pos, 100000);
 
     for (let iUnit = 0; iUnit < model.myUnits.count; ++iUnit)
     {
@@ -28,8 +30,6 @@ export function tick()
 
         if (iUnit === 0)
         {
-            nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
-            
             if (nearbyDeposit && myUnit.pos !== nearbyDeposit.pos)
             {
                 myUnit.moveTo(nearbyDeposit.pos);
