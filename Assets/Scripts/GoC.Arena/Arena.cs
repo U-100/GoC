@@ -131,7 +131,7 @@ namespace GoC.Arena
 
             int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
             Unit unit = Instantiate(_unitPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
-            unit.Setup(team, _config.initialUnitProductionParams);
+            unit.Setup(team, _config.initialUnitParams);
             Register(unit);
         }
 

@@ -86,7 +86,7 @@ namespace GoC.Arena
     }
     
     [CreateAssetMenu]
-    public class ProductionConfig : ScriptableObject
+    public class UnitConfig : ScriptableObject
     {
         [SerializeField] private AttackTier[] _attackTiers;
         public IReadOnlyList<AttackTier> attackTiers => _attackTiers;
@@ -106,55 +106,55 @@ namespace GoC.Arena
         [SerializeField] private StorageTier[] _storageTiers;
         public IReadOnlyList<StorageTier> storageTiers => _storageTiers;
 
-        public ProductionParams ClampProductionParams(ProductionParams productionParams) =>
+        public UnitParams ClampProductionParams(UnitParams unitParams) =>
             new()
             {
-                attackTier = clamp(productionParams.attackTier, 0, attackTiers.Count - 1),
-                miningTier = clamp(productionParams.miningTier, 0, miningTiers.Count - 1),
-                productionTier = clamp(productionParams.productionTier, 0, productionTiers.Count - 1),
-                movementTier = clamp(productionParams.movementTier, 0, movementTiers.Count - 1),
-                hullTier = clamp(productionParams.hullTier, 0, hullTiers.Count - 1),
-                storageTier = clamp(productionParams.storageTier, 0, storageTiers.Count - 1),
+                attackTier = clamp(unitParams.attackTier, 0, attackTiers.Count - 1),
+                miningTier = clamp(unitParams.miningTier, 0, miningTiers.Count - 1),
+                productionTier = clamp(unitParams.productionTier, 0, productionTiers.Count - 1),
+                movementTier = clamp(unitParams.movementTier, 0, movementTiers.Count - 1),
+                hullTier = clamp(unitParams.hullTier, 0, hullTiers.Count - 1),
+                storageTier = clamp(unitParams.storageTier, 0, storageTiers.Count - 1),
             };
 
-        public int ProductionCost(ProductionParams productionParams, int substanceIndex)
+        public int ProductionCost(UnitParams unitParams, int substanceIndex)
         {
-            productionParams = ClampProductionParams(productionParams);
+            unitParams = ClampProductionParams(unitParams);
             
             int cost = 0;
 
-            if (attackTiers[productionParams.attackTier].productionCost.Count > substanceIndex)
-                cost += attackTiers[productionParams.attackTier].productionCost[substanceIndex];
+            if (attackTiers[unitParams.attackTier].productionCost.Count > substanceIndex)
+                cost += attackTiers[unitParams.attackTier].productionCost[substanceIndex];
                 
-            if (miningTiers[productionParams.miningTier].productionCost.Count > substanceIndex)
-                cost += miningTiers[productionParams.miningTier].productionCost[substanceIndex];
+            if (miningTiers[unitParams.miningTier].productionCost.Count > substanceIndex)
+                cost += miningTiers[unitParams.miningTier].productionCost[substanceIndex];
                 
-            if (productionTiers[productionParams.productionTier].productionCost.Count > substanceIndex)
-                cost += productionTiers[productionParams.productionTier].productionCost[substanceIndex];
+            if (productionTiers[unitParams.productionTier].productionCost.Count > substanceIndex)
+                cost += productionTiers[unitParams.productionTier].productionCost[substanceIndex];
                 
-            if (movementTiers[productionParams.movementTier].productionCost.Count > substanceIndex)
-                cost += movementTiers[productionParams.movementTier].productionCost[substanceIndex];
+            if (movementTiers[unitParams.movementTier].productionCost.Count > substanceIndex)
+                cost += movementTiers[unitParams.movementTier].productionCost[substanceIndex];
                 
-            if (hullTiers[productionParams.hullTier].productionCost.Count > substanceIndex)
-                cost += hullTiers[productionParams.hullTier].productionCost[substanceIndex];
+            if (hullTiers[unitParams.hullTier].productionCost.Count > substanceIndex)
+                cost += hullTiers[unitParams.hullTier].productionCost[substanceIndex];
                 
-            if (storageTiers[productionParams.storageTier].productionCost.Count > substanceIndex)
-                cost += storageTiers[productionParams.storageTier].productionCost[substanceIndex];
+            if (storageTiers[unitParams.storageTier].productionCost.Count > substanceIndex)
+                cost += storageTiers[unitParams.storageTier].productionCost[substanceIndex];
 
             return cost;
         }
 
-        public int ProductionTicks(ProductionParams productionParams)
+        public int ProductionTicks(UnitParams unitParams)
         {
-            productionParams = ClampProductionParams(productionParams);
+            unitParams = ClampProductionParams(unitParams);
 
             int productionTicks =
-                attackTiers[productionParams.attackTier].productionTicks
-                + miningTiers[productionParams.miningTier].productionTicks
-                + productionTiers[productionParams.productionTier].productionTicks
-                + movementTiers[productionParams.movementTier].productionTicks
-                + hullTiers[productionParams.hullTier].productionTicks
-                + storageTiers[productionParams.storageTier].productionTicks;
+                attackTiers[unitParams.attackTier].productionTicks
+                + miningTiers[unitParams.miningTier].productionTicks
+                + productionTiers[unitParams.productionTier].productionTicks
+                + movementTiers[unitParams.movementTier].productionTicks
+                + hullTiers[unitParams.hullTier].productionTicks
+                + storageTiers[unitParams.storageTier].productionTicks;
 
             return max(1, productionTicks);
         }

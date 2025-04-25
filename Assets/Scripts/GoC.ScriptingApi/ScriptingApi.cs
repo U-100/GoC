@@ -49,7 +49,7 @@ namespace GoC.ScriptingApi
         bool busy { get; }
         
         Result CanMine(object target);
-        Result CanProduce(object productionParamsObject);
+        Result CanProduce(object unitParamsObject);
 
         public IHull hull { get; }
         public IStorage storage { get; }

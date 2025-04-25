@@ -34,7 +34,7 @@ namespace GoC.Arena
         {
             public int ticksLeft;
             public int2 productionPos;
-            public ProductionParams clampedProductionParams;
+            public UnitParams clampedUnitParams;
         }
 
         private struct MoveCommand
@@ -107,22 +107,22 @@ namespace GoC.Arena
             return Result.Ok;
         }
         
-        public Result CanProduce(ProductionParams productionParams)
+        public Result CanProduce(UnitParams unitParams)
         {
-            productionParams = _team.arena.config.productionConfig.ClampProductionParams(productionParams);
+            unitParams = _team.arena.config.unitConfig.ClampProductionParams(unitParams);
             
             if (
-                productionParams.attackTier > _maxProductionTier
-                || productionParams.miningTier > _maxProductionTier
-                || productionParams.productionTier > _maxProductionTier
-                || productionParams.movementTier > _maxProductionTier
-                || productionParams.hullTier > _maxProductionTier
-                || productionParams.storageTier > _maxProductionTier
+                unitParams.attackTier > _maxProductionTier
+                || unitParams.miningTier > _maxProductionTier
+                || unitParams.productionTier > _maxProductionTier
+                || unitParams.movementTier > _maxProductionTier
+                || unitParams.hullTier > _maxProductionTier
+                || unitParams.storageTier > _maxProductionTier
             )
                 return Result.OperationUnavailable;
             
             for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
-                if (storage.content[substanceIndex] < _team.arena.config.productionConfig.ProductionCost(productionParams, substanceIndex))
+                if (storage.content[substanceIndex] < _team.arena.config.unitConfig.ProductionCost(unitParams, substanceIndex))
                     return Result.NotEnoughSubstance;
             
             return Result.Ok;
@@ -203,7 +203,7 @@ namespace GoC.Arena
             return Result.Ok;
         }
         
-        public Result Produce(ProductionParams productionParams, int2? productionPos)
+        public Result Produce(UnitParams unitParams, int2? productionPos)
         {
             if (busy)
                 return Result.Busy;
@@ -217,7 +217,7 @@ namespace GoC.Arena
                     return Result.PathBlocked;
             }
             
-            Result canProduce = CanProduce(productionParams);
+            Result canProduce = CanProduce(unitParams);
             if (canProduce != Result.Ok)
                 return canProduce;
             
@@ -225,7 +225,7 @@ namespace GoC.Arena
             {
                 ticksLeft = 0,
                 productionPos = productionPos ?? _team.arena.grid.FindEmptyCellAround(pos),
-                clampedProductionParams = _team.arena.config.productionConfig.ClampProductionParams(productionParams),
+                clampedUnitParams = _team.arena.config.unitConfig.ClampProductionParams(unitParams),
             };
             
             return Result.Ok;
@@ -266,16 +266,16 @@ namespace GoC.Arena
         }
 
         // to set up upon instantiation
-        public void Setup(Team team, ProductionParams productionParams)
+        public void Setup(Team team, UnitParams unitParams)
         {
             _team = team;
 
-            _damage = _team.arena.config.productionConfig.attackTiers[productionParams.attackTier].damage;
-            _canMine = _team.arena.config.productionConfig.miningTiers[productionParams.miningTier].canMine;
-            _maxProductionTier = _team.arena.config.productionConfig.productionTiers[productionParams.productionTier].maxProductionTier;
-            _canMove = _team.arena.config.productionConfig.movementTiers[productionParams.movementTier].canMove;
-            myHull.Setup(_team.arena.config.productionConfig.hullTiers[productionParams.hullTier].maxIntegrity);
-            myStorage.Setup(_team.arena.config.productionConfig.storageTiers[productionParams.storageTier].storageCapacityPerSubstance);
+            _damage = _team.arena.config.unitConfig.attackTiers[unitParams.attackTier].damage;
+            _canMine = _team.arena.config.unitConfig.miningTiers[unitParams.miningTier].canMine;
+            _maxProductionTier = _team.arena.config.unitConfig.productionTiers[unitParams.productionTier].maxProductionTier;
+            _canMove = _team.arena.config.unitConfig.movementTiers[unitParams.movementTier].canMove;
+            myHull.Setup(_team.arena.config.unitConfig.hullTiers[unitParams.hullTier].maxIntegrity);
+            myStorage.Setup(_team.arena.config.unitConfig.storageTiers[unitParams.storageTier].storageCapacityPerSubstance);
 
             _team.arena.grid[pos]++;
 
@@ -320,7 +320,7 @@ namespace GoC.Arena
                         _team.arena.grid[produceCommand.productionPos]--;
 
                         Unit unit = Instantiate(_fabricatedUnitPrototype, produceCommand.productionPos.ToUnityPos(), Quaternion.identity);
-                        unit.Setup(_team, produceCommand.clampedProductionParams);
+                        unit.Setup(_team, produceCommand.clampedUnitParams);
                         _team.arena.Register(unit);
 
                         _produceCommand = null;
@@ -383,9 +383,9 @@ namespace GoC.Arena
                 ProduceCommand produceCommand = _produceCommand.Value;
                 if(produceCommand.ticksLeft == 0) // just started production
                 {
-                    produceCommand.ticksLeft = _team.arena.config.productionConfig.ProductionTicks(produceCommand.clampedProductionParams);
+                    produceCommand.ticksLeft = _team.arena.config.unitConfig.ProductionTicks(produceCommand.clampedUnitParams);
                     for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
-                        myStorage.Withdraw((Substance.Type)substanceIndex, _team.arena.config.productionConfig.ProductionCost(produceCommand.clampedProductionParams, substanceIndex));
+                        myStorage.Withdraw((Substance.Type)substanceIndex, _team.arena.config.unitConfig.ProductionCost(produceCommand.clampedUnitParams, substanceIndex));
 
                     // in rare cases when two productions are targeting the same grid cell one of them will be pushed away into a nearby empty cell
                     if (_team.arena.grid[produceCommand.productionPos] > 0)
