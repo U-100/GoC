@@ -1,5 +1,4 @@
-﻿using System;
-using GoC.ScriptingApi;
+﻿using GoC.ScriptingApi;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -52,11 +51,9 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
         [SerializeField] private VisualEffect _giveEffect;
-        [Space]
-        [SerializeField] private Unit _fabricatedUnitPrototype;
         [SerializeField] private VisualEffect _productionEffect;
-        [Space]
         [SerializeField] private VisualEffect _moveEffect;
+        [Space]
         [SerializeField] private Renderer _skinColorSubjectRenderer; 
 
         private ExposedProperty _attackEffectColorProperty;
