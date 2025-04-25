@@ -32,7 +32,8 @@ namespace GoC.Arena
         [SerializeField] private ArenaConfig _config;
         [Space]
         [SerializeField] private VisualEffect _gridEffect;
-        [SerializeField] private Unit _unitPrefab;
+        [SerializeField] private Unit _stationaryUnitPrefab;
+        [SerializeField] private Unit _movingUnitPrefab;
         [SerializeField] private Deposit _depositPrefab;
         
         private Grid<int> _grid;
@@ -125,21 +126,24 @@ namespace GoC.Arena
         
         private void CreateTeamLandscape(Team team, int iTeam, int teamsCount)
         {
-            int2 baseFactoryPos = _grid.size / 4;
+            int2 baseUnitPos = _grid.size / 4;
 
             float teamAngleRadians = 2 * iTeam * PI / teamsCount;
 
-            int2 factoryPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseFactoryPos.ToUnityPos()).ToArenaPos();
-            Unit unit = Instantiate(_unitPrefab, factoryPos.ToUnityPos(), Quaternion.identity);
-            unit.Setup(team, _config.initialUnitParams);
-            Register(unit);
+            int2 unitPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseUnitPos.ToUnityPos()).ToArenaPos();
+            CreateUnit(_config.initialUnitParams, team, unitPos);
         }
 
         public void Register(Deposit deposit) => _deposits.Add(deposit);
         public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
-        public void Register(Unit unit)
+        public Unit CreateUnit(UnitParams unitParams, Team team, int2 unitPos)
         {
+            Unit unitPrefab = _config.unitConfig.movementTiers[unitParams.movementTier].canMove ? _movingUnitPrefab : _stationaryUnitPrefab;
+            
+            Unit unit = Instantiate(unitPrefab, unitPos.ToUnityPos(), Quaternion.identity);
+            unit.Setup(team, unitParams);
+
             _units.Add(new ExposedUnit(unit));
             
             foreach (TeamRecord teamRecord in _teamRecords)
@@ -149,8 +153,10 @@ namespace GoC.Arena
                 else
                     teamRecord.team.AddEnemyUnit(unit);
             }
+            
+            return unit;
         }
-
+        
         public void Unregister(Unit unit)
         {
             _units.RemoveAll(exposedUnit => exposedUnit.unit == unit);

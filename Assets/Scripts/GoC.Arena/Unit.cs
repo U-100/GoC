@@ -319,9 +319,7 @@ namespace GoC.Arena
                     {
                         _team.arena.grid[produceCommand.productionPos]--;
 
-                        Unit unit = Instantiate(_fabricatedUnitPrototype, produceCommand.productionPos.ToUnityPos(), Quaternion.identity);
-                        unit.Setup(_team, produceCommand.clampedUnitParams);
-                        _team.arena.Register(unit);
+                        _team.arena.CreateUnit(produceCommand.clampedUnitParams, _team, produceCommand.productionPos);
 
                         _produceCommand = null;
                     }

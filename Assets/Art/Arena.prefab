@@ -161,9 +161,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _config: {fileID: 11400000, guid: 710568fee22ecde4583d404871ab22e3, type: 2}
   _gridEffect: {fileID: 7398389565426770519}
-  _teamPrefab: {fileID: 9007627430032670072, guid: 9cd71d82197ece64e945297115889cfe,
+  _stationaryUnitPrefab: {fileID: 6335039547265471034, guid: 435601d0b3425b44f8068cc5b4020b3a,
     type: 3}
-  _unitPrefab: {fileID: 8391022737454312585, guid: 08fb3a1303a359648b32627116f743aa,
+  _movingUnitPrefab: {fileID: 8391022737454312585, guid: 08fb3a1303a359648b32627116f743aa,
     type: 3}
   _depositPrefab: {fileID: 6952737876265442335, guid: 41d586a321035634f8b217a8f868ee01,
     type: 3}
