@@ -5,7 +5,7 @@
                 <engine:DataBinding property="style.display" data-source-path="isPaused" data-source-type="GoC.Arena.ArenaViewModel, Assembly-CSharp" binding-mode="ToTarget" />
             </Bindings>
         </engine:Label>
-        <engine:Label text="???Log label is unbound???" name="LogLabel" class="goc-text" style="position: absolute; width: 100%; -unity-text-align: lower-left; height: 38%; bottom: 0; left: 0; white-space: pre-wrap; background-color: rgba(0, 0, 0, 0.75); overflow: hidden;">
+        <engine:Label text="???Log label is unbound???" name="LogLabel" class="goc-text" style="position: absolute; width: 100%; -unity-text-align: lower-left; height: 38%; bottom: 0; left: 0; white-space: pre-wrap; background-color: rgba(0, 0, 0, 0); overflow: hidden;">
             <Bindings>
                 <engine:DataBinding property="text" data-source-path="log" binding-mode="ToTarget" update-trigger="EveryUpdate" />
             </Bindings>

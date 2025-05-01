@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9328c1fcf6c84994b669471fabb37d05, type: 3}
   m_Name: YellowTeamSkin
   m_EditorClassIdentifier: 
-  _mainColorMaterial: {fileID: 2100000, guid: ccc91978981d8594ca9a50d56fb782ee, type: 2}
+  _mainColorMaterial: {fileID: 2100000, guid: 470c4c9f0db3a7740ae2f220a4659476, type: 2}
   _vfxColorTint: {r: 0.9858571, g: 1, b: 0, a: 1}
