@@ -29,12 +29,12 @@ namespace GoC.Arena
     
     public class Arena : MonoBehaviour, IArena
     {
-        [SerializeField] private ArenaConfig _config;
-        [Space]
         [SerializeField] private VisualEffect _gridEffect;
         [SerializeField] private Unit _stationaryUnitPrefab;
         [SerializeField] private Unit _movingUnitPrefab;
         [SerializeField] private Deposit _depositPrefab;
+
+        private ArenaConfig _config;
         
         private Grid<int> _grid;
         private readonly List<Deposit> _deposits = new();
