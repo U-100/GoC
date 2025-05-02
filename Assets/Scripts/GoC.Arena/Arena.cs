@@ -32,7 +32,9 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _gridEffect;
         [SerializeField] private Unit _stationaryUnitPrefab;
         [SerializeField] private Unit _movingUnitPrefab;
-        [SerializeField] private Deposit _depositPrefab;
+        
+        [Tooltip("One prefab per substance")]
+        [SerializeField] private Deposit[] _depositPrefabs;
 
         private ArenaConfig _config;
         
@@ -140,7 +142,7 @@ namespace GoC.Arena
 
         public Deposit CreateDeposit(DepositConfig depositConfig, int2 depositPos)
         {
-            Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
+            Deposit deposit = Instantiate(_depositPrefabs[(int)depositConfig.substanceType], depositPos.ToUnityPos(), Quaternion.identity);
             deposit.Setup(this, depositConfig);
             _deposits.Add(deposit);
             return deposit;

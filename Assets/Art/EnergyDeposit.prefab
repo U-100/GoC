@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 915399751292620134}
   - component: {fileID: 6952737876265442335}
   m_Layer: 0
-  m_Name: Deposit
+  m_Name: EnergyDeposit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
