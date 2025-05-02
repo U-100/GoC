@@ -1,13 +1,33 @@
-function findNearby(set, pos, maxDistance)
+function findNearbyDeposit(pos, iSubstance)
 {
     let nearest = undefined;
-    let distanceToNearest = maxDistance;
-    for (let elem of set)
+    let distanceToNearest = 1000000;
+    for (let deposit of model.deposits)
     {
-        let curDist = distance(elem.pos, pos);
+        if (deposit.substanceType == iSubstance)
+        {
+            let curDist = distance(deposit.pos, pos);
+            if (distanceToNearest > curDist)
+            {
+                nearest = deposit;
+                distanceToNearest = curDist;
+            }
+        }
+    }
+
+    return nearest;
+}
+
+function findNearbyEnemy(pos)
+{
+    let nearest = undefined;
+    let distanceToNearest = 1000000;
+    for (let enemyUnit of model.enemyUnits)
+    {
+        let curDist = distance(enemyUnit.pos, pos);
         if (distanceToNearest > curDist)
         {
-            nearest = elem;
+            nearest = enemyUnit;
             distanceToNearest = curDist;
         }
     }
@@ -15,63 +35,56 @@ function findNearby(set, pos, maxDistance)
     return nearest;
 }
 
+let warriorParams =
+    {
+        attackTier: 1,
+        movementTier: 1,
+        hullTier: 1,
+    }
+
 export function tick()
 {
-    let nearbyDeposit = undefined;
-    if (model.myUnits.count > 0)
-        nearbyDeposit = findNearby(model.deposits, model.myUnits[0].pos, 100000);
-
-    for (let iUnit = 0; iUnit < model.myUnits.count; ++iUnit)
+    for (let myUnit of model.myUnits)
     {
-        let myUnit = model.myUnits[iUnit];
-
-        if (myUnit.busy)
-            continue;
-
-        if (iUnit === 0)
-        {
-            if (nearbyDeposit && myUnit.pos !== nearbyDeposit.pos)
-            {
-                myUnit.moveTo(nearbyDeposit.pos);
-                continue;
-            }
-
-            let pp =
-            [
-                nearbyDeposit.pos + new int2(-1, 0),
-                nearbyDeposit.pos + new int2(1, 0),
-                nearbyDeposit.pos + new int2(0, -1),
-                nearbyDeposit.pos + new int2(0, 1)
-            ];
-            
-            if (model.myUnits.count < 5)
-            {
-                let miner = { miningTier: 1, productionTier: 1, storageTier: 1 };
-
-                myUnit.produce(miner, pp[model.myUnits.count - 1]) == Result.Ok || myUnit.mine(nearbyDeposit);
-                continue;
-            }
-        }
-        else if (model.myUnits.count < 5)
-        {
-            myUnit.mine(nearbyDeposit);
-        }
-        else if (myUnit.storage.capacityPerSubstance > 0)
-        {
-            let warrior = { attackTier: 1, movementTier: 1, hullTier: 1 };
-
-            myUnit.produce(warrior) == Result.Ok || myUnit.mine(nearbyDeposit);
-            continue;
-        }
+        if (myUnit.storage.capacityPerSubstance > 0)
+            tickWorker(myUnit);
         else
-        {
-            let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 100000);
+            tickWarrior(myUnit);
+    }
+}
 
-            if (nearbyEnemyUnit)
-            {
-                myUnit.attack(nearbyEnemyUnit) == Result.Ok || myUnit.moveTo(nearbyEnemyUnit.pos);
-                continue;
-            }
+function tickWorker(myUnit)
+{
+    if (myUnit.busy)
+        return;
+
+    if (myUnit.Produce(warriorParams) == Result.Ok)
+        return;
+
+    for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
+    {
+        if (myUnit.storage.content[iSubstance] < model.ProductionCost(warriorParams, iSubstance))
+        {
+            let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
+
+            if (myUnit.Mine(nearbyDeposit) == Result.Ok)
+                return;
+
+            myUnit.MoveTo(nearbyDeposit.pos);
+            return;
         }
+    }
+}
+
+function tickWarrior(myUnit)
+{
+    let nearbyEnemy = findNearbyEnemy(myUnit.pos);
+
+    if (nearbyEnemy)
+    {
+        if (myUnit.Attack(nearbyEnemy) == Result.Ok)
+            return;
+
+        myUnit.MoveTo(nearbyEnemy.pos);
     }
 }

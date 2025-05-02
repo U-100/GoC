@@ -80,11 +80,15 @@ function tickWarrior(myUnit)
 {
     let nearbyEnemy = findNearbyEnemy(myUnit.pos);
     
-    if (nearbyEnemy)
-    {
-        if (myUnit.Attack(nearbyEnemy) == Result.Ok)
-            return;
-
+    if (nearbyEnemy && myUnit.Attack(nearbyEnemy) == Result.Ok)
+        return;
+    
+    let radius = model.myUnits.count + 1;
+    
+    if (nearbyEnemy && distance(nearbyEnemy.pos, model.myUnits[0].pos) < radius + 3)
         myUnit.MoveTo(nearbyEnemy.pos);
-    }
+    if (nearbyEnemy && distance(myUnit.pos, model.myUnits[0].pos) < radius)
+        myUnit.MoveTo(nearbyEnemy.pos);
+    else
+        myUnit.MoveTo(model.myUnits[0].pos);
 }

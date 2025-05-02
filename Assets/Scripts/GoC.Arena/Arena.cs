@@ -113,10 +113,10 @@ namespace GoC.Arena
 
         private void CreateDeposits()
         {
-            int2 baseDepositPos = _grid.size / 6;
+            int2 baseDepositPos = _grid.size / 3 + _grid.size / 20;
 
             float anglePerTeam = 2 * PI / _teamRecords.Count;
-            float anglePerDeposit = anglePerTeam / 2 / _config.depositConfigs.Count;
+            float anglePerDeposit = anglePerTeam / 5 / _config.depositConfigs.Count;
 
             for (int iTeam = 0; iTeam < _teamRecords.Count; iTeam++)
             {
