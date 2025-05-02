@@ -85,5 +85,8 @@ namespace GoC.ScriptingApi
         IReadOnlyList<IUnit> enemyUnits { get; }
         
         IReadOnlyList<IDeposit> deposits { get; }
+        
+        int ProductionCost(object unitParamsObject, Substance.Type substanceType);
+        int ProductionTicks(object unitParamsObject);
     }
 }

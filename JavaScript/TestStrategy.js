@@ -38,10 +38,6 @@ function wander(myUnit)
     myUnit.MoveTo(destination);
 }
 
-// log("This is a test log message");
-// logWarning("This is a test warning");
-// logError("This is a test error");
-
 let productionParams =
 {
     attackTier: 1,
@@ -51,6 +47,8 @@ let productionParams =
     hullTier: 1,
     storageTier: 1
 }
+
+log("Production ticks: " + model.ProductionTicks(productionParams));
 
 export function tick()
 {

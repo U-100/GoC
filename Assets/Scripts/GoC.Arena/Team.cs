@@ -25,6 +25,10 @@ namespace GoC.Arena
         public IReadOnlyList<IUnit> enemyUnits => _enemyUnits;
         public IReadOnlyList<IDeposit> deposits => _arena.deposits;
 
+        public int ProductionCost(object unitParamsObject, Substance.Type substanceType) => arena.config.unitConfig.ProductionCost(UnitParams.FromObject(unitParamsObject), (int)substanceType);
+
+        public int ProductionTicks(object unitParamsObject) => arena.config.unitConfig.ProductionTicks(UnitParams.FromObject(unitParamsObject));
+
 
         public Team(int initTeamId, Arena initArena, TeamConfig initConfig)
         {
