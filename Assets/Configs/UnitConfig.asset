@@ -16,7 +16,7 @@ MonoBehaviour:
   - _productionCost: 
     _productionTicks: 0
     _damage: 0
-  - _productionCost: 01000000
+  - _productionCost: 0000000001000000
     _productionTicks: 1
     _damage: 1
   _miningTiers:

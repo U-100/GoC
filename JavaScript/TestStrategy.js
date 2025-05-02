@@ -1,26 +1,29 @@
-function findNearby(set, pos, maxDistance) {
+function findNearbyDeposit(pos, iSubstance)
+{
     let nearest = undefined;
-    let distanceToNearest = maxDistance;
-    for (let elem of set) {
-        let curDist = distance(elem.pos, pos);
-        if (distanceToNearest > curDist) {
-            nearest = elem;
-            distanceToNearest = curDist;
+    let distanceToNearest = 1000000;
+    for (let deposit of model.deposits)
+    {
+        if (deposit.substanceType == iSubstance)
+        {
+            let curDist = distance(deposit.pos, pos);
+            if (distanceToNearest > curDist)
+            {
+                nearest = deposit;
+                distanceToNearest = curDist;
+            }
         }
     }
 
     return nearest;
 }
 
-function findNearbyNonAttackedEnemy(pos)
+function findNearbyEnemy(pos)
 {
     let nearest = undefined;
     let distanceToNearest = 1000000;
     for (let enemyUnit of model.enemyUnits) 
     {
-        if (enemyUnit.attackers >= enemyUnit.hull.integrity)
-            continue;
-        
         let curDist = distance(enemyUnit.pos, pos);
         if (distanceToNearest > curDist)
         {
@@ -32,73 +35,56 @@ function findNearbyNonAttackedEnemy(pos)
     return nearest;
 }
 
-function wander(myUnit)
-{
-    let destination = [myUnit.pos.x - 1 + Math.floor(Math.random() * 3), myUnit.pos.y - 1 + Math.floor(Math.random() * 3)];
-    myUnit.MoveTo(destination);
-}
-
-let productionParams =
+let warriorParams =
 {
     attackTier: 1,
-    miningTier: 1,
-    productionTier: 1,
     movementTier: 1,
     hullTier: 1,
-    storageTier: 1
 }
-
-log("Production ticks: " + model.ProductionTicks(productionParams));
 
 export function tick()
 {
-    for (let enemyUnit of model.enemyUnits)
-        enemyUnit.attackers = 0;
-    
-    for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
+    for (let myUnit of model.myUnits)
     {
-        let myUnit = model.myUnits[iUnit];
+        if (myUnit.storage.capacityPerSubstance > 0)
+            tickWorker(myUnit);
+        else
+            tickWarrior(myUnit);
+    }
+}
 
-        if (myUnit.busy)
-            continue;
-        
-        //let nearbyEnemyUnit = findNearby(model.enemyUnits, myUnit.pos, 100000);
-        let nearbyEnemyUnit = findNearbyNonAttackedEnemy(myUnit.pos);
-        if (nearbyEnemyUnit)
-            if (myUnit.Attack(nearbyEnemyUnit) == Result.Ok)
-            {
-                nearbyEnemyUnit.attackers = nearbyEnemyUnit.attackers + 1;
-                continue;
-            }
-        
-        if (myUnit.storage.content[Substance.Type.Energy] >= 2)
-            if (myUnit.Produce(productionParams) == Result.Ok)
-                continue;
+function tickWorker(myUnit)
+{
+    if (myUnit.busy)
+        return;
 
-        let nearbyDeposit = findNearby(model.deposits, myUnit.pos, 100000);
-        if (nearbyDeposit)
+    if (myUnit.Produce(warriorParams) == Result.Ok)
+        return;
+    
+    for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
+    {
+        if (myUnit.storage.content[iSubstance] < model.ProductionCost(warriorParams, iSubstance))
         {
-            if (iUnit == 0 && myUnit.pos !== nearbyDeposit.pos)
-            {
-                myUnit.MoveTo(nearbyDeposit.pos);
-                continue;
-            }
-                
+            let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
+
             if (myUnit.Mine(nearbyDeposit) == Result.Ok)
-                continue;
-            else if (iUnit < 2)
-            {
-                myUnit.MoveTo(nearbyDeposit.pos);
-                continue;
-            }
-        }
+                return;
 
-        if (nearbyEnemyUnit)
-        {
-            myUnit.MoveTo(nearbyEnemyUnit.pos);
-            continue;
+            myUnit.MoveTo(nearbyDeposit.pos);
+            return;
         }
+    }
+}
 
-        wander(myUnit);
+function tickWarrior(myUnit)
+{
+    let nearbyEnemy = findNearbyEnemy(myUnit.pos);
+    
+    if (nearbyEnemy)
+    {
+        if (myUnit.Attack(nearbyEnemy) == Result.Ok)
+            return;
+
+        myUnit.MoveTo(nearbyEnemy.pos);
     }
 }

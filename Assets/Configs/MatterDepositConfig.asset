@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36a9aef1e2934e8daf8f8f27772a98ee, type: 3}
-  m_Name: DepositConfig
+  m_Name: MatterDepositConfig
   m_EditorClassIdentifier: 
-  _substanceType: 0
+  _substanceType: 1
   _miningSpeed: 1

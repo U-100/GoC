@@ -113,14 +113,18 @@ namespace GoC.Arena
         {
             int2 baseDepositPos = _grid.size / 6;
 
-            for (int iDeposit = 0; iDeposit < _config.depositsCount; ++iDeposit)
-            {
-                float depositAngleRadians = 2 * PI * iDeposit / _config.depositsCount;
+            float anglePerTeam = 2 * PI / _teamRecords.Count;
+            float anglePerDeposit = anglePerTeam / 2 / _config.depositConfigs.Count;
 
-                int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(depositAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
-                Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
-                deposit.Setup(this, _config.depositConfig);
-                Register(deposit);
+            for (int iTeam = 0; iTeam < _teamRecords.Count; iTeam++)
+            {
+                for (int iDeposit = 0; iDeposit < _config.depositConfigs.Count; ++iDeposit)
+                {
+                    float depositAngleRadians = anglePerTeam * iTeam + anglePerDeposit * iDeposit;
+
+                    int2 depositPos = rotate(Unity.Mathematics.quaternion.RotateY(depositAngleRadians), baseDepositPos.ToUnityPos()).ToArenaPos();
+                    CreateDeposit(_config.depositConfigs[iDeposit], depositPos);
+                }
             }
         }
         
@@ -134,7 +138,14 @@ namespace GoC.Arena
             CreateUnit(_config.initialUnitParams, team, unitPos);
         }
 
-        public void Register(Deposit deposit) => _deposits.Add(deposit);
+        public Deposit CreateDeposit(DepositConfig depositConfig, int2 depositPos)
+        {
+            Deposit deposit = Instantiate(_depositPrefab, depositPos.ToUnityPos(), Quaternion.identity);
+            deposit.Setup(this, depositConfig);
+            _deposits.Add(deposit);
+            return deposit;
+        }
+
         public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
         public Unit CreateUnit(UnitParams unitParams, Team team, int2 unitPos)
