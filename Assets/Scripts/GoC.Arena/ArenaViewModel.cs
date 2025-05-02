@@ -24,6 +24,8 @@ namespace GoC.Arena
             Application.logMessageReceived += OnLogMessageReceived;
         }
 
+        [CreateProperty] public string version => Application.version;
+        
         [CreateProperty] public bool isInMainMenu { get; private set; } = true;
 
         [CreateProperty] public bool isInCodeVsAIMenu { get; private set; }
