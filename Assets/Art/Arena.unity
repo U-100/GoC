@@ -303,7 +303,7 @@ MonoBehaviour:
   TargetOffset: {x: 0, y: 0, z: 0}
   TrackerSettings:
     BindingMode: 4
-    PositionDamping: {x: 1, y: 1, z: 1}
+    PositionDamping: {x: 0.2, y: 0.2, z: 0.2}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
@@ -344,7 +344,7 @@ MonoBehaviour:
   RadialAxis:
     Value: 1.5
     Center: 1
-    Range: {x: 0.25, y: 4}
+    Range: {x: 0.5, y: 4}
     Wrap: 0
     Recentering:
       Enabled: 0
@@ -576,6 +576,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 582264391}
+  - component: {fileID: 582264392}
   m_Layer: 0
   m_Name: CameraTarget
   m_TagString: Untagged
@@ -598,6 +599,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 144735886}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &582264392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582264390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0694e35bdb9dfd440a078a7567ec1829, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cameraTransform: {fileID: 278531547}
+  _cameraTargetTransform: {fileID: 582264391}
 --- !u!1 &626484437
 GameObject:
   m_ObjectHideFlags: 0
