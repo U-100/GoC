@@ -83,9 +83,11 @@ function tickWarrior(myUnit)
     if (nearbyEnemy && myUnit.Attack(nearbyEnemy) == Result.Ok)
         return;
     
-    let radius = model.myUnits.count + 1;
+    let radius = model.myUnits.count * 2 + 1 - model.units.count;
+    if (radius < 3)
+        radius = 3;
     
-    if (nearbyEnemy && distance(nearbyEnemy.pos, model.myUnits[0].pos) < radius + 3)
+    if (nearbyEnemy && distance(nearbyEnemy.pos, model.myUnits[0].pos) < 2 * radius)
         myUnit.MoveTo(nearbyEnemy.pos);
     if (nearbyEnemy && distance(myUnit.pos, model.myUnits[0].pos) < radius)
         myUnit.MoveTo(nearbyEnemy.pos);
