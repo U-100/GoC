@@ -7,7 +7,7 @@ using UnityEngine;
 using static Unity.Mathematics.math;
 
 [TestFixture]
-public class TestPathfinding
+public class TestAStar
 {
     [Test]
     public void TestStartOutsideRange()
@@ -115,6 +115,33 @@ public class TestPathfinding
         aStar.Run();
         
         Assert.That(aStar.path.Length == 0);
+        
+        aStar.grid.Dispose();
+        aStar.path.Dispose();
+    }
+
+    [Test]
+    public void TestLargeGrid()
+    {
+        int large = 64;
+
+        AStar aStar = new()
+        {
+            grid = new NativeArray<int>(large * large, Allocator.TempJob),
+            size = int2(large, large),
+            from = int2(0, 0),
+            to = int2(large - 1, large - 1),
+            // from = int2(10, 10),
+            // to = int2(20, 20),
+            path = new NativeList<int2>(0, Allocator.TempJob)
+        };
+
+        System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        aStar.Run();
+        stopwatch.Stop();
+        Debug.Log(stopwatch.ElapsedTicks);
+        
+        Assert.That(aStar.path.Length == large + large - 1);
         
         aStar.grid.Dispose();
         aStar.path.Dispose();

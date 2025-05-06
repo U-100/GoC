@@ -5,18 +5,18 @@ using Unity.Mathematics;
 
 using static Unity.Mathematics.math;
 
-public struct Node
-{
-    public int g;
-    public int h;
-
-    public int2 parent;
-    public bool closed;
-}
-
-//[BurstCompile]
+[BurstCompile]
 public struct AStar : IJob
 {
+    private struct Node
+    {
+        public int g;
+        public int h;
+
+        public int2 parent;
+        public bool closed;
+    }
+
     public int2 size;
     public NativeArray<int> grid;
     
@@ -118,6 +118,7 @@ public struct AStar : IJob
             path.Resize(0, NativeArrayOptions.UninitializedMemory);
 
         nodes.Dispose();
+        offsets.Dispose();
     }
 
     private int Heuristic(int2 p1, int2 p2)
