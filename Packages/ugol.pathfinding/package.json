@@ -1,0 +1,13 @@
+{
+  "name": "ugol.pathfinding",
+  "displayName": "ugol.pathfinding",
+  "version": "0.0.1",
+  "unity": "6000.1",
+  "description": "Pathfinding library",
+  "keywords": [
+    "pathfinding"
+  ],
+  "author": {
+    "name": "Ugol"
+  }
+}
