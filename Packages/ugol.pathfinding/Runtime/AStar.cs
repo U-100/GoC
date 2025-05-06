@@ -27,6 +27,13 @@ public struct AStar : IJob
 
     public void Execute()
     {
+        if (any(from < 0 | from >= size | to < 0 | to >= size))
+        {
+            // from and to must be in range, otherwise the path doesn't exist
+            path.Resize(0, NativeArrayOptions.UninitializedMemory);
+            return;
+        }
+        
         NativeArray<Node> nodes = new (size.x * size.y, Allocator.Temp);
         int openCount = 0;
         
