@@ -38,7 +38,7 @@ public struct AStar : IJob
         int openCount = 0;
         
         // add start position to open list
-        nodes[from.x + from.y * size.x] = new Node { g = 0, h = Heuristic(from, to), parent = from };
+        nodes[from.x + from.y * size.x] = new Node { g = 0, h = (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y), parent = from };
         ++openCount;
 
         NativeArray<int2> offsets = new (4, Allocator.Temp);
@@ -49,8 +49,29 @@ public struct AStar : IJob
         
         do
         {
-            (int2 cur, int curIndex, Node curNode) = FindBest(nodes);
+            int i = 0;
+            int foundF = int.MaxValue;
+            int2 cur = int2(-1, -1);
+            Node curNode = new Node();
+            int curIndex = -1;
+        
+            for(int2 p = int2(0, 0); p.y < size.y; ++p.y)
+            for (p.x = 0; p.x < size.x; ++p.x, ++i)
+            {
+                Node tempNode = nodes[i];
+                if (tempNode.closed)
+                    continue;
             
+                int f = tempNode.g + tempNode.h;
+                if (f > 0 && f < foundF)
+                {
+                    foundF = f;
+                    cur = p;
+                    curNode = tempNode;
+                    curIndex = i;
+                }
+            }
+        
             // remove from open list
             curNode.closed = true;
             nodes[curIndex] = curNode;
@@ -69,6 +90,7 @@ public struct AStar : IJob
                 if (
                     all(neighbour >= 0 & neighbour < size)  // if in range
                     && grid[neighbourIndex] == 0 // is passable
+                    && any(neighbour != curNode.parent) // is not current nodes parent
                 )
                 {
                     Node neighbourNode = nodes[neighbourIndex];
@@ -76,7 +98,7 @@ public struct AStar : IJob
                     if (!neighbourNode.closed) // if not on the closed list
                     {
                         int neighbourG = curNode.g + 1;
-                        int neighbourH = Heuristic(neighbour, to);
+                        int neighbourH = (neighbour.x - to.x) * (neighbour.x - to.x) + (neighbour.y - to.y) * (neighbour.y - to.y);
 
                         if (neighbourNode.g == 0 && neighbourNode.h == 0) // if neighbour is not on the open list
                         {
@@ -101,17 +123,17 @@ public struct AStar : IJob
             }
         } while(openCount > 0);
 
-        Node node = nodes[to.x + to.y * size.x];
-        if (node.closed) // if destination is on the closed list then we have found a path
+        Node pathNode = nodes[to.x + to.y * size.x];
+        if (pathNode.closed) // if destination is on the closed list then we have found a path
         {
             int2 cur = to;
             // there should be exactly toNode.g elements of the path
-            path.Resize(node.g + 1, NativeArrayOptions.UninitializedMemory);
-            for (int i = node.g; i >= 0; --i)
+            path.Resize(pathNode.g + 1, NativeArrayOptions.UninitializedMemory);
+            for (int i = pathNode.g; i >= 0; --i)
             {
                 path[i] = cur;
-                cur = node.parent;
-                node = nodes[cur.x + cur.y * size.x];
+                cur = pathNode.parent;
+                pathNode = nodes[cur.x + cur.y * size.x];
             }
         }
         else
@@ -119,39 +141,5 @@ public struct AStar : IJob
 
         nodes.Dispose();
         offsets.Dispose();
-    }
-
-    private int Heuristic(int2 p1, int2 p2)
-    {
-        int2 dx = abs(p1 - p2);
-        return dx.x + dx.y;
-    }
-
-    private (int2, int, Node) FindBest(NativeArray<Node> nodes)
-    {
-        int i = 0;
-        int foundF = int.MaxValue;
-        int2 found = int2(-1, -1);
-        Node foundNode = new Node();
-        int foundIndex = -1;
-        
-        for(int2 p = int2(0, 0); p.y < size.y; ++p.y)
-        for (p.x = 0; p.x < size.x; ++p.x, ++i)
-        {
-            Node node = nodes[i];
-            if (node.closed)
-                continue;
-            
-            int f = node.g + node.h;
-            if (f > 0 && f < foundF)
-            {
-                foundF = f;
-                found = p;
-                foundNode = node;
-                foundIndex = i;
-            }
-        }
-        
-        return (found, foundIndex, foundNode);
     }
 }

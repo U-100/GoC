@@ -40,7 +40,8 @@ public struct AStar2 : IJob
         NativeHashMap<int2, Node> closedList = new(listInitialCapacity, Allocator.Temp);
         
         // add start position to open list
-        openList[from] = new Node { pos = from, g = 0, h = fromTo.x + fromTo.y, parent = from };
+        //openList[from] = new Node { pos = from, g = 0, h = fromTo.x + fromTo.y, parent = from };
+        openList[from] = new Node { pos = from, g = 0, h = fromTo.x * fromTo.x + fromTo.y * fromTo.y, parent = from };
 
         NativeArray<int2> offsets = new (4, Allocator.Temp);
         offsets[0] = int2(1, 0);
@@ -91,7 +92,8 @@ public struct AStar2 : IJob
 
                     int neighbourG = curNode.g + 1;
                     int2 absDelta = abs(neighbourPos - to);
-                    int neighbourH = absDelta.x + absDelta.y;
+                    //int neighbourH = absDelta.x + absDelta.y;
+                    int neighbourH = absDelta.x * absDelta.x + absDelta.y * absDelta.y;
 
                     if (openList.TryGetValue(neighbourPos, out Node openNeighbourNode))
                     {
