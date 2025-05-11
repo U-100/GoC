@@ -77,15 +77,13 @@ public struct AStar2 : IJob
             if (all(curNodePos == to))
                 break; // destination reached
             
-            //if (curNode.g >= path.Length - 1)
-            //  continue; // any path formed by a neighbour of cur node will be longer then the resulting path array, will not continue searching neighbours
-
             for (int iOffset = 0; iOffset < offsets.Length; ++iOffset)
             {
                 int2 neighbourPos = curNodePos + offsets[iOffset];
                 if (
                     all(neighbourPos >= 0 & neighbourPos < size)  // if in range
                     && grid[neighbourPos.x + neighbourPos.y * size.x] == 0 // is passable
+                    && any(neighbourPos != curNode.parent) // is not current nodes parent
                 )
                 {
                     if (closedList.ContainsKey(neighbourPos))
