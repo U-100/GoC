@@ -31,13 +31,29 @@ public class AStarExperiment : MonoBehaviour
     
     void OnDrawGizmos()
     {
+        Vector3 boxSize = new Vector3(.8f, 0, .8f);
+
+        if (openList.IsCreated)
+        {
+            Gizmos.color = Color.cyan;
+            for (int z = 0; z < size.y; z++)
+            for (int x = 0; x < size.x; x++)
+            {
+                if (openList.ContainsKey(int2(x, z)))
+                {
+                    Gizmos.DrawWireCube(new Vector3(x + .5f, 0, z + .5f), boxSize);
+                }
+            }
+        }
+        
         if (closedList.IsCreated)
         {
+            Gizmos.color = Color.white;
             for (int z = 0; z < size.y; z++)
             for (int x = 0; x < size.x; x++)
             {
                 if (closedList.ContainsKey(int2(x, z)))
-                    Gizmos.DrawWireCube(new Vector3(x + .5f, 0, z + .5f), new Vector3(1, 0, 1));
+                    Gizmos.DrawWireCube(new Vector3(x + .5f, 0, z + .5f), boxSize);
             }
         }
 
@@ -46,7 +62,7 @@ public class AStarExperiment : MonoBehaviour
             Gizmos.color = Color.red;
             for (int i = 0; i < path.Length; i++)
             {
-                Gizmos.DrawWireCube(new Vector3(path[i].x + .5f, 0, path[i].y + .5f), new Vector3(1, 0, 1));
+                Gizmos.DrawWireCube(new Vector3(path[i].x + .5f, 0, path[i].y + .5f), boxSize - new Vector3(.1f, 0, .1f));
             }
         }
     }
@@ -84,6 +100,8 @@ public class AStarExperiment : MonoBehaviour
         
         do
         {
+            yield return new WaitForSeconds(1.5f);
+
             // find the best node on the open list
             Node curNode = new Node();
             NativeArray<Node> nodes = openList.GetValueArray(Allocator.Temp);
@@ -107,8 +125,6 @@ public class AStarExperiment : MonoBehaviour
             
             // add to closed list
             closedList[curNodePos] = curNode;
-
-            yield return new WaitForSeconds(.5f);
             
             if (all(curNodePos == to))
                 break; // destination reached
