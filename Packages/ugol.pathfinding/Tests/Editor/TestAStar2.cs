@@ -30,7 +30,7 @@ public class TestAStar2
         stopwatch.Stop();
         Debug.Log(stopwatch.ElapsedTicks);
         
-        Assert.That(aStar2.path.Length == large + large - 1);
+        Assert.AreEqual(large + large - 1, aStar2.path.Length);
         
         aStar2.grid.Dispose();
         aStar2.path.Dispose();

@@ -118,46 +118,78 @@ public class AStarExperiment : MonoBehaviour
                 }
             }
             nodes.Dispose();
-            int2 curNodePos = curNode.pos;
-            
+                
             // remove from open list
-            openList.Remove(curNodePos);
-            
-            // add to closed list
-            closedList[curNodePos] = curNode;
-            
-            if (all(curNodePos == to))
-                break; // destination reached
-            
-            for (int iOffset = 0; iOffset < offsets.Length; ++iOffset)
+            openList.Remove(curNode.pos);
+
+            bool haveCandidate;
+            do
             {
-                int2 neighbourPos = curNodePos + offsets[iOffset];
-                if (
-                    all(neighbourPos >= 0 & neighbourPos < size)  // if in range
-                    && grid[neighbourPos.x + neighbourPos.y * size.x] == 0 // is passable
-                    && any(neighbourPos != curNode.parent) // is not current nodes parent
-                )
+                haveCandidate = false;
+
+                // add to closed list
+                closedList[curNode.pos] = curNode;
+
+                if (all(curNode.pos == to))
+                    break; // destination reached
+
+                Node candidateNode = new();
+                int candidateF = int.MaxValue;
+                for (int iOffset = 0; iOffset < offsets.Length; ++iOffset)
                 {
-                    if (closedList.ContainsKey(neighbourPos))
-                        continue;
-
-                    int neighbourG = curNode.g + 1;
-                    int2 absDelta = abs(neighbourPos - to);
-                    //int neighbourH = absDelta.x + absDelta.y;
-                    int neighbourH = absDelta.x * absDelta.x + absDelta.y * absDelta.y;
-
-                    if (openList.TryGetValue(neighbourPos, out Node openNeighbourNode))
+                    int2 neighbourPos = curNode.pos + offsets[iOffset];
+                    if (
+                        all(neighbourPos >= 0 & neighbourPos < size) // if in range
+                        && grid[neighbourPos.x + neighbourPos.y * size.x] == 0 // is passable
+                        && any(neighbourPos != curNode.parent) // is not current nodes parent
+                    )
                     {
-                        if (openNeighbourNode.g > neighbourG)
+                        if (closedList.ContainsKey(neighbourPos))
+                            continue;
+
+                        int neighbourG = curNode.g + 1;
+                        int2 absDelta = abs(neighbourPos - to);
+                        //int neighbourH = absDelta.x + absDelta.y;
+                        int neighbourH = absDelta.x * absDelta.x + absDelta.y * absDelta.y;
+
+                        if (openList.TryGetValue(neighbourPos, out Node openNeighbourNode))
                         {
-                            openNeighbourNode.g = neighbourG;
-                            openList[neighbourPos] = openNeighbourNode;
+                            if (openNeighbourNode.g > neighbourG)
+                            {
+                                openNeighbourNode.g = neighbourG;
+                                openList[neighbourPos] = openNeighbourNode;
+                            }
+                        }
+                        else
+                        {
+                            int neighbourF = neighbourG + neighbourH;
+                            if (neighbourF <= curNode.g + curNode.h && neighbourF < candidateF)
+                            {
+                                // we found a new candidate for immediate processing
+
+                                if (haveCandidate) // if we already had a candidate
+                                    openList.Add(candidateNode.pos, candidateNode); // store it on the open list
+
+                                // assign a new candidate
+                                candidateF = neighbourF;
+                                candidateNode = new() { pos = neighbourPos, g = neighbourG, h = neighbourH, parent = curNode.pos };
+
+                                haveCandidate = true;
+                            }
+                            else
+                                openList.Add(neighbourPos, new() { pos = neighbourPos, g = neighbourG, h = neighbourH, parent = curNode.pos });
                         }
                     }
-                    else
-                        openList.Add(neighbourPos, new() { pos = neighbourPos, g = neighbourG, h = neighbourH, parent = curNodePos });
                 }
-            }
+
+                if (haveCandidate)
+                    curNode = candidateNode;
+                
+            } while (haveCandidate);
+            
+            if (all(curNode.pos == to))
+                break; // destination reached
+            
         } while(openList.Count > 0);
 
         if (closedList.TryGetValue(to, out Node toNode)) // if destination is on the closed list then we have found a path
