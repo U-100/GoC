@@ -1,4 +1,4 @@
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -10,12 +10,20 @@ public struct AStar : IJob
 {
     private struct Node
     {
+        public int2 pos;
         public int g;
         public int h;
 
         public int2 parent;
-        public bool closed;
     }
+
+    private static readonly int2[] OFFSETS =
+    {
+        new(1, 0),
+        new(-1, 0),
+        new(0, 1),
+        new(0, -1),
+    };
 
     public int2 size;
     public NativeArray<int> grid;
@@ -33,113 +41,125 @@ public struct AStar : IJob
             path.Resize(0, NativeArrayOptions.UninitializedMemory);
             return;
         }
-        
-        NativeArray<Node> nodes = new (size.x * size.y, Allocator.Temp);
-        int openCount = 0;
+
+        int2 fromTo = abs(from - to);
+        int listInitialCapacity = fromTo.x + fromTo.y;
+        NativeHashMap<int2, Node> openList = new(listInitialCapacity, Allocator.Temp);
+        NativeHashMap<int2, Node> closedList = new(listInitialCapacity, Allocator.Temp);
         
         // add start position to open list
-        nodes[from.x + from.y * size.x] = new Node { g = 0, h = (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y), parent = from };
-        ++openCount;
+        //openList[from] = new Node { pos = from, g = 0, h = fromTo.x + fromTo.y, parent = from };
+        openList[from] = new Node { pos = from, g = 0, h = H(ref fromTo), parent = from };
 
-        NativeArray<int2> offsets = new (4, Allocator.Temp);
-        offsets[0] = int2(1, 0);
-        offsets[1] = int2(-1, 0);
-        offsets[2] = int2(0, 1);
-        offsets[3] = int2(0, -1);
-        
         do
         {
-            int i = 0;
-            int foundF = int.MaxValue;
-            int2 cur = int2(-1, -1);
+            // find the best node on the open list
             Node curNode = new Node();
-            int curIndex = -1;
-        
-            for(int2 p = int2(0, 0); p.y < size.y; ++p.y)
-            for (p.x = 0; p.x < size.x; ++p.x, ++i)
+            NativeArray<Node> nodes = openList.GetValueArray(Allocator.Temp);
+            int foundF = int.MaxValue;
+            for(int i = 0; i < nodes.Length; ++i)
             {
-                Node tempNode = nodes[i];
-                if (tempNode.closed)
-                    continue;
+                Node node = nodes[i];
             
-                int f = tempNode.g + tempNode.h;
-                if (f > 0 && f < foundF)
+                int f = node.g + node.h;
+                if (f < foundF)
                 {
                     foundF = f;
-                    cur = p;
-                    curNode = tempNode;
-                    curIndex = i;
+                    curNode = node;
                 }
             }
-        
+            nodes.Dispose();
+            
             // remove from open list
-            curNode.closed = true;
-            nodes[curIndex] = curNode;
-            --openCount;
-            
-            if (all(cur == to))
-                break; // destination reached
-            
-            //if (curNode.g >= path.Length - 1)
-              //  continue; // any path formed by a neighbour of cur node will be longer then the resulting path array, will not continue searching neighbours
+            openList.Remove(curNode.pos);
 
-            for (int iOffset = 0; iOffset < offsets.Length; ++iOffset)
+            bool haveCandidate;
+            do
             {
-                int2 neighbour = cur + offsets[iOffset];
-                int neighbourIndex = neighbour.x + neighbour.y * size.x;
-                if (
-                    all(neighbour >= 0 & neighbour < size)  // if in range
-                    && grid[neighbourIndex] == 0 // is passable
-                    && any(neighbour != curNode.parent) // is not current nodes parent
-                )
+                haveCandidate = false;
+                Node candidateNode = new();
+                int candidateF = int.MaxValue;
+
+                // add to closed list
+                closedList[curNode.pos] = curNode;
+            
+                if (all(curNode.pos == to))
+                    break; // destination reached
+            
+                for (int iOffset = 0; iOffset < OFFSETS.Length; ++iOffset)
                 {
-                    Node neighbourNode = nodes[neighbourIndex];
-
-                    if (!neighbourNode.closed) // if not on the closed list
+                    int2 neighbourPos = curNode.pos + OFFSETS[iOffset];
+                    if (
+                        all(neighbourPos >= 0 & neighbourPos < size)  // if in range
+                        && grid[neighbourPos.x + neighbourPos.y * size.x] == 0 // is passable
+                        && any(neighbourPos != curNode.parent) // is not current nodes parent
+                    )
                     {
-                        int neighbourG = curNode.g + 1;
-                        int neighbourH = (neighbour.x - to.x) * (neighbour.x - to.x) + (neighbour.y - to.y) * (neighbour.y - to.y);
+                        if (closedList.ContainsKey(neighbourPos))
+                            continue;
 
-                        if (neighbourNode.g == 0 && neighbourNode.h == 0) // if neighbour is not on the open list
+                        int neighbourG = curNode.g + 1;
+                        int2 absDelta = abs(neighbourPos - to);
+                        int neighbourH = H(ref absDelta);
+
+                        if (openList.TryGetValue(neighbourPos, out Node openNeighbourNode))
                         {
-                            // add neighbour to the open list
-                            neighbourNode.parent = cur;
-                            neighbourNode.g = neighbourG;
-                            neighbourNode.h = neighbourH;
-                            nodes[neighbourIndex] = neighbourNode;
-                            ++openCount;
+                            if (openNeighbourNode.g > neighbourG)
+                            {
+                                openNeighbourNode.g = neighbourG;
+                                openList[neighbourPos] = openNeighbourNode;
+                            }
                         }
                         else
                         {
-                            // check if we need to update existing neighbours open list value with a better g-value 
-                            if (neighbourNode.g > neighbourG)
+                            if (neighbourG + neighbourH <= curNode.g + curNode.h && neighbourG + neighbourH < candidateF)
                             {
-                                neighbourNode.g = neighbourG;
-                                nodes[neighbourIndex] = neighbourNode;
+                                // we found a new candidate for immediate processing
+
+                                if (haveCandidate) // if we already had a candidate
+                                    openList.Add(candidateNode.pos, candidateNode); // store it on the open list
+
+                                // assign a new candidate
+                                candidateF = neighbourG + neighbourH;
+                                candidateNode = new() { pos = neighbourPos, g = neighbourG, h = neighbourH, parent = curNode.pos };
+
+                                haveCandidate = true;
                             }
+                            else
+                                openList.Add(neighbourPos, new() { pos = neighbourPos, g = neighbourG, h = neighbourH, parent = curNode.pos });
                         }
                     }
                 }
-            }
-        } while(openCount > 0);
 
-        Node pathNode = nodes[to.x + to.y * size.x];
-        if (pathNode.closed) // if destination is on the closed list then we have found a path
+                if (haveCandidate)
+                    curNode = candidateNode;
+                
+            } while (haveCandidate);
+            
+            if (all(curNode.pos == to))
+                break; // destination reached
+            
+        } while(openList.Count > 0);
+
+        if (closedList.TryGetValue(to, out Node lastNode)) // if destination is on the closed list then we have found a path
         {
-            int2 cur = to;
+            int2 curPos = to;
             // there should be exactly toNode.g elements of the path
-            path.Resize(pathNode.g + 1, NativeArrayOptions.UninitializedMemory);
-            for (int i = pathNode.g; i >= 0; --i)
+            path.Resize(lastNode.g + 1, NativeArrayOptions.UninitializedMemory);
+            for (int i = lastNode.g; i >= 0; --i)
             {
-                path[i] = cur;
-                cur = pathNode.parent;
-                pathNode = nodes[cur.x + cur.y * size.x];
+                path[i] = curPos;
+                curPos = lastNode.parent;
+                lastNode = closedList[curPos];
             }
         }
         else
             path.Resize(0, NativeArrayOptions.UninitializedMemory);
-
-        nodes.Dispose();
-        offsets.Dispose();
+        
+        openList.Dispose();
+        closedList.Dispose();
     }
+    
+    [BurstCompile]
+    private static int H(ref int2 p) => p.x * p.x + p.y * p.y;
 }

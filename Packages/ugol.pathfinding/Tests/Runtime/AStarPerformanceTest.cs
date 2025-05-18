@@ -14,9 +14,9 @@ public class AStarPerformanceTest : MonoBehaviour
         
         int large = 64;
 
-        AStar2 aStar = new()
+        AStar aStar = new()
         {
-            grid = new NativeArray<int>(large * large, Allocator.TempJob),
+            grid = new NativeArray<int>(large * large, Allocator.Persistent),
             size = int2(large, large),
             from = int2(0, 0),
             to = int2(large - 1, large - 1),
@@ -26,13 +26,13 @@ public class AStarPerformanceTest : MonoBehaviour
         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
         aStar.Run();
         stopwatch.Stop();
-        Debug.Log(stopwatch.ElapsedMilliseconds);
+        Debug.Log(stopwatch.ElapsedTicks);
         
         if (aStar.path.Length == large + large - 1)
             Debug.Log("aStar.path.Length is correct");
         else
             Debug.Log("aStar.path.Length is incorrect");
-        
+
         aStar.grid.Dispose();
         aStar.path.Dispose();
     }
