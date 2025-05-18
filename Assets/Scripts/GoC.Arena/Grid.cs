@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.Collections;
 using Unity.Mathematics;
 
 using static Unity.Mathematics.math;
@@ -13,14 +14,16 @@ namespace GoC.Arena
         T this[int2 p] { get; }
     }
     
-    public interface IGrid<T> : IReadOnlyGrid<T>
+    public interface IGrid<T> : IReadOnlyGrid<T> where T : struct
     {
-        new ref T this[int2 p] { get; }
+        new T this[int2 p] { get; set; }
+        
+        NativeArray<T> nativeArray { get; }
     }
 
-    public class Grid<T> : IGrid<T>
+    public class Grid<T> : IGrid<T>, IDisposable where T : struct
     {
-        private readonly T[] _grid;
+        private NativeArray<T> _grid;
         
         public Grid(int2 initMin, int2 initMax)
         {
@@ -29,23 +32,31 @@ namespace GoC.Arena
             
             min = initMin;
             max = initMax;
-            _grid = new T[size.x * size.y];
+            
+            _grid = new(size.x * size.y, Allocator.Persistent);
         }
+
+        public void Dispose() => _grid.Dispose();
 
         public int2 min { get; }
         public int2 max { get; }
         public int2 size => max - min + 1;
         
         T IReadOnlyGrid<T>.this[int2 p] => this[p];
+        
+        public NativeArray<T> nativeArray => _grid;
 
-        public ref T this[int2 p]
+        public T this[int2 p]
         {
             get
             {
-                if (!IsInRange(p))
-                    throw new ArgumentOutOfRangeException(nameof(p));
-
-                return ref _grid[IndexOf(p)];
+                if (!IsInRange(p)) throw new ArgumentOutOfRangeException(nameof(p));
+                return _grid[IndexOf(p)];
+            }
+            set
+            {
+                if (!IsInRange(p)) throw new ArgumentOutOfRangeException(nameof(p));
+                _grid[IndexOf(p)] = value;
             }
         }
 

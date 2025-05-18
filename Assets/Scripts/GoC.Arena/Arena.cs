@@ -204,6 +204,8 @@ namespace GoC.Arena
             }
             
             _teamRecords.Clear();
+            
+            _grid.Dispose();
         }
 
         private void OnDrawGizmos()
