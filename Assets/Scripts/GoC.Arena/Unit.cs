@@ -1,4 +1,6 @@
 ﻿using GoC.ScriptingApi;
+using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -235,29 +237,39 @@ namespace GoC.Arena
 
             if (!_canMove)
                 return Result.OperationUnavailable;
-            
-            int2 delta = (int2)round(p - transform.position.ToArenaPos());
-            if (all(delta == 0))
-                return Result.AlreadyThere;
 
             if (any(p < _team.arena.grid.min | _team.arena.grid.max < p))
                 return Result.OutOfRange;
 
-            int2 absDelta = abs(delta);
+            AStar aStar = new()
+            {
+                from = transform.position.ToArenaPos() - _team.arena.grid.min,
+                to = p - _team.arena.grid.min,
+                enoughManhattanDistance = 1,
+                grid = _team.arena.grid.nativeArray,
+                size = _team.arena.grid.size,
+                path = new NativeList<int2>(0, Allocator.TempJob)
+            };
 
-            int2 dirTo = sign(delta);
-            int2 dir1 = absDelta.x > absDelta.y ? int2(dirTo.x, 0) : int2(0, dirTo.y);
-            int2 dir2 = absDelta.x > absDelta.y ? int2(0, dirTo.y) : int2(dirTo.x, 0);
+            try
+            {
+                aStar.Run();
+                if (aStar.path.Length == 0)
+                    return Result.PathBlocked;
+                else if (aStar.path.Length == 1)
+                    return Result.AlreadyThere;
+                if (aStar.path.Length > 1)
+                {
+                    _moveCommand = new MoveCommand { targetPosition = aStar.path[1] + _team.arena.grid.min };
 
-            if (_team.arena.grid[pos + dir1] == 0)
-                _moveCommand = new MoveCommand { targetPosition = pos + dir1 };
-            else if (_team.arena.grid[pos + dir2] == 0)
-                _moveCommand = new MoveCommand { targetPosition = pos + dir2 };
-            else
-                return Result.PathBlocked;
-
-            _team.arena.grid[pos]--;
-            _team.arena.grid[_moveCommand.Value.targetPosition]++;
+                    _team.arena.grid[pos]--;
+                    _team.arena.grid[_moveCommand.Value.targetPosition]++;
+                }
+            }
+            finally
+            {
+                aStar.path.Dispose();
+            }
 
             return Result.Ok;
         }
