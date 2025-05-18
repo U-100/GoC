@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -211,7 +212,18 @@ public class AStarExperiment : MonoBehaviour
         //closedList.Dispose();
         offsets.Dispose();
         
-        
         grid.Dispose();
+    }
+
+    private void OnDestroy()
+    {
+        if (openList.IsCreated)
+            openList.Dispose();
+        
+        if (closedList.IsCreated)
+            closedList.Dispose();
+        
+        if (path.IsCreated)
+            path.Dispose();
     }
 }
