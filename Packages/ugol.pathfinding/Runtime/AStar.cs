@@ -30,6 +30,7 @@ public struct AStar : IJob
     
     public int2 from;
     public int2 to;
+    public int enoughManhattanDistance;
     
     public NativeList<int2> path;
 
@@ -44,13 +45,15 @@ public struct AStar : IJob
 
         int2 fromTo = abs(from - to);
         int listInitialCapacity = fromTo.x + fromTo.y;
-        NativeHashMap<int2, Node> openList = new(listInitialCapacity, Allocator.Temp);
-        NativeHashMap<int2, Node> closedList = new(listInitialCapacity, Allocator.Temp);
+        NativeHashMap<int2, Node> openList = new(listInitialCapacity, Allocator.Temp); // Allocator.Temp is disposed upon job completion, no need to Dispose()
+        NativeHashMap<int2, Node> closedList = new(listInitialCapacity, Allocator.Temp); // Allocator.Temp is disposed upon job completion, no need to Dispose()
         
         // add start position to open list
-        //openList[from] = new Node { pos = from, g = 0, h = fromTo.x + fromTo.y, parent = from };
         openList[from] = new Node { pos = from, g = 0, h = H(ref fromTo), parent = from };
 
+        int2 lastPos = to;
+        bool pathFound = false;
+        
         do
         {
             // find the best node on the open list
@@ -83,8 +86,14 @@ public struct AStar : IJob
                 // add to closed list
                 closedList[curNode.pos] = curNode;
             
-                if (all(curNode.pos == to))
-                    break; // destination reached
+                int2 absCurTo = abs(curNode.pos - to);
+                //if (all(curNode.pos == to))
+                if (absCurTo.x + absCurTo.y <= enoughManhattanDistance) // close enough to destination
+                {
+                    lastPos = curNode.pos;
+                    pathFound = true;
+                    break; 
+                }
             
                 for (int iOffset = 0; iOffset < OFFSETS.Length; ++iOffset)
                 {
@@ -136,28 +145,24 @@ public struct AStar : IJob
                 
             } while (haveCandidate);
             
-            if (all(curNode.pos == to))
+            if (pathFound)
                 break; // destination reached
             
         } while(openList.Count > 0);
 
-        if (closedList.TryGetValue(to, out Node lastNode)) // if destination is on the closed list then we have found a path
+        if (closedList.TryGetValue(lastPos, out Node lastNode)) // if destination is on the closed list then we have found a path
         {
-            int2 curPos = to;
             // there should be exactly toNode.g elements of the path
             path.Resize(lastNode.g + 1, NativeArrayOptions.UninitializedMemory);
             for (int i = lastNode.g; i >= 0; --i)
             {
-                path[i] = curPos;
-                curPos = lastNode.parent;
-                lastNode = closedList[curPos];
+                path[i] = lastPos;
+                lastPos = lastNode.parent;
+                lastNode = closedList[lastPos];
             }
         }
         else
             path.Resize(0, NativeArrayOptions.UninitializedMemory);
-        
-        openList.Dispose();
-        closedList.Dispose();
     }
     
     [BurstCompile]
