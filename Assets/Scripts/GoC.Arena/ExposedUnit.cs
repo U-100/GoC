@@ -13,7 +13,8 @@ namespace GoC.Arena
         public int2 pos => unit.pos;
         public int2 dir => unit.dir;
         public bool busy => unit.busy;
-        
+        public bool canMove => unit.canMove;
+
         public Result CanMine(object target) => unit.CanMine(target);
         public Result CanProduce(object unitParamsObject) => unit.CanProduce(UnitParams.FromObject(unitParamsObject));
 

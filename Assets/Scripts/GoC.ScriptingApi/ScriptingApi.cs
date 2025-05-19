@@ -47,6 +47,7 @@ namespace GoC.ScriptingApi
         int2 pos { get; }
         int2 dir { get; }
         bool busy { get; }
+        bool canMove { get; }
         
         Result CanMine(object target);
         Result CanProduce(object unitParamsObject);
