@@ -57,6 +57,9 @@ namespace GoC.Arena
         
         [SerializeField] private bool _canMove;
         public bool canMove => _canMove;
+        
+        [SerializeField] private int _additionalIntegrity;
+        public int additionalIntegrity => _additionalIntegrity;
     }
     
     [Serializable]

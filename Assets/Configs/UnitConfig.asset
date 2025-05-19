@@ -37,9 +37,11 @@ MonoBehaviour:
   - _productionCost: 00000000
     _productionTicks: 0
     _canMove: 0
+    _additionalIntegrity: 10
   - _productionCost: 01000000
     _productionTicks: 1
     _canMove: 1
+    _additionalIntegrity: 0
   _hullTiers:
   - _productionCost: 01000000
     _productionTicks: 1

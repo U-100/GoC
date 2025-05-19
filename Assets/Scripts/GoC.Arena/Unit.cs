@@ -279,12 +279,14 @@ namespace GoC.Arena
         {
             _team = team;
 
-            _damage = _team.arena.config.unitConfig.attackTiers[unitParams.attackTier].damage;
-            _canMine = _team.arena.config.unitConfig.miningTiers[unitParams.miningTier].canMine;
-            _maxProductionTier = _team.arena.config.unitConfig.productionTiers[unitParams.productionTier].maxProductionTier;
-            _canMove = _team.arena.config.unitConfig.movementTiers[unitParams.movementTier].canMove;
-            myHull.Setup(_team.arena.config.unitConfig.hullTiers[unitParams.hullTier].maxIntegrity);
-            myStorage.Setup(_team.arena.config.unitConfig.storageTiers[unitParams.storageTier].storageCapacityPerSubstance);
+            UnitConfig unitConfig = _team.arena.config.unitConfig;
+            _damage = unitConfig.attackTiers[unitParams.attackTier].damage;
+            _canMine = unitConfig.miningTiers[unitParams.miningTier].canMine;
+            _maxProductionTier = unitConfig.productionTiers[unitParams.productionTier].maxProductionTier;
+            MovementTier movementTier = unitConfig.movementTiers[unitParams.movementTier];
+            _canMove = movementTier.canMove;
+            myHull.Setup(unitConfig.hullTiers[unitParams.hullTier].maxIntegrity + movementTier.additionalIntegrity);
+            myStorage.Setup(unitConfig.storageTiers[unitParams.storageTier].storageCapacityPerSubstance);
 
             _team.arena.grid[pos]++;
 
