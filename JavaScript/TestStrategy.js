@@ -51,14 +51,19 @@ let warriorParams =
     hullTier: 1,
 }
 
+let turretParams =
+{
+    attackTier: 1,
+    hullTier: 1,
+}
+
 let enemiesMidPos;
 let energyDeposit;
 let matterDeposit;
 
 let workerCount;
-let factoryCount;
-let energyMinerCount;
-let matterMinerCount;
+let warriorCount;
+let turretCount;
 
 let defencePos;
 
@@ -80,57 +85,27 @@ export function tick()
     defencePos = new int2(defencePosX, defencePosY);
 
     workerCount = 0;
-    factoryCount = 0;
-    energyMinerCount = 0;
-    matterMinerCount = 0;
+    warriorCount = 0;
+    turretCount = 0;
     for (let myUnit of model.myUnits)
     {
         if (!myUnit.canMove)
-        {
-            if (CanMineEnergy(myUnit))
-                ++energyMinerCount;
-            else if (CanMineMatter(myUnit))
-                ++matterMinerCount;
-            else
-                ++factoryCount;
-        }
+            ++turretCount;
         else if (myUnit.storage.capacityPerSubstance > 0)
             ++workerCount;
+        else
+            ++warriorCount;
     }
     
-    //log("workerCount: " + workerCount + ", factoryCount: " + factoryCount + ", energyMinerCount: " + energyMinerCount + ", matterMinerCount: " + matterMinerCount);
+    //log("workerCount: " + workerCount + ", warriorCount: " + warriorCount + ", turretCount: " + turretCount);
 
     for (let myUnit of model.myUnits)
     {
-        if (!myUnit.canMove)
-        {
-            if (myUnit.Mine(energyDeposit) == Result.Ok)
-                continue;
-            
-            if (myUnit.Mine(matterDeposit) == Result.Ok)
-                continue;
-
-            myUnit.Produce(warriorParams);
-        }
-        else if (myUnit.storage.capacityPerSubstance > 0)
-        {
+        if (myUnit.storage.capacityPerSubstance > 0)
             tickWorker(myUnit);
-        }
         else
             tickWarrior(myUnit);
     }
-}
-
-function CanMineEnergy(myUnit)
-{
-    let canMineEnergyResult = myUnit.CanMine(energyDeposit);
-    return canMineEnergyResult == Result.Ok || canMineEnergyResult == Result.NotEnoughStorageCapacity;
-}
-
-function CanMineMatter(myUnit)
-{
-    let canMineMatterResult = myUnit.CanMine(matterDeposit);
-    return canMineMatterResult == Result.Ok || canMineMatterResult == Result.NotEnoughStorageCapacity;
 }
 
 function tickWorker(myUnit)
@@ -138,14 +113,40 @@ function tickWorker(myUnit)
     if (myUnit.busy)
         return;
 
-    let requredProductionParams = workerCount < 2 ? workerParams : warriorParams;
-    
-    if (myUnit.Produce(requredProductionParams) == Result.Ok)
-        return;
-    
+    if (workerCount < 3)
+    {
+        if (myUnit.Produce(workerParams) == Result.Ok)
+            return;
+        else
+            tickFarmResourcesFor(myUnit, workerParams);
+    }
+    else if (turretCount < 10)
+    {
+        if (myUnit.CanProduce(turretParams) == Result.Ok)
+        {
+            if (distance(myUnit.pos, defencePos) > 2)
+            {
+                myUnit.MoveTo(defencePos);
+                return;
+            }
+            else
+            {
+                myUnit.Produce(turretParams);
+                return;
+            }
+        }
+        else
+            tickFarmResourcesFor(myUnit, turretParams);
+    }
+    else if (myUnit.Produce(warriorParams) != Result.Ok)
+        tickFarmResourcesFor(myUnit, warriorParams);
+}
+
+function tickFarmResourcesFor(myUnit, productionParams)
+{
     for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
     {
-        if (myUnit.storage.content[iSubstance] < model.ProductionCost(requredProductionParams, iSubstance))
+        if (myUnit.storage.content[iSubstance] < model.ProductionCost(productionParams, iSubstance))
         {
             let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
 
