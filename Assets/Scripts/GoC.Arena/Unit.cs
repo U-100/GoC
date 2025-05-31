@@ -61,6 +61,7 @@ namespace GoC.Arena
         private ExposedProperty _attackEffectColorProperty;
         private ExposedProperty _attackEffectDistanceProperty;
         private ExposedProperty _mineEffectTexIndexProperty;
+        private ExposedProperty _mineEffectSourcePositionProperty;
         private ExposedProperty _productionEffectDurationProperty;
         private ExposedProperty _productionEffectSpawnPositionProperty;
         private ExposedProperty _productionEffectColorProperty;
@@ -377,6 +378,7 @@ namespace GoC.Arena
                 myStorage.Deposit(depositMiningOutcome.substanceType, depositMiningOutcome.amount);
 
                 _mineEffect.SetUInt(_mineEffectTexIndexProperty, (uint)depositMiningOutcome.substanceType);
+                _mineEffect.SetVector3(_mineEffectSourcePositionProperty, _mineCommand.Value.deposit.pos.ToUnityPos());
                 _mineEffect.Play();
             }
 
@@ -423,6 +425,7 @@ namespace GoC.Arena
             _attackEffectColorProperty = "color";
             _attackEffectDistanceProperty = "distance";
             _mineEffectTexIndexProperty = "texIndex";
+            _mineEffectSourcePositionProperty = "sourcePosition_position";
             _productionEffectSpawnPositionProperty = "spawnPosition_position";
             _productionEffectDurationProperty = "duration";
             _productionEffectColorProperty = "color";
