@@ -118,6 +118,7 @@ namespace GoC.Arena
                 log += $"[{_currentArena.currentTick,4}] ";
 
             log += message + "\n";
+            log += stacktrace.Substring(0, stacktrace.IndexOf('\n')) + "\n";
 
             if (logType != LogType.Log)
                 log += $"</color>";

@@ -5,11 +5,6 @@
                 <engine:DataBinding property="style.display" data-source-path="isPaused" data-source-type="GoC.Arena.ArenaViewModel, Assembly-CSharp" binding-mode="ToTarget" />
             </Bindings>
         </engine:Label>
-        <engine:Label text="???Log label is unbound???" name="LogLabel" class="goc-text" style="position: absolute; width: 100%; -unity-text-align: lower-left; height: 38%; bottom: 0; left: 0; white-space: pre-wrap; background-color: rgba(0, 0, 0, 0); overflow: hidden;">
-            <Bindings>
-                <engine:DataBinding property="text" data-source-path="log" binding-mode="ToTarget" update-trigger="EveryUpdate" />
-            </Bindings>
-        </engine:Label>
         <engine:VisualElement style="flex-direction: row; justify-content: flex-end; padding-top: 25px; padding-right: 25px; padding-bottom: 25px; padding-left: 25px;">
             <engine:Button name="FastButton" class="goc-button" style="width: 180px; height: 100px; margin-top: 25px; margin-right: 25px; margin-bottom: 25px; margin-left: 25px;">
                 <engine:VisualElement style="flex-grow: 1; width: 80px; background-image: url(&quot;project://database/Assets/UI/play.png?fileID=2800000&amp;guid=ba9027ffd6dbb0646b5f6c9ac740ec6d&amp;type=3#play&quot;); -unity-background-image-tint-color: rgb(80, 120, 231); height: 80px; position: absolute; top: 7px; left: 88px;" />
