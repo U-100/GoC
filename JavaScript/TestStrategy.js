@@ -58,12 +58,8 @@ let turretParams =
 }
 
 let enemiesMidPos;
-let energyDeposit;
-let matterDeposit;
-
+let deposits = {};
 let workerCount;
-let warriorCount;
-let turretCount;
 
 let defencePos;
 
@@ -72,40 +68,43 @@ export function tick()
     if (model.myUnits.count == 0 || model.enemyUnits.count == 0)
         return;
     
-    energyDeposit = findNearbyDeposit(model.myUnits[0].pos, Substance.Type.Energy);
-    matterDeposit = findNearbyDeposit(model.myUnits[0].pos, Substance.Type.Matter);
+    deposits[Substance.Type.Energy] = findNearbyDeposit(model.myUnits[0].pos, Substance.Type.Energy);
+    deposits[Substance.Type.Matter] = findNearbyDeposit(model.myUnits[0].pos, Substance.Type.Matter);
 
     enemiesMidPos = new int2(0, 0);
     for (let enemyUnit of model.enemyUnits)
         enemiesMidPos += enemyUnit.pos;
     enemiesMidPos /= model.enemyUnits.count;
 
-    let defencePosX = enemiesMidPos.x * 0.1 + (energyDeposit.pos.x * 0.9 + matterDeposit.pos.x * 0.9) / 2;
-    let defencePosY = enemiesMidPos.y * 0.1 + (energyDeposit.pos.y * 0.9 + matterDeposit.pos.y * 0.9) / 2;
-    defencePos = new int2(defencePosX, defencePosY);
-
     workerCount = 0;
-    warriorCount = 0;
-    turretCount = 0;
     for (let myUnit of model.myUnits)
-    {
-        if (!myUnit.canMove)
-            ++turretCount;
-        else if (myUnit.storage.capacityPerSubstance > 0)
-            ++workerCount;
-        else
-            ++warriorCount;
-    }
-    
-    //log("workerCount: " + workerCount + ", warriorCount: " + warriorCount + ", turretCount: " + turretCount);
-
-    for (let myUnit of model.myUnits)
-    {
         if (myUnit.storage.capacityPerSubstance > 0)
+            ++workerCount;
+    
+    for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
+    {
+        let myUnit = model.myUnits[iUnit];
+        if (iUnit == 0)
+            tickPrimalWorker(myUnit);
+        else if (myUnit.storage.capacityPerSubstance > 0)
             tickWorker(myUnit);
         else
-            tickWarrior(myUnit);
+            tickTurret(myUnit);
     }
+}
+
+function tickPrimalWorker(myUnit)
+{
+    if (myUnit.busy)
+        return;
+    
+    if (workerCount >= 10)
+        return;
+
+    if (myUnit.Produce(workerParams) == Result.Ok)
+        return;
+    else
+        tickFarmResourcesFor(myUnit, workerParams);
 }
 
 function tickWorker(myUnit)
@@ -113,33 +112,16 @@ function tickWorker(myUnit)
     if (myUnit.busy)
         return;
 
-    if (workerCount < 3)
+    if (myUnit.CanProduce(turretParams) == Result.Ok)
     {
-        if (myUnit.Produce(workerParams) == Result.Ok)
-            return;
+        let enemy = findNearbyEnemy(myUnit.pos);
+        if (distance(enemy.pos, myUnit.pos) < 7)
+            myUnit.Produce(turretParams);
         else
-            tickFarmResourcesFor(myUnit, workerParams);
+            myUnit.MoveTo(enemiesMidPos);
     }
-    else if (turretCount < 10)
-    {
-        if (myUnit.CanProduce(turretParams) == Result.Ok)
-        {
-            if (distance(myUnit.pos, defencePos) > 2)
-            {
-                myUnit.MoveTo(defencePos);
-                return;
-            }
-            else
-            {
-                myUnit.Produce(turretParams);
-                return;
-            }
-        }
-        else
-            tickFarmResourcesFor(myUnit, turretParams);
-    }
-    else if (myUnit.Produce(warriorParams) != Result.Ok)
-        tickFarmResourcesFor(myUnit, warriorParams);
+    else
+        tickFarmResourcesFor(myUnit, turretParams);
 }
 
 function tickFarmResourcesFor(myUnit, productionParams)
@@ -148,7 +130,8 @@ function tickFarmResourcesFor(myUnit, productionParams)
     {
         if (myUnit.storage.content[iSubstance] < model.ProductionCost(productionParams, iSubstance))
         {
-            let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
+            //let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
+            let nearbyDeposit = deposits[iSubstance];
 
             if (myUnit.Mine(nearbyDeposit) == Result.Ok)
                 return;
@@ -159,21 +142,27 @@ function tickFarmResourcesFor(myUnit, productionParams)
     }
 }
 
-function tickWarrior(myUnit)
+function tickTurret(myUnit)
 {
     let nearbyEnemy = findNearbyEnemy(myUnit.pos);
-    
-    if (nearbyEnemy && myUnit.Attack(nearbyEnemy) == Result.Ok)
-        return;
-    
-    let radius = model.myUnits.count * 2 + 8 - model.units.count;
-    if (radius < 3)
-        radius = 3;
-    
-    if (nearbyEnemy && distance(nearbyEnemy.pos, defencePos) < 2 * radius)
-        myUnit.MoveTo(nearbyEnemy.pos);
-    if (nearbyEnemy && distance(myUnit.pos, defencePos) < radius)
-        myUnit.MoveTo(nearbyEnemy.pos);
-    else
-        myUnit.MoveTo(defencePos);
+    myUnit.Attack(nearbyEnemy);
 }
+
+// function tickWarrior(myUnit)
+// {
+//     let nearbyEnemy = findNearbyEnemy(myUnit.pos);
+//    
+//     if (nearbyEnemy && myUnit.Attack(nearbyEnemy) == Result.Ok)
+//         return;
+//    
+//     let radius = model.myUnits.count * 2 + 8 - model.units.count;
+//     if (radius < 3)
+//         radius = 3;
+//    
+//     if (nearbyEnemy && distance(nearbyEnemy.pos, defencePos) < 2 * radius)
+//         myUnit.MoveTo(nearbyEnemy.pos);
+//     if (nearbyEnemy && distance(myUnit.pos, defencePos) < radius)
+//         myUnit.MoveTo(nearbyEnemy.pos);
+//     else
+//         myUnit.MoveTo(defencePos);
+// }
