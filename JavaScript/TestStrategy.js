@@ -95,6 +95,9 @@ export function tick()
 
 function tickPrimalWorker(myUnit)
 {
+    if (workerCount < 10)
+        myUnit.Say("more workers");
+
     if (myUnit.busy)
         return;
     

@@ -613,6 +613,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cameraTransform: {fileID: 278531547}
   _cameraTargetTransform: {fileID: 582264391}
+  _cameraElevationFactor: 0.1
 --- !u!1 &626484437
 GameObject:
   m_ObjectHideFlags: 0

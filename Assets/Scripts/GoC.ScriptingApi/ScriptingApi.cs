@@ -58,6 +58,7 @@ namespace GoC.ScriptingApi
     
     public interface IUnitControl : IUnit
     {
+        void Say(string speech);
         Result Attack(object target);
         Result Mine(object target);
         Result Give(object target, Substance.Type substanceType, int amount);

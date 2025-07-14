@@ -9,6 +9,7 @@ namespace GoC.Arena
     {
         public ExposedUnitControl(Unit unit) : base(unit) { }
         
+        public void Say(string phrase) => unit.Say(phrase);
         public Result Attack(object target) => unit.Attack(target);
         public Result Mine(object target) => unit.Mine(target);
         public Result Give(object target, Substance.Type substanceType, int amount) => unit.Give(target, substanceType, amount);

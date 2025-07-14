@@ -2,7 +2,9 @@
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Properties;
 using UnityEngine;
+using UnityEngine.UIElements;
 using UnityEngine.VFX;
 using UnityEngine.VFX.Utility;
 
@@ -55,8 +57,12 @@ namespace GoC.Arena
         [SerializeField] private VisualEffect _giveEffect;
         [SerializeField] private VisualEffect _productionEffect;
         [SerializeField] private VisualEffect _moveEffect;
+        
         [Space]
-        [SerializeField] private Renderer _skinColorSubjectRenderer; 
+        [SerializeField] private Renderer _skinColorSubjectRenderer;
+
+        [Space]
+        [SerializeField] private UIDocument _speechBubble;
 
         private ExposedProperty _attackEffectColorProperty;
         private ExposedProperty _attackEffectDistanceProperty;
@@ -81,6 +87,8 @@ namespace GoC.Arena
         private Storage _myStorage;
         private Storage myStorage => _myStorage ??= GetComponent<Storage>();
 
+        [CreateProperty] public string speech { get; private set; }
+        [CreateProperty] public bool speaking => speech != null;
         
         public int teamId => _team.teamId;
         public int2 pos => transform.position.ToArenaPos();
@@ -132,6 +140,8 @@ namespace GoC.Arena
         public IHull hull => myHull;
         public IStorage storage => myStorage;
 
+
+        public void Say(string phrase) => speech = phrase;
 
         public Result Attack(object targetObject)
         {
@@ -304,6 +314,8 @@ namespace GoC.Arena
 
         public void BeforeTick()
         {
+            speech = null;
+            
             if (_attackCommand != null)
             {
                 _attackEffect.Stop();
@@ -429,6 +441,8 @@ namespace GoC.Arena
             _productionEffectSpawnPositionProperty = "spawnPosition_position";
             _productionEffectDurationProperty = "duration";
             _productionEffectColorProperty = "color";
+            
+            _speechBubble.rootVisualElement.dataSource = this;
         }
 
         private void Update()
