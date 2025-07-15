@@ -44,7 +44,7 @@ namespace GoC.Arena
                     MemberFilter = MEMBER_FILTER
                 }
             );
-            options.EnableModules(Path.Combine(Directory.GetCurrentDirectory(), "JavaScript"));
+            options.EnableModules(Path.Combine(Application.streamingAssetsPath, "JavaScript"));
             options.AllowClr(typeof(math).Assembly);
             options.Interop.AllowOperatorOverloading = true;
         }
