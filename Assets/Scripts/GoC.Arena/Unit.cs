@@ -63,6 +63,9 @@ namespace GoC.Arena
                 transform.position = _moveTargetPos.Value.ToUnityPos();
                 _moveTargetPos = null;
             }
+
+            _rotateTargetPos = null;
+            _rotateTargetTransform = null;
         }
 
         public void StartAttack(Transform targetTransform)
@@ -137,6 +140,8 @@ namespace GoC.Arena
         {
             if (_rotateTargetTransform != null)
                 RotateTowards(_rotateTargetTransform.position);
+            else if (_rotateTargetPos != null)
+                RotateTowards(_rotateTargetPos.Value.ToUnityPos());
 
             if (_moveTargetPos != null)
             {
