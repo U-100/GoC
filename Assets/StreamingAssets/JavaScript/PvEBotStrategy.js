@@ -55,12 +55,9 @@ let enemiesMidPos;
 let energyDeposit;
 let matterDeposit;
 
-let workerCount;
-let factoryCount;
-let energyMinerCount;
-let matterMinerCount;
-
 let defencePos;
+
+let workerCount;
 
 export function tick()
 {
@@ -80,57 +77,19 @@ export function tick()
     defencePos = new int2(defencePosX, defencePosY);
 
     workerCount = 0;
-    factoryCount = 0;
-    energyMinerCount = 0;
-    matterMinerCount = 0;
     for (let myUnit of model.myUnits)
     {
-        if (!myUnit.canMove)
-        {
-            if (CanMineEnergy(myUnit))
-                ++energyMinerCount;
-            else if (CanMineMatter(myUnit))
-                ++matterMinerCount;
-            else
-                ++factoryCount;
-        }
-        else if (myUnit.storage.capacityPerSubstance > 0)
+        if (myUnit.storageCapacityPerSubstance > 0)
             ++workerCount;
     }
 
-    //log("workerCount: " + workerCount + ", factoryCount: " + factoryCount + ", energyMinerCount: " + energyMinerCount + ", matterMinerCount: " + matterMinerCount);
-
     for (let myUnit of model.myUnits)
     {
-        if (!myUnit.canMove)
-        {
-            if (myUnit.Mine(energyDeposit) == Result.Ok)
-                continue;
-
-            if (myUnit.Mine(matterDeposit) == Result.Ok)
-                continue;
-
-            myUnit.Produce(warriorParams);
-        }
-        else if (myUnit.storage.capacityPerSubstance > 0)
-        {
+        if (myUnit.storageCapacityPerSubstance > 0)
             tickWorker(myUnit);
-        }
         else
             tickWarrior(myUnit);
     }
-}
-
-function CanMineEnergy(myUnit)
-{
-    let canMineEnergyResult = myUnit.CanMine(energyDeposit);
-    return canMineEnergyResult == Result.Ok || canMineEnergyResult == Result.NotEnoughStorageCapacity;
-}
-
-function CanMineMatter(myUnit)
-{
-    let canMineMatterResult = myUnit.CanMine(matterDeposit);
-    return canMineMatterResult == Result.Ok || canMineMatterResult == Result.NotEnoughStorageCapacity;
 }
 
 function tickWorker(myUnit)
@@ -145,13 +104,14 @@ function tickWorker(myUnit)
 
     for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
     {
-        if (myUnit.storage.content[iSubstance] < model.ProductionCost(requredProductionParams, iSubstance))
+        if (myUnit.storage[iSubstance] < model.ProductionCost(requredProductionParams, iSubstance))
         {
             let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
 
             if (myUnit.Mine(nearbyDeposit) == Result.Ok)
                 return;
 
+            myUnit.Say("Going to " + nearbyDeposit.pos.x + "," + nearbyDeposit.pos.y);
             myUnit.MoveTo(nearbyDeposit.pos);
             return;
         }
@@ -165,8 +125,12 @@ function tickWarrior(myUnit)
     if (nearbyEnemy)
     {
         if (myUnit.Attack(nearbyEnemy) == Result.Ok)
+        {
+            myUnit.Say("attack");
             return;
+        }
 
+        myUnit.Say("move to attack");
         myUnit.MoveTo(nearbyEnemy.pos);
         return;
     }

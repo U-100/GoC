@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using GoC.ScriptingApi;
 using Jint;
 using Jint.Native;
@@ -42,21 +43,16 @@ namespace GoC.Arena
         private readonly List<Deposit> _deposits = new();
         private readonly List<Deposit> _depositsCache = new();
 
-        private readonly List<ExposedUnit> _units = new();
-        
         private readonly List<TeamRecord> _teamRecords = new();
         private float _tickCooldown;
-        private Team _executingTeam;
 
         public ArenaConfig config => _config;
         
         public uint currentTick { get; private set; } 
-        public int executingTeamId => _executingTeam.teamId;
 
         public IGrid<int> grid => _grid;
 
         public IReadOnlyList<IDeposit> deposits => _deposits;
-        public IReadOnlyList<IUnit> units => _units;
 
         
         public void Setup(ArenaConfig initConfig)
@@ -140,46 +136,41 @@ namespace GoC.Arena
             CreateUnit(_config.initialUnitParams, team, unitPos);
         }
 
-        public Deposit CreateDeposit(DepositConfig depositConfig, int2 depositPos)
+        private void CreateDeposit(DepositConfig depositConfig, int2 depositPos)
         {
-            Deposit deposit = Instantiate(_depositPrefabs[(int)depositConfig.substanceType], depositPos.ToUnityPos(), Quaternion.identity);
-            deposit.Setup(this, depositConfig);
+            Deposit deposit = Instantiate(_depositPrefabs[(int)depositConfig.substanceType]);
+            deposit.Setup(this, depositConfig, depositPos);
             _deposits.Add(deposit);
-            return deposit;
         }
 
         public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
-        public Unit CreateUnit(UnitParams unitParams, Team team, int2 unitPos)
+        public void CreateUnit(UnitParams unitParams, Team team, int2 unitPos)
         {
             Unit unitPrefab = _config.unitConfig.movementTiers[unitParams.movementTier].canMove ? _movingUnitPrefab : _stationaryUnitPrefab;
             
-            Unit unit = Instantiate(unitPrefab, unitPos.ToUnityPos(), Quaternion.identity);
-            unit.Setup(team, unitParams);
+            Unit unit = Instantiate(unitPrefab);
+            unit.Setup(team.skin);
 
-            _units.Add(new ExposedUnit(unit));
+            ExposedUnitControl exposedUnitControl = new ExposedUnitControl(team, unitParams, unitPos, unit);
+
+            team.AddMyUnit(exposedUnitControl);
             
             foreach (TeamRecord teamRecord in _teamRecords)
             {
-                if (teamRecord.team.teamId == unit.teamId)
-                    teamRecord.team.AddMyUnit(unit);
-                else
-                    teamRecord.team.AddEnemyUnit(unit);
+                if (teamRecord.team.teamId != team.teamId)
+                    teamRecord.team.AddEnemyUnit(exposedUnitControl);
             }
-            
-            return unit;
         }
         
-        public void Unregister(Unit unit)
+        public void Unregister(ExposedUnitControl exposedUnitControl)
         {
-            _units.RemoveAll(exposedUnit => exposedUnit.unit == unit);
-            
             foreach (TeamRecord teamRecord in _teamRecords)
             {
-                if (teamRecord.team.teamId == unit.teamId)
-                    teamRecord.team.RemoveMyUnit(unit);
+                if (teamRecord.team.teamId == exposedUnitControl.teamId)
+                    teamRecord.team.RemoveMyUnit(exposedUnitControl);
                 else
-                    teamRecord.team.RemoveEnemyUnit(unit);
+                    teamRecord.team.RemoveEnemyUnit(exposedUnitControl);
             }
         }
 
@@ -219,45 +210,50 @@ namespace GoC.Arena
                     Gizmos.DrawWireCube(p.ToUnityPos(), new Vector3(1, .1f, 1));
         }
 
+        private Task _tickTask;
+        
         private void Update()
         {
             if (_teamRecords.Count == 0)
                 return; // teams haven't been created yet
+
+            if (_tickCooldown > 0)
+                _tickCooldown -= Time.deltaTime;
             
-            if ((_tickCooldown -= Time.deltaTime) <= 0)
+            if (_tickCooldown <= 0)
             {
-                //System.Diagnostics.Stopwatch tickStopwatch = System.Diagnostics.Stopwatch.StartNew();
+                if (_tickTask != null)
+                {
+                    if (_tickTask.IsCompletedSuccessfully)
+                    {
+                        foreach (TeamRecord teamRecord in _teamRecords)
+                            teamRecord.team.ApplyTick();
+                    }
+                    else
+                        Debug.LogWarning("Tick task still running");
+                }
+
+                if (_tickTask == null || _tickTask.IsCompletedSuccessfully)
+                {
+                    ++currentTick;
+                    _tickTask = Task.Run(InvokeScripts);
+                    _tickCooldown += Tick.TIME;
+                }
+            }
+        }
+
+        // this one runs on the scripting thread
+        private void InvokeScripts()
+        {
+            foreach (TeamRecord teamRecord in _teamRecords)
+            {
                 try
                 {
-                    foreach (TeamRecord teamRecord in _teamRecords)
-                        teamRecord.team.BeforeTick();
-
-                    foreach (TeamRecord teamRecord in _teamRecords)
-                    {
-                        try
-                        {
-                            _executingTeam = teamRecord.team;
-                            teamRecord.engine.Invoke(teamRecord.tickFunction);
-                        }
-                        catch (Exception exception)
-                        {
-                            Debug.LogException(exception);
-                        }
-                        finally
-                        {
-                            _executingTeam = null;
-                        }
-                    }
-
-                    foreach (TeamRecord teamRecord in _teamRecords)
-                        teamRecord.team.AfterTick();
+                    teamRecord.engine.Invoke(teamRecord.tickFunction);
                 }
-                finally
+                catch (Exception exception)
                 {
-                    _tickCooldown += Tick.TIME;
-                    ++currentTick;
-
-                    //Debug.Log($"Arena tick: {tickStopwatch.ElapsedMilliseconds} ms");
+                    Debug.LogException(exception);
                 }
             }
         }

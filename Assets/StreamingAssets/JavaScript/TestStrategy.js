@@ -78,7 +78,7 @@ export function tick()
 
     workerCount = 0;
     for (let myUnit of model.myUnits)
-        if (myUnit.storage.capacityPerSubstance > 0)
+        if (myUnit.storageCapacityPerSubstance > 0)
             ++workerCount;
     
     for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
@@ -86,7 +86,7 @@ export function tick()
         let myUnit = model.myUnits[iUnit];
         if (iUnit == 0)
             tickPrimalWorker(myUnit);
-        else if (myUnit.storage.capacityPerSubstance > 0)
+        else if (myUnit.storageCapacityPerSubstance > 0)
             tickWorker(myUnit);
         else
             tickTurret(myUnit);
@@ -95,9 +95,6 @@ export function tick()
 
 function tickPrimalWorker(myUnit)
 {
-    if (workerCount < 10)
-        myUnit.Say("more workers");
-
     if (myUnit.busy)
         return;
     
@@ -105,7 +102,10 @@ function tickPrimalWorker(myUnit)
         return;
 
     if (myUnit.Produce(workerParams) == Result.Ok)
+    {
+        myUnit.Say("produce worker");
         return;
+    }
     else
         tickFarmResourcesFor(myUnit, workerParams);
 }
@@ -119,9 +119,15 @@ function tickWorker(myUnit)
     {
         let enemy = findNearbyEnemy(myUnit.pos);
         if (distance(enemy.pos, myUnit.pos) < 7)
+        {
+            myUnit.Say("produce turret");
             myUnit.Produce(turretParams);
+        }
         else
+        {
+            myUnit.Say("move to place turret at (" + enemiesMidPos.x + ", " + enemiesMidPos.y + ")");
             myUnit.MoveTo(enemiesMidPos);
+        }
     }
     else
         tickFarmResourcesFor(myUnit, turretParams);
@@ -129,9 +135,11 @@ function tickWorker(myUnit)
 
 function tickFarmResourcesFor(myUnit, productionParams)
 {
+    myUnit.Say("farm resources");
+
     for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
     {
-        if (myUnit.storage.content[iSubstance] < model.ProductionCost(productionParams, iSubstance))
+        if (myUnit.storage[iSubstance] < model.ProductionCost(productionParams, iSubstance))
         {
             //let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
             let nearbyDeposit = deposits[iSubstance];

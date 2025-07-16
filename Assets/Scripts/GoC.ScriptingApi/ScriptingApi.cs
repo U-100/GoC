@@ -30,35 +30,29 @@ namespace GoC.ScriptingApi
         public static readonly int TYPES_COUNT = Enum.GetValues(typeof(Type)).Length;
     }
 
-    public interface IStorage
-    {
-        public int capacityPerSubstance { get; }
-        public IReadOnlyList<int> content { get; }
-    }
-
-    public interface IHull
-    {
-        public int integrity { get; }
-    }
-    
     public interface IUnit
     {
         int teamId { get; } // owner team id
         int2 pos { get; }
-        int2 dir { get; }
         bool busy { get; }
-        bool canMove { get; }
+
+        int integrity { get; }
+
+        int storageCapacityPerSubstance { get; }
+        IReadOnlyList<int> storage { get; }
         
+        bool canMove { get; }
+        bool canMine { get; }
+        int damage { get; }
+        int maxProductionTier { get; }
+
         Result CanMine(object target);
         Result CanProduce(object unitParamsObject);
-
-        public IHull hull { get; }
-        public IStorage storage { get; }
     }
     
     public interface IUnitControl : IUnit
     {
-        void Say(string speech);
+        Result Say(string speech);
         Result Attack(object target);
         Result Mine(object target);
         Result Give(object target, Substance.Type substanceType, int amount);
@@ -83,7 +77,6 @@ namespace GoC.ScriptingApi
         int teamId { get; } // team id
 
         IReadOnlyList<IUnitControl> myUnits { get; }
-        IReadOnlyList<IUnit> units { get; }
         IReadOnlyList<IUnit> enemyUnits { get; }
         
         IReadOnlyList<IDeposit> deposits { get; }

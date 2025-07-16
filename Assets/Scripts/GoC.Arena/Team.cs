@@ -21,7 +21,6 @@ namespace GoC.Arena
         public int teamId { get; }
 
         public IReadOnlyList<IUnitControl> myUnits => _myUnits;
-        public IReadOnlyList<IUnit> units => _arena.units;
         public IReadOnlyList<IUnit> enemyUnits => _enemyUnits;
         public IReadOnlyList<IDeposit> deposits => _arena.deposits;
 
@@ -43,8 +42,7 @@ namespace GoC.Arena
             {
                 _myUnitsCache.AddRange(_myUnits);
                 foreach (ExposedUnitControl myUnit in _myUnitsCache)
-                    if (myUnit.unit != null)
-                        UnityEngine.Object.Destroy(myUnit.unit.gameObject);
+                    myUnit.Dispose();
             }
             finally
             {
@@ -52,13 +50,13 @@ namespace GoC.Arena
             }
         }
 
-        public void BeforeTick()
+        public void ApplyTick()
         {
             try
             {
                 _myUnitsCache.AddRange(_myUnits);
                 foreach (ExposedUnitControl myUnit in _myUnitsCache)
-                    myUnit.unit.BeforeTick();
+                    myUnit.ApplyTick();
             }
             finally
             {
@@ -66,38 +64,12 @@ namespace GoC.Arena
             }
         }
 
-        public void AfterTick()
-        {
-            try
-            {
-                _myUnitsCache.AddRange(_myUnits);
-                foreach (ExposedUnitControl myUnit in _myUnitsCache)
-                    myUnit.unit.AfterTick();
-            }
-            finally
-            {
-                _myUnitsCache.Clear();
-            }
-        }
+        public void AddMyUnit(ExposedUnitControl exposedUnitControl) => _myUnits.Add(exposedUnitControl);
 
-        public void AddMyUnit(Unit unit)
-        {
-            _myUnits.Add(new ExposedUnitControl(unit));
-        }
+        public void AddEnemyUnit(ExposedUnitControl exposedUnitControl) => _enemyUnits.Add(new ExposedUnit(exposedUnitControl));
 
-        public void AddEnemyUnit(Unit unit)
-        {
-            _enemyUnits.Add(new ExposedUnit(unit));
-        }
-        
-        public void RemoveMyUnit(Unit unit)
-        {
-            _myUnits.RemoveAll(exposedUnitControl => exposedUnitControl.unit == unit);
-        }
+        public void RemoveMyUnit(ExposedUnitControl exposedUnitControl) => _myUnits.Remove(exposedUnitControl);
 
-        public void RemoveEnemyUnit(Unit unit)
-        {
-            _enemyUnits.RemoveAll(exposedUnitControl => exposedUnitControl.unit == unit);
-        }
+        public void RemoveEnemyUnit(ExposedUnitControl exposedUnitControl) => _enemyUnits.RemoveAll(exposedUnit => exposedUnit.exposedUnitControl == exposedUnitControl);
     }
 }

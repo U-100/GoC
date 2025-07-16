@@ -9,8 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5894296014513820637}
-  - component: {fileID: 8177559141951777715}
-  - component: {fileID: 4415725807842194804}
   - component: {fileID: 2029166070667984591}
   m_Layer: 0
   m_Name: MovingUnit
@@ -42,36 +40,6 @@ Transform:
   - {fileID: 1529940386950875931}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8177559141951777715
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2270813136937699141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03e8727dc627465fb2f20441c7f20f79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _integrity: 0
-  _dyingEffect: {fileID: 9165939972335586178}
-  _destructionEffectPrefab: {fileID: 2428393347250931738, guid: 5a73548db2650fb43bd3f4405b992aa1,
-    type: 3}
---- !u!114 &4415725807842194804
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2270813136937699141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e206bb5d4bd4891be91d5fd0d3ea62f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _capacityPerSubstance: 0
-  _content: 0000000000000000
 --- !u!114 &2029166070667984591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,15 +52,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4528f46c50cb4c1a9bf2d942c5193a37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _damage: 0
-  _canMine: 0
-  _maxProductionTier: 0
-  _canMove: 0
   _attackEffect: {fileID: 6351344789439175510}
   _mineEffect: {fileID: 392628368104633867}
   _giveEffect: {fileID: 6530460652935214495}
   _productionEffect: {fileID: 3903691516391001913}
   _moveEffect: {fileID: 246898509281720171}
+  _dyingEffect: {fileID: 9165939972335586178}
+  _destructionEffectPrefab: {fileID: 2428393347250931738, guid: 5a73548db2650fb43bd3f4405b992aa1,
+    type: 3}
   _skinColorSubjectRenderer: {fileID: 8662025366518265136}
   _speechBubble: {fileID: 8040007461557517870}
 --- !u!1 &3159108665251280522

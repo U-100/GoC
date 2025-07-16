@@ -1,6 +1,4 @@
 ﻿using GoC.ScriptingApi;
-using Unity.Collections;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Properties;
 using UnityEngine;
@@ -12,51 +10,16 @@ using static Unity.Mathematics.math;
 
 namespace GoC.Arena
 {
-    [RequireComponent(typeof(Hull))]
-    [RequireComponent(typeof(Storage))]
     public class Unit : MonoBehaviour
     {
-        private struct AttackCommand
-        {
-            public Hull targetHull;
-        }
-
-        private struct MineCommand
-        {
-            public Deposit deposit;
-        }
-
-        private struct GiveCommand
-        {
-            public Storage targetStorage;
-            public Substance.Type substanceType;
-            public int amount;
-        }
-
-        private struct ProduceCommand
-        {
-            public int ticksLeft;
-            public int2 productionPos;
-            public UnitParams clampedUnitParams;
-        }
-
-        private struct MoveCommand
-        {
-            public int2 targetPosition;
-        }
-        
-        [Space] // the fields below are exposed in inspector for debug purposes only
-        [SerializeField] private int _damage;
-        [SerializeField] private bool _canMine;
-        [SerializeField] private int _maxProductionTier;
-        [SerializeField] private bool _canMove;
-
         [Space]
         [SerializeField] private VisualEffect _attackEffect;
         [SerializeField] private VisualEffect _mineEffect;
         [SerializeField] private VisualEffect _giveEffect;
         [SerializeField] private VisualEffect _productionEffect;
         [SerializeField] private VisualEffect _moveEffect;
+        [SerializeField] private VisualEffect _dyingEffect;
+        [SerializeField] private GameObject _destructionEffectPrefab;
         
         [Space]
         [SerializeField] private Renderer _skinColorSubjectRenderer;
@@ -72,366 +35,86 @@ namespace GoC.Arena
         private ExposedProperty _productionEffectSpawnPositionProperty;
         private ExposedProperty _productionEffectColorProperty;
 
-        private Team _team;
-        
-        private AttackCommand? _attackCommand;
-        private MineCommand? _mineCommand;
-        private GiveCommand? _giveCommand;
-        private ProduceCommand? _produceCommand;
-        private MoveCommand? _moveCommand;
-
-        
-        private Hull _myHull;
-        private Hull myHull => _myHull ??= GetComponent<Hull>();
-
-        private Storage _myStorage;
-        private Storage myStorage => _myStorage ??= GetComponent<Storage>();
-
-        [CreateProperty] public string speech { get; private set; }
+        [CreateProperty] public string speech { get; set; }
         [CreateProperty] public bool speaking => speech != null;
-        
-        public int teamId => _team.teamId;
-        public int2 pos => transform.position.ToArenaPos();
-        public int2 dir => transform.forward.ToArenaPos();
-        public bool busy => _attackCommand != null || _mineCommand != null || _giveCommand != null || _produceCommand != null || _moveCommand != null;
-        public bool canMove => _canMove;
-        
-        public Result CanMine(object targetObject)
-        {
-            if (!_canMine)
-                return Result.OperationUnavailable;
-            
-            if (targetObject is not Deposit targetDeposit)
-                return Result.InvalidTarget;
 
-            if (targetDeposit == null)
-                return Result.InvalidTarget;
-
-            if (distance(pos, targetDeposit.pos) > 1)
-                return Result.OutOfRange;
-
-            if (myStorage.content[(int)targetDeposit.substanceType] + targetDeposit.miningSpeed > myStorage.capacityPerSubstance)
-                return Result.NotEnoughStorageCapacity;
-
-            return Result.Ok;
-        }
-        
-        public Result CanProduce(UnitParams unitParams)
-        {
-            unitParams = _team.arena.config.unitConfig.ClampUnitParams(unitParams);
-            
-            if (
-                unitParams.attackTier > _maxProductionTier
-                || unitParams.miningTier > _maxProductionTier
-                || unitParams.productionTier > _maxProductionTier
-                || unitParams.movementTier > _maxProductionTier
-                || unitParams.hullTier > _maxProductionTier
-                || unitParams.storageTier > _maxProductionTier
-            )
-                return Result.OperationUnavailable;
-            
-            for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
-                if (storage.content[substanceIndex] < _team.arena.config.unitConfig.ProductionCost(unitParams, substanceIndex))
-                    return Result.NotEnoughSubstance;
-            
-            return Result.Ok;
-        }
-        
-        public IHull hull => myHull;
-        public IStorage storage => myStorage;
-
-
-        public void Say(string phrase) => speech = phrase;
-
-        public Result Attack(object targetObject)
-        {
-            if (busy)
-                return Result.Busy;
-            
-            if (_damage <= 0)
-                return Result.OperationUnavailable;
-            
-            if (targetObject is not ExposedUnit targetExposedUnit)
-                return Result.InvalidTarget;
-
-            Hull targetHull = targetExposedUnit.unit.GetComponent<Hull>();
-            if (targetHull == null)
-                return Result.InvalidTarget;
-
-            if (distance(pos, targetExposedUnit.unit.transform.position.ToArenaPos()) > 3)
-                return Result.OutOfRange;
-
-            _attackCommand = new AttackCommand { targetHull = targetHull };
-
-            return Result.Ok;
-        }
-
-        public Result Mine(object targetObject)
-        {
-            if (busy)
-                return Result.Busy;
-            
-            Result canMine = CanMine(targetObject);
-            if (canMine != Result.Ok)
-                return canMine;
-
-            _mineCommand = new MineCommand { deposit = ((MonoBehaviour)targetObject).GetComponent<Deposit>() };
-
-            return Result.Ok;
-        }
-
-        public Result Give(object targetObject, Substance.Type substanceType, int amount)
-        {
-            if (busy)
-                return Result.Busy;
-            
-            if (amount <= 0)
-                return Result.InvalidArgument;
-
-            if (targetObject is not ExposedUnit targetExposedUnit)
-                return Result.InvalidTarget;
-
-            if (distance(pos, targetExposedUnit.unit.transform.position.ToArenaPos()) > 1)
-                return Result.OutOfRange;
-
-            Storage targetStorage = targetExposedUnit.unit.GetComponent<Storage>();
-            if (targetStorage == null)
-                return Result.InvalidTarget;
-
-            if (myStorage.content[(int)substanceType] < amount)
-                return Result.NotEnoughSubstance;
-
-            if (targetStorage.content[(int)substanceType] + amount > targetStorage.capacityPerSubstance)
-                return Result.NotEnoughStorageCapacity;
-
-            _giveCommand = new GiveCommand
-            {
-                targetStorage = targetStorage,
-                substanceType = substanceType,
-                amount = amount
-            };
-
-            return Result.Ok;
-        }
-        
-        public Result Produce(UnitParams unitParams, int2? productionPos)
-        {
-            if (busy)
-                return Result.Busy;
-
-            if (productionPos != null)
-            {
-                if (distance(pos, productionPos.Value) > 1)
-                    return Result.OutOfRange;
-
-                if (_team.arena.grid[productionPos.Value] > 0)
-                    return Result.PathBlocked;
-            }
-            
-            Result canProduce = CanProduce(unitParams);
-            if (canProduce != Result.Ok)
-                return canProduce;
-            
-            _produceCommand = new ProduceCommand
-            {
-                ticksLeft = 0,
-                productionPos = productionPos ?? _team.arena.grid.FindEmptyCellAround(pos),
-                clampedUnitParams = _team.arena.config.unitConfig.ClampUnitParams(unitParams),
-            };
-            
-            return Result.Ok;
-        }
-
-        public Result MoveTo(int2 p)
-        {
-            if (busy)
-                return Result.Busy;
-
-            if (!_canMove)
-                return Result.OperationUnavailable;
-
-            if (any(p < _team.arena.grid.min | _team.arena.grid.max < p))
-                return Result.OutOfRange;
-
-            AStar aStar = new()
-            {
-                from = transform.position.ToArenaPos() - _team.arena.grid.min,
-                to = p - _team.arena.grid.min,
-                enoughManhattanDistance = 1,
-                grid = _team.arena.grid.nativeArray,
-                size = _team.arena.grid.size,
-                path = new NativeList<int2>(0, Allocator.TempJob)
-            };
-
-            try
-            {
-                aStar.Run();
-                if (aStar.path.Length == 0)
-                    return Result.PathBlocked;
-                else if (aStar.path.Length == 1)
-                    return Result.AlreadyThere;
-                if (aStar.path.Length > 1)
-                {
-                    _moveCommand = new MoveCommand { targetPosition = aStar.path[1] + _team.arena.grid.min };
-
-                    _team.arena.grid[pos]--;
-                    _team.arena.grid[_moveCommand.Value.targetPosition]++;
-                }
-            }
-            finally
-            {
-                aStar.path.Dispose();
-            }
-
-            return Result.Ok;
-        }
+        private int2? _moveTargetPos;
+        private int2? _rotateTargetPos;
+        private Transform _rotateTargetTransform;
 
         // to set up upon instantiation
-        public void Setup(Team team, UnitParams unitParams)
-        {
-            _team = team;
-
-            UnitConfig unitConfig = _team.arena.config.unitConfig;
-            _damage = unitConfig.attackTiers[unitParams.attackTier].damage;
-            _canMine = unitConfig.miningTiers[unitParams.miningTier].canMine;
-            _maxProductionTier = unitConfig.productionTiers[unitParams.productionTier].maxProductionTier;
-            MovementTier movementTier = unitConfig.movementTiers[unitParams.movementTier];
-            _canMove = movementTier.canMove;
-            myHull.Setup(unitConfig.hullTiers[unitParams.hullTier].maxIntegrity + movementTier.additionalIntegrity);
-            myStorage.Setup(unitConfig.storageTiers[unitParams.storageTier].storageCapacityPerSubstance);
-
-            _team.arena.grid[pos]++;
-
-            ApplySkin(_team.skin);
-        }
-
-        private void ApplySkin(TeamSkin teamSkin)
+        public void Setup(TeamSkin teamSkin)
         {
             _skinColorSubjectRenderer.material = teamSkin.mainColorMaterial;
             _attackEffect.SetVector4(_attackEffectColorProperty, teamSkin.vfxColorTint);
             _productionEffect.SetVector4(_productionEffectColorProperty, teamSkin.vfxColorTint);
         }
 
-        public void BeforeTick()
+        public void FinishLastTick()
         {
             speech = null;
-            
-            if (_attackCommand != null)
+            _attackEffect.Stop();
+            _mineEffect.Stop();
+            _giveEffect.Stop();
+            _moveEffect.Stop();
+
+            if (_moveTargetPos != null)
             {
-                _attackEffect.Stop();
-                _attackCommand = null;
-            }
-
-            if (_mineCommand != null)
-            {
-                _mineEffect.Stop();
-                _mineCommand = null;
-            }
-
-            // ReSharper disable once RedundantCheckBeforeAssignment
-            if (_giveCommand != null)
-            {
-                _giveEffect.Stop();
-                _giveCommand = null;
-            }
-
-            if (_produceCommand != null)
-            {
-                ProduceCommand produceCommand = _produceCommand.Value;
-                if (produceCommand.ticksLeft > 0)
-                {
-                    if (--produceCommand.ticksLeft == 0)
-                    {
-                        _team.arena.grid[produceCommand.productionPos]--;
-
-                        _team.arena.CreateUnit(produceCommand.clampedUnitParams, _team, produceCommand.productionPos);
-
-                        _produceCommand = null;
-                    }
-                    else
-                        _produceCommand = produceCommand;
-                }
-            }
-
-            if (_moveCommand != null)
-            {
-                transform.position = _moveCommand.Value.targetPosition.ToUnityPos();
-                _moveEffect.Stop();
-                _moveCommand = null;
-            }
-
-            if (myHull.BeforeTick() == Hull.State.Destroyed)
-            {
-                _team.arena.Unregister(this);
-
-                _team.arena.grid[pos]--;
-
-                if (_produceCommand != null)
-                    _team.arena.grid[_produceCommand.Value.productionPos]--;
-
-                Destroy(gameObject);
+                transform.position = _moveTargetPos.Value.ToUnityPos();
+                _moveTargetPos = null;
             }
         }
 
-        public void AfterTick()
+        public void StartAttack(Transform targetTransform)
         {
-            if (_attackCommand.HasValue)
-            {
-                _attackCommand.Value.targetHull.Absorb(_damage);
-                
-                float distance = Vector3.Distance(transform.position, _attackCommand.Value.targetHull.transform.position);
-                _attackEffect.SetFloat(_attackEffectDistanceProperty, distance);
-                _attackEffect.Play();
-            }
-
-            if (_mineCommand != null)
-            {
-                DepositMiningOutcome depositMiningOutcome = _mineCommand.Value.deposit.Mine();
-                myStorage.Deposit(depositMiningOutcome.substanceType, depositMiningOutcome.amount);
-
-                _mineEffect.SetUInt(_mineEffectTexIndexProperty, (uint)depositMiningOutcome.substanceType);
-                _mineEffect.SetVector3(_mineEffectSourcePositionProperty, _mineCommand.Value.deposit.pos.ToUnityPos());
-                _mineEffect.Play();
-            }
-
-            if (_giveCommand != null)
-            {
-                myStorage.Withdraw(_giveCommand.Value.substanceType, _giveCommand.Value.amount);
-                _giveCommand.Value.targetStorage.Deposit(_giveCommand.Value.substanceType, _giveCommand.Value.amount);
-
-                _giveEffect.Play();
-            }
-
-            if (_produceCommand != null)
-            {
-                ProduceCommand produceCommand = _produceCommand.Value;
-                if(produceCommand.ticksLeft == 0) // just started production
-                {
-                    produceCommand.ticksLeft = _team.arena.config.unitConfig.ProductionTicks(produceCommand.clampedUnitParams);
-                    for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
-                        myStorage.Withdraw((Substance.Type)substanceIndex, _team.arena.config.unitConfig.ProductionCost(produceCommand.clampedUnitParams, substanceIndex));
-
-                    // in rare cases when two productions are targeting the same grid cell one of them will be pushed away into a nearby empty cell
-                    if (_team.arena.grid[produceCommand.productionPos] > 0)
-                        produceCommand.productionPos = _team.arena.grid.FindEmptyCellAround(produceCommand.productionPos);
-                    
-                    _team.arena.grid[produceCommand.productionPos]++;
-                
-                    _productionEffect.SetVector3(_productionEffectSpawnPositionProperty, produceCommand.productionPos.ToUnityPos());
-                    _productionEffect.SetFloat(_productionEffectDurationProperty, produceCommand.ticksLeft * Tick.TIME);
-                    _productionEffect.Play();
-                }
-                _produceCommand = produceCommand;
-            }
+            _rotateTargetTransform = targetTransform;
             
-            if (_moveCommand != null)
-            {
-            }
-
-            myHull.AfterTick();
+            float distance = Vector3.Distance(transform.position, targetTransform.position);
+            _attackEffect.SetFloat(_attackEffectDistanceProperty, distance);
+            _attackEffect.Play();
         }
 
+        public void StartMine(Substance.Type substanceType, int2 depositPos)
+        {
+            _rotateTargetPos = depositPos;
+            
+            _mineEffect.SetUInt(_mineEffectTexIndexProperty, (uint)substanceType);
+            _mineEffect.SetVector3(_mineEffectSourcePositionProperty, depositPos.ToUnityPos());
+            _mineEffect.Play();
+        }
 
+        public void StartGive(Transform targetTransform)
+        {
+            _rotateTargetTransform = targetTransform;
+            
+            _giveEffect.Play();
+        }
+
+        public void StartMove(int2 targetPos)
+        {
+            _moveTargetPos = targetPos;
+        }
+
+        public void StartProduce(int2 productionPos, int ticksLeft)
+        {
+            _rotateTargetPos = productionPos;
+            
+            _productionEffect.SetVector3(_productionEffectSpawnPositionProperty, productionPos.ToUnityPos());
+            _productionEffect.SetFloat(_productionEffectDurationProperty, ticksLeft * Tick.TIME);
+            _productionEffect.Play();
+        }
+
+        public void StartDying()
+        {
+            _dyingEffect.enabled = true;
+        }
+
+        public void StartDestruction()
+        {
+            GameObject destructionEffect = Instantiate(_destructionEffectPrefab, transform.position, transform.rotation);
+            Destroy(destructionEffect, 1);
+        }
+        
         private void Awake()
         {
             _attackEffectColorProperty = "color";
@@ -445,26 +128,19 @@ namespace GoC.Arena
             _speechBubble.rootVisualElement.dataSource = this;
         }
 
+        private void OnEnable()
+        {
+            _dyingEffect.enabled = false;
+        }
+
         private void Update()
         {
-            if (_attackCommand != null)
+            if (_rotateTargetTransform != null)
+                RotateTowards(_rotateTargetTransform.position);
+
+            if (_moveTargetPos != null)
             {
-                RotateTowards(_attackCommand.Value.targetHull.transform.position);
-            }
-            
-            if (_mineCommand != null)
-            {
-                RotateTowards(_mineCommand.Value.deposit.transform.position);
-            }
-            
-            if (_giveCommand != null)
-            {
-                RotateTowards(_giveCommand.Value.targetStorage.transform.position);
-            }
-            
-            if (_moveCommand != null)
-            {
-                Vector3 targetPosition = _moveCommand.Value.targetPosition.ToUnityPos();
+                Vector3 targetPosition = _moveTargetPos.Value.ToUnityPos();
                 if (distance(transform.position, targetPosition) > Mathf.Epsilon)
                 {
                     if (RotateTowards(targetPosition))
@@ -476,11 +152,6 @@ namespace GoC.Arena
                     else
                         _moveEffect.Stop();
                 }
-            }
-
-            if (_produceCommand != null)
-            {
-                RotateTowards(_produceCommand.Value.productionPos.ToUnityPos());
             }
         }
 

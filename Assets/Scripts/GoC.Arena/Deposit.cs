@@ -15,16 +15,20 @@ namespace GoC.Arena
         [SerializeField] private Arena _arena;
         [SerializeField] private DepositConfig _config;
 
+        private int2 _pos;
 
-        public int2 pos => transform.position.ToArenaPos();
+        public int2 pos => _pos;
         public Substance.Type substanceType => _config.substanceType;
         public int miningSpeed => _config.miningSpeed;
 
         
-        public void Setup(Arena initArena, DepositConfig initConfig)
+        public void Setup(Arena initArena, DepositConfig initConfig, int2 initPos)
         {
-            _config = initConfig;
             _arena = initArena;
+            _config = initConfig;
+            _pos = initPos;
+            
+            transform.position = pos.ToUnityPos();
         }
         
         public DepositMiningOutcome Mine() => new DepositMiningOutcome { substanceType = substanceType, amount = miningSpeed };
