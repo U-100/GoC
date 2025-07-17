@@ -111,7 +111,6 @@ function tickWorker(myUnit)
             if (myUnit.Mine(nearbyDeposit) == Result.Ok)
                 return;
 
-            myUnit.Say("Going to " + nearbyDeposit.pos.x + "," + nearbyDeposit.pos.y);
             myUnit.MoveTo(nearbyDeposit.pos);
             return;
         }
@@ -125,12 +124,8 @@ function tickWarrior(myUnit)
     if (nearbyEnemy)
     {
         if (myUnit.Attack(nearbyEnemy) == Result.Ok)
-        {
-            myUnit.Say("attack");
             return;
-        }
 
-        myUnit.Say("move to attack");
         myUnit.MoveTo(nearbyEnemy.pos);
         return;
     }

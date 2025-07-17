@@ -102,10 +102,7 @@ function tickPrimalWorker(myUnit)
         return;
 
     if (myUnit.Produce(workerParams) == Result.Ok)
-    {
-        myUnit.Say("produce worker");
         return;
-    }
     else
         tickFarmResourcesFor(myUnit, workerParams);
 }
@@ -119,15 +116,9 @@ function tickWorker(myUnit)
     {
         let enemy = findNearbyEnemy(myUnit.pos);
         if (distance(enemy.pos, myUnit.pos) < 7)
-        {
-            myUnit.Say("produce turret");
             myUnit.Produce(turretParams);
-        }
         else
-        {
-            myUnit.Say("move to place turret at (" + enemiesMidPos.x + ", " + enemiesMidPos.y + ")");
             myUnit.MoveTo(enemiesMidPos);
-        }
     }
     else
         tickFarmResourcesFor(myUnit, turretParams);
@@ -135,8 +126,6 @@ function tickWorker(myUnit)
 
 function tickFarmResourcesFor(myUnit, productionParams)
 {
-    myUnit.Say("farm resources");
-
     for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
     {
         if (myUnit.storage[iSubstance] < model.ProductionCost(productionParams, iSubstance))
