@@ -10,7 +10,7 @@ using static Unity.Mathematics.math;
 
 namespace GoC.Arena
 {
-    public class Unit : MonoBehaviour
+    public class UnitView : MonoBehaviour
     {
         [Space]
         [SerializeField] private VisualEffect _attackEffect;

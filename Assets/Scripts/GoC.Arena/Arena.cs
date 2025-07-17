@@ -7,6 +7,7 @@ using Jint.Native;
 using Jint.Native.Object;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.VFX;
 
 using static Unity.Mathematics.math;
@@ -31,8 +32,8 @@ namespace GoC.Arena
     public class Arena : MonoBehaviour, IArena
     {
         [SerializeField] private VisualEffect _gridEffect;
-        [SerializeField] private Unit _stationaryUnitPrefab;
-        [SerializeField] private Unit _movingUnitPrefab;
+        [SerializeField] private UnitView _stationaryUnitViewPrefab;
+        [SerializeField] private UnitView _movingUnitViewPrefab;
         
         [Tooltip("One prefab per substance")]
         [SerializeField] private Deposit[] _depositPrefabs;
@@ -147,12 +148,12 @@ namespace GoC.Arena
 
         public void CreateUnit(UnitParams unitParams, Team team, int2 unitPos)
         {
-            Unit unitPrefab = _config.unitConfig.movementTiers[unitParams.movementTier].canMove ? _movingUnitPrefab : _stationaryUnitPrefab;
+            UnitView unitViewPrefab = _config.unitConfig.movementTiers[unitParams.movementTier].canMove ? _movingUnitViewPrefab : _stationaryUnitViewPrefab;
             
-            Unit unit = Instantiate(unitPrefab);
-            unit.Setup(team.skin);
+            UnitView unitView = Instantiate(unitViewPrefab);
+            unitView.Setup(team.skin);
 
-            ExposedUnitControl exposedUnitControl = new ExposedUnitControl(team, unitParams, unitPos, unit);
+            ExposedUnitControl exposedUnitControl = new ExposedUnitControl(team, unitParams, unitPos, unitView);
 
             team.AddMyUnit(exposedUnitControl);
             

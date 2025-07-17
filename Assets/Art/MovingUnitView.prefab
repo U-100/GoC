@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5894296014513820637}
   - component: {fileID: 2029166070667984591}
   m_Layer: 0
-  m_Name: MovingUnit
+  m_Name: MovingUnitView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

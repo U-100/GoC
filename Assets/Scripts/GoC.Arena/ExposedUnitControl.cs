@@ -42,7 +42,7 @@ namespace GoC.Arena
         }
 
         private readonly Team _team;
-        private readonly Unit _unit;
+        private readonly UnitView _unitView;
         private readonly int[] _storage = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
         
         private AttackCommand? _attackCommand;
@@ -55,10 +55,10 @@ namespace GoC.Arena
         // Required to track production through multiple ticks
         private ProduceCommand? _currentProduction;
         
-        public ExposedUnitControl(Team team, UnitParams unitParams, int2 initPos, Unit unit)
+        public ExposedUnitControl(Team team, UnitParams unitParams, int2 initPos, UnitView unitView)
         {
             _team = team;
-            _unit = unit;
+            _unitView = unitView;
 
             pos = initPos;
 
@@ -76,13 +76,13 @@ namespace GoC.Arena
 
             _team.arena.grid[pos]++;
 
-            _unit.transform.position = pos.ToUnityPos();
+            _unitView.transform.position = pos.ToUnityPos();
         }
 
         public void Dispose()
         {
-            if (_unit != null)
-                UnityEngine.Object.Destroy(_unit.gameObject);
+            if (_unitView != null)
+                UnityEngine.Object.Destroy(_unitView.gameObject);
         }
 
         public int teamId => _team.teamId;
@@ -305,7 +305,7 @@ namespace GoC.Arena
 
         public void ApplyTick()
         {
-            _unit.FinishLastTick();
+            _unitView.FinishLastTick();
 
             FinishLastTick();
             ApplyNextTick();
@@ -337,15 +337,15 @@ namespace GoC.Arena
                 if (_currentProduction != null)
                     _team.arena.grid[_currentProduction.Value.productionPos]--;
 
-                _unit.StartDestruction();
+                _unitView.StartDestruction();
                 
-                UnityEngine.Object.Destroy(_unit.gameObject);
+                UnityEngine.Object.Destroy(_unitView.gameObject);
             }
         }
         
         private void ApplyNextTick()
         {
-            _unit.speech = _speech;
+            _unitView.speech = _speech;
             _speech = null;
 
             if (_attackCommand.HasValue)
@@ -353,9 +353,9 @@ namespace GoC.Arena
                 _attackCommand.Value.target.integrity -= damage;
                 
                 if (_attackCommand.Value.target.integrity <= 0)
-                    _attackCommand.Value.target._unit.StartDying();
+                    _attackCommand.Value.target._unitView.StartDying();
                 
-                _unit.StartAttack(_attackCommand.Value.target._unit.transform);
+                _unitView.StartAttack(_attackCommand.Value.target._unitView.transform);
                 
                 _attackCommand = null;
             }
@@ -365,7 +365,7 @@ namespace GoC.Arena
                 DepositMiningOutcome depositMiningOutcome = _mineCommand.Value.deposit.Mine();
                 _storage[(int)depositMiningOutcome.substanceType] += depositMiningOutcome.amount;
 
-                _unit.StartMine(depositMiningOutcome.substanceType, _mineCommand.Value.deposit.pos);
+                _unitView.StartMine(depositMiningOutcome.substanceType, _mineCommand.Value.deposit.pos);
 
                 _mineCommand = null;
             }
@@ -375,14 +375,14 @@ namespace GoC.Arena
                 _storage[(int)_giveCommand.Value.substanceType] -= _giveCommand.Value.amount;
                 _giveCommand.Value.target._storage[(int)_giveCommand.Value.substanceType] += _giveCommand.Value.amount;
 
-                _unit.StartGive(_giveCommand.Value.target._unit.transform);
+                _unitView.StartGive(_giveCommand.Value.target._unitView.transform);
             
                 _giveCommand = null;
             }
             
             if (_moveCommand != null)
             {
-                _unit.StartMove(_moveCommand.Value.targetPosition);
+                _unitView.StartMove(_moveCommand.Value.targetPosition);
                 
                 pos = _moveCommand.Value.targetPosition;
 
@@ -402,7 +402,7 @@ namespace GoC.Arena
                     
                 _team.arena.grid[produceCommand.productionPos]++;
 
-                _unit.StartProduce(produceCommand.productionPos, produceCommand.ticks);
+                _unitView.StartProduce(produceCommand.productionPos, produceCommand.ticks);
 
                 _currentProduction = produceCommand;
                 _produceCommand = null;
