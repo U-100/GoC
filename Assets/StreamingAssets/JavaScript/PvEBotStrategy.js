@@ -61,6 +61,7 @@ let workerCount;
 
 export function tick()
 {
+    return;
     if (model.myUnits.count == 0 || model.enemyUnits.count == 0)
         return;
 

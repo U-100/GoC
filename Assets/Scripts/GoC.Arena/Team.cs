@@ -56,7 +56,9 @@ namespace GoC.Arena
             {
                 _myUnitsCache.AddRange(_myUnits);
                 foreach (ExposedUnitControl myUnit in _myUnitsCache)
-                    myUnit.ApplyTick();
+                    myUnit.ApplyTickPhaseOne();
+                foreach (ExposedUnitControl myUnit in _myUnitsCache)
+                    myUnit.ApplyTickPhaseTwo();
             }
             finally
             {

@@ -110,14 +110,9 @@ namespace GoC.Arena
         public void StartDying()
         {
             _dyingEffect.enabled = true;
+            Destroy(gameObject, 1);
         }
 
-        public void StartDestruction()
-        {
-            GameObject destructionEffect = Instantiate(_destructionEffectPrefab, transform.position, transform.rotation);
-            Destroy(destructionEffect, 1);
-        }
-        
         private void Awake()
         {
             _attackEffectColorProperty = "color";
@@ -129,11 +124,17 @@ namespace GoC.Arena
             _productionEffectColorProperty = "color";
             
             _speechBubble.rootVisualElement.dataSource = this;
+
+            _dyingEffect.enabled = false;
         }
 
-        private void OnEnable()
+        private void OnDestroy()
         {
-            _dyingEffect.enabled = false;
+            if (_dyingEffect.enabled)
+            {
+                GameObject destructionEffect = Instantiate(_destructionEffectPrefab, transform.position, transform.rotation);
+                Destroy(destructionEffect, 1);
+            }
         }
 
         private void Update()

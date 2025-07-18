@@ -95,7 +95,7 @@ namespace GoC.Arena
             || _giveCommand != null
             || _produceCommand != null
             || _moveCommand != null
-            || _currentProduction?.ticks > 1;
+            || _currentProduction != null;
 
         public int integrity { get; private set; }
         
@@ -303,57 +303,16 @@ namespace GoC.Arena
             return Result.Ok;
         }
 
-        public void ApplyTick()
+        public void ApplyTickPhaseOne()
         {
             _unitView.FinishLastTick();
 
-            FinishLastTick();
-            ApplyNextTick();
-        }
-
-        private void FinishLastTick()
-        {
-            if (_currentProduction != null)
-            {
-                ProduceCommand currentProduction = _currentProduction.Value;
-                if (--currentProduction.ticks <= 0)
-                {
-                    _team.arena.grid[currentProduction.productionPos]--;
-
-                    _team.arena.CreateUnit(currentProduction.clampedUnitParams, _team, currentProduction.productionPos);
-
-                    _currentProduction = null;
-                }
-                else
-                    _currentProduction = currentProduction;
-            }
-
-            if (integrity <= 0)
-            {
-                _team.arena.Unregister(this);
-
-                _team.arena.grid[pos]--;
-
-                if (_currentProduction != null)
-                    _team.arena.grid[_currentProduction.Value.productionPos]--;
-
-                _unitView.StartDestruction();
-                
-                UnityEngine.Object.Destroy(_unitView.gameObject);
-            }
-        }
-        
-        private void ApplyNextTick()
-        {
             _unitView.speech = _speech;
             _speech = null;
 
             if (_attackCommand.HasValue)
             {
                 _attackCommand.Value.target.integrity -= damage;
-                
-                if (_attackCommand.Value.target.integrity <= 0)
-                    _attackCommand.Value.target._unitView.StartDying();
                 
                 _unitView.StartAttack(_attackCommand.Value.target._unitView.transform);
                 
@@ -406,6 +365,37 @@ namespace GoC.Arena
 
                 _currentProduction = produceCommand;
                 _produceCommand = null;
+            }
+
+            if (_currentProduction != null)
+            {
+                ProduceCommand currentProduction = _currentProduction.Value;
+
+                if (--currentProduction.ticks <= 0)
+                {
+                    _team.arena.grid[currentProduction.productionPos]--;
+
+                    _team.arena.CreateUnit(currentProduction.clampedUnitParams, _team, currentProduction.productionPos);
+
+                    _currentProduction = null;
+                }
+                else
+                    _currentProduction = currentProduction;
+            }
+        }
+
+        public void ApplyTickPhaseTwo()
+        {
+            if (integrity <= 0)
+            {
+                _team.arena.Unregister(this);
+
+                _team.arena.grid[pos]--;
+
+                if (_currentProduction != null)
+                    _team.arena.grid[_currentProduction.Value.productionPos]--;
+
+                _unitView.StartDying();
             }
         }
     }
