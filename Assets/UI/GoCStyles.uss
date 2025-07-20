@@ -1,12 +1,5 @@
-TextField TextInput#unity-text-input {
-    background-color: rgba(0, 0, 0, 0);
-    border-left-color: rgba(0, 0, 0, 0);
-    border-right-color: rgba(0, 0, 0, 0);
-    border-top-color: rgba(0, 0, 0, 0);
-    border-bottom-color: rgba(0, 0, 0, 0);
-}
-
 .goc-border {
+    border-radius: 8px;
     border-left-color: rgb(80, 120, 231);
     border-right-color: rgb(80, 120, 231);
     border-top-color: rgb(80, 120, 231);
@@ -15,10 +8,6 @@ TextField TextInput#unity-text-input {
     border-right-width: 1px;
     border-top-width: 1px;
     border-bottom-width: 1px;
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
 }
 
 .goc-text {
@@ -27,10 +16,41 @@ TextField TextInput#unity-text-input {
 }
 
 .goc-button {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-radius: 8px;
+    background-color: rgb(64, 64, 64);
+    font-size: 42px;
+    border-left-color: rgb(80, 120, 231);
+    border-right-color: rgb(80, 120, 231);
+    border-top-color: rgb(80, 120, 231);
+    border-bottom-color: rgb(80, 120, 231);
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-top-width: 4px;
+    border-bottom-width: 4px;
+    color: rgb(80, 120, 231);
+    -unity-text-outline-color: rgb(80, 120, 231);
+    -unity-text-outline-width: 3px;
+}
+
+.goc-dropdown {
+    border-radius: 8px;
+    background-color: rgb(64, 64, 64);
+    font-size: 42px;
+    border-left-color: rgb(80, 120, 231);
+    border-right-color: rgb(80, 120, 231);
+    border-top-color: rgb(80, 120, 231);
+    border-bottom-color: rgb(80, 120, 231);
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-top-width: 4px;
+    border-bottom-width: 4px;
+    color: rgb(80, 120, 231);
+    -unity-text-outline-color: rgb(80, 120, 231);
+    -unity-text-outline-width: 3px;
+}
+
+.unity-base-dropdown__container-outer {
+    border-radius: 8px;
     background-color: rgb(64, 64, 64);
     font-size: 42px;
     border-left-color: rgb(80, 120, 231);

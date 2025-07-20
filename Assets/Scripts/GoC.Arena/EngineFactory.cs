@@ -14,6 +14,8 @@ namespace GoC.Arena
 {
     public static class EngineFactory
     {
+        public static string JAVASCRIPT_MODULES_BASE_PATH = Path.Combine(Application.streamingAssetsPath, "JavaScript");
+        
         public static Engine Create()
         {
             Engine engine = new Engine(Configure);
@@ -44,7 +46,7 @@ namespace GoC.Arena
                     MemberFilter = MEMBER_FILTER
                 }
             );
-            options.EnableModules(Path.Combine(Application.streamingAssetsPath, "JavaScript"));
+            options.EnableModules(JAVASCRIPT_MODULES_BASE_PATH);
             options.AllowClr(typeof(math).Assembly);
             options.Interop.AllowOperatorOverloading = true;
         }

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Unity.Properties;
 using UnityEngine;
 
@@ -12,6 +15,7 @@ namespace GoC.Arena
         private readonly TeamConfig _aiTeamConfig;
         
         private IArena _currentArena;
+        private int _codeVsAIScriptIndex;
 
         public ArenaViewModel(Func<IArena> arenaFactory, ArenaConfig arenaConfig, TeamSkin playerTeamSkin, TeamConfig aiTeamConfig)
         {
@@ -19,8 +23,9 @@ namespace GoC.Arena
             _arenaConfig = arenaConfig;
             _playerTeamSkin = playerTeamSkin;
             _aiTeamConfig = aiTeamConfig;
-            _codeVsAIScript = PlayerPrefs.GetString("USER_SCRIPT_PATH", "./TestStrategy.js");
-
+            
+            codeVsAIScripts = new List<string>();
+            
             Application.logMessageReceived += OnLogMessageReceived;
         }
 
@@ -30,13 +35,19 @@ namespace GoC.Arena
 
         [CreateProperty] public bool isInCodeVsAIMenu { get; private set; }
 
-        private string _codeVsAIScript;
-        [CreateProperty] public string codeVsAIScript
+        [CreateProperty] public List<string> codeVsAIScripts { get; private set; }
+
+        [CreateProperty]
+        public int codeVsAIScriptIndex
         {
-            get => _codeVsAIScript;
-            set => PlayerPrefs.SetString("USER_SCRIPT_PATH", _codeVsAIScript = value);
+            get => _codeVsAIScriptIndex;
+            set
+            {
+                _codeVsAIScriptIndex = value;
+                PlayerPrefs.SetString("USER_SCRIPT_PATH", codeVsAIScripts[_codeVsAIScriptIndex]);
+            }
         }
-        
+
         [CreateProperty] public bool isInHud { get; private set; }
 
         [CreateProperty] public bool isPaused => Time.timeScale == 0;
@@ -46,12 +57,22 @@ namespace GoC.Arena
         public void PrepareCodeVsAI()
         {
             if (_currentArena != null) throw new InvalidOperationException();
+            if (codeVsAIScriptIndex < 0) throw new InvalidOperationException();
             
             isInMainMenu = false;
             isInCodeVsAIMenu = true;
 
             _currentArena = _arenaFactory();
             _currentArena.Setup(_arenaConfig);
+            
+            codeVsAIScripts.Clear();
+            codeVsAIScripts.AddRange(
+                Directory.GetFiles(EngineFactory.JAVASCRIPT_MODULES_BASE_PATH, "*.js", SearchOption.AllDirectories)
+                    .Select(path => Path.GetRelativePath(EngineFactory.JAVASCRIPT_MODULES_BASE_PATH, path))
+                    .Select(path => Path.Combine("./", path)));
+            
+            string lastScriptPath = PlayerPrefs.GetString("USER_SCRIPT_PATH", "./TestStrategy.js");
+            codeVsAIScriptIndex = codeVsAIScripts.IndexOf(lastScriptPath);
         }
 
         public void Quit()
@@ -65,7 +86,7 @@ namespace GoC.Arena
         
         public void PlayCodeVsAI()
         {
-            TeamConfig playerTeamConfig = TeamConfig.Create(codeVsAIScript, _playerTeamSkin);
+            TeamConfig playerTeamConfig = TeamConfig.Create(codeVsAIScripts[codeVsAIScriptIndex], _playerTeamSkin);
             _currentArena.CreateTeams(playerTeamConfig, _aiTeamConfig);
             
             isInMainMenu = false;
