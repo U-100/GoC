@@ -30,7 +30,7 @@ namespace GoC.ScriptingApi
         public static readonly int TYPES_COUNT = Enum.GetValues(typeof(Type)).Length;
     }
 
-    public interface IUnitParams
+    public interface IUnitConfig
     {
         string name { get; }
         
@@ -42,7 +42,7 @@ namespace GoC.ScriptingApi
         int storageCapacityPerSubstance { get; }
         int damage { get; }
         bool canMine { get; }
-        IReadOnlyList<IUnitParams> products { get; }
+        IReadOnlyList<IUnitConfig> productConfigs { get; }
     }
     
     public interface IUnit
@@ -51,7 +51,7 @@ namespace GoC.ScriptingApi
         int2 pos { get; }
         bool busy { get; }
 
-        IUnitParams unitParams { get; }
+        IUnitConfig config { get; }
 
         int integrity { get; }
         IReadOnlyList<int> storage { get; }
@@ -86,7 +86,7 @@ namespace GoC.ScriptingApi
     {
         int teamId { get; } // team id
 
-        IReadOnlyDictionary<string, IUnitParams> myUnitParams { get; }
+        IReadOnlyDictionary<string, IUnitConfig> myUnitConfigs { get; }
         
         IReadOnlyList<IUnitControl> myUnits { get; }
         IReadOnlyList<IUnit> enemyUnits { get; }

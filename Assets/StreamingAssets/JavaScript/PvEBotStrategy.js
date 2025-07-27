@@ -62,12 +62,12 @@ export function tick()
 
     workerCount = 0;
     for (let myUnit of model.myUnits)
-        if (myUnit.unitParams.canMine)
+        if (myUnit.config.canMine)
             ++workerCount;
 
     for (let myUnit of model.myUnits)
     {
-        if (myUnit.unitParams.canMine)
+        if (myUnit.config.canMine)
             tickWorker(myUnit);
         else
             tickWarrior(myUnit);
@@ -84,17 +84,17 @@ function tickWorker(myUnit)
     if (myUnit.Produce(requredProduct) == Result.Ok)
         return;
 
-    let unitParams = model.myUnitParams[requredProduct];
+    let unitConfig = model.myUnitConfigs[requredProduct];
     
-    if (!unitParams)
+    if (!unitConfig)
     {
-        log("Couldn't get unitParams for " + requredProduct);
+        log("Couldn't get unit config for " + requredProduct);
         return;
     }
     
     for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
     {
-        if (myUnit.storage[iSubstance] < unitParams.productionCost[iSubstance])
+        if (myUnit.storage[iSubstance] < unitConfig.productionCost[iSubstance])
         {
             let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
 

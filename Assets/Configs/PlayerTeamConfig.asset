@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65830c3a5c4f456d88edc10390032697, type: 3}
   m_Name: PlayerTeamConfig
   m_EditorClassIdentifier: 
-  _starterUnitParams: {fileID: 11400000, guid: 7a57bf7ce052f2647b801457a288c9be, type: 2}
+  _starterUnitConfig: {fileID: 11400000, guid: 7a57bf7ce052f2647b801457a288c9be, type: 2}
   _scriptFile: 
   _teamSkin: {fileID: 11400000, guid: be8327babe068ab4abec1b9b91a4f030, type: 2}

@@ -33,7 +33,7 @@ namespace GoC.Arena
         {
             public int ticks;
             public int2 productionPos;
-            public UnitParams productUnitParams;
+            public UnitConfig productUnitConfig;
         }
 
         private struct MoveCommand
@@ -42,7 +42,7 @@ namespace GoC.Arena
         }
 
         private readonly Team _team;
-        private readonly UnitParams _unitParams;
+        private readonly UnitConfig _config;
         private readonly UnitView _unitView;
         private readonly int[] _storage;
         
@@ -56,15 +56,15 @@ namespace GoC.Arena
         // Required to track production through multiple ticks
         private ProduceCommand? _currentProduction;
         
-        public ExposedUnitControl(Team team, UnitParams unitParams, int2 pos, UnitView unitView)
+        public ExposedUnitControl(Team team, UnitConfig config, int2 pos, UnitView unitView)
         {
             _team = team;
-            _unitParams = unitParams;
+            _config = config;
             _unitView = unitView;
             
             this.pos = pos;
 
-            integrity = this.unitParams.maxIntegrity;
+            integrity = this.config.maxIntegrity;
             _storage = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
             
             _team.arena.grid[pos]++;
@@ -90,14 +90,14 @@ namespace GoC.Arena
             || _moveCommand != null
             || _currentProduction != null;
 
-        public IUnitParams unitParams => _unitParams;
+        public IUnitConfig config => _config;
 
         public int integrity { get; private set; }
         public IReadOnlyList<int> storage => _storage;
         
         public Result CanMine(object targetObject)
         {
-            if (!unitParams.canMine)
+            if (!config.canMine)
                 return Result.OperationUnavailable;
             
             if (targetObject is not Deposit targetDeposit)
@@ -109,7 +109,7 @@ namespace GoC.Arena
             if (distance(pos, targetDeposit.pos) > 1)
                 return Result.OutOfRange;
 
-            if (storage[(int)targetDeposit.substanceType] + targetDeposit.miningSpeed > unitParams.storageCapacityPerSubstance)
+            if (storage[(int)targetDeposit.substanceType] + targetDeposit.miningSpeed > config.storageCapacityPerSubstance)
                 return Result.NotEnoughStorageCapacity;
 
             return Result.Ok;
@@ -117,10 +117,10 @@ namespace GoC.Arena
 
         public Result CanProduce(string productName)
         {
-            if (TryFindProductByName(productName, out UnitParams productUnitParams))
+            if (TryFindProductByName(productName, out UnitConfig productConfig))
             {
                 for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
-                    if (storage[substanceIndex] < productUnitParams.productionCost[substanceIndex])
+                    if (storage[substanceIndex] < productConfig.productionCost[substanceIndex])
                         return Result.NotEnoughSubstance;
             
                 return Result.Ok;
@@ -129,18 +129,18 @@ namespace GoC.Arena
             return Result.OperationUnavailable;
         }
 
-        private bool TryFindProductByName(string productName, out UnitParams productUnitParams)
+        private bool TryFindProductByName(string productName, out UnitConfig productConfig)
         {
-            foreach (UnitParams possibleProductUnitParams in unitParams.products)
+            foreach (UnitConfig potentialProductConfig in _config.productConfigs)
             {
-                if (possibleProductUnitParams.name == productName)
+                if (potentialProductConfig.name == productName)
                 {
-                    productUnitParams = possibleProductUnitParams;
+                    productConfig = potentialProductConfig;
                     return true;
                 }
             }
 
-            productUnitParams = null;
+            productConfig = null;
             return false;
         }
 
@@ -157,7 +157,7 @@ namespace GoC.Arena
             if (busy)
                 return Result.Busy;
             
-            if (unitParams.damage <= 0)
+            if (config.damage <= 0)
                 return Result.OperationUnavailable;
             
             if (targetObject is not ExposedUnit targetExposedUnit)
@@ -202,7 +202,7 @@ namespace GoC.Arena
             if (storage[(int)substanceType] < amount)
                 return Result.NotEnoughSubstance;
 
-            if (target.storage[(int)substanceType] + amount > target.unitParams.storageCapacityPerSubstance)
+            if (target.storage[(int)substanceType] + amount > target.config.storageCapacityPerSubstance)
                 return Result.NotEnoughStorageCapacity;
 
             _giveCommand = new GiveCommand
@@ -238,14 +238,14 @@ namespace GoC.Arena
             if (canProduce != Result.Ok)
                 return canProduce;
 
-            if (!TryFindProductByName(productName, out UnitParams productUnitParams))
-                throw new Exception($"Can produce {productName}, but can't find it's unit params");
+            if (!TryFindProductByName(productName, out UnitConfig productConfig))
+                throw new Exception($"Can produce {productName}, but can't find it's UnitConfig");
 
             _produceCommand = new ProduceCommand
             {
-                ticks = productUnitParams.productionTicks,
+                ticks = productConfig.productionTicks,
                 productionPos = productionPos ?? _team.arena.grid.FindEmptyCellAround(pos),
-                productUnitParams = productUnitParams
+                productUnitConfig = productConfig
             };
             
             return Result.Ok;
@@ -260,7 +260,7 @@ namespace GoC.Arena
             if (busy)
                 return Result.Busy;
 
-            if (!unitParams.canMove)
+            if (!config.canMove)
                 return Result.OperationUnavailable;
 
             if (any(p < _team.arena.grid.min | _team.arena.grid.max < p))
@@ -308,7 +308,7 @@ namespace GoC.Arena
 
             if (_attackCommand.HasValue)
             {
-                _attackCommand.Value.target.integrity -= unitParams.damage;
+                _attackCommand.Value.target.integrity -= config.damage;
                 
                 _unitView.StartAttack(_attackCommand.Value.target._unitView.transform);
                 
@@ -349,7 +349,7 @@ namespace GoC.Arena
                 ProduceCommand produceCommand = _produceCommand.Value;
                 
                 for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
-                    _storage[substanceIndex] -= produceCommand.productUnitParams.productionCost[substanceIndex];
+                    _storage[substanceIndex] -= produceCommand.productUnitConfig.productionCost[substanceIndex];
 
                 // in rare cases when two productions are targeting the same grid cell one of them will be pushed away into a nearby empty cell
                 if (_team.arena.grid[produceCommand.productionPos] > 0)
@@ -371,7 +371,7 @@ namespace GoC.Arena
                 {
                     _team.arena.grid[currentProduction.productionPos]--;
 
-                    _team.arena.CreateUnit(currentProduction.productUnitParams, _team, currentProduction.productionPos);
+                    _team.arena.CreateUnit(currentProduction.productUnitConfig, _team, currentProduction.productionPos);
 
                     _currentProduction = null;
                 }

@@ -14,7 +14,7 @@ namespace GoC.Arena
         public int2 pos => exposedUnitControl.pos;
         public bool busy => exposedUnitControl.busy;
 
-        public IUnitParams unitParams => exposedUnitControl.unitParams;
+        public IUnitConfig config => exposedUnitControl.config;
 
         public int integrity => exposedUnitControl.integrity;
         public IReadOnlyList<int> storage => exposedUnitControl.storage;

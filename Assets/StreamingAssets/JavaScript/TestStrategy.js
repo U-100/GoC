@@ -55,7 +55,7 @@ export function tick()
 
     workerCount = 0;
     for (let myUnit of model.myUnits)
-        if (myUnit.unitParams.storageCapacityPerSubstance > 0)
+        if (myUnit.config.storageCapacityPerSubstance > 0)
             ++workerCount;
     
     for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
@@ -63,7 +63,7 @@ export function tick()
         let myUnit = model.myUnits[iUnit];
         if (iUnit == 0)
             tickPrimalWorker(myUnit);
-        else if (myUnit.unitParams.storageCapacityPerSubstance > 0)
+        else if (myUnit.config.storageCapacityPerSubstance > 0)
             tickWorker(myUnit);
         else
             tickTurret(myUnit);
@@ -94,7 +94,7 @@ function tickWorker(myUnit)
         let enemy = findNearbyEnemy(myUnit.pos);
         
         if (
-            enemy.unitParams.damage > 0 && distance(enemy.pos, myUnit.pos) < 6
+            enemy.config.damage > 0 && distance(enemy.pos, myUnit.pos) < 6
             || distance(enemy.pos, myUnit.pos) < 3
         )
             myUnit.Produce("BotTurret");
@@ -107,13 +107,13 @@ function tickWorker(myUnit)
 
 function tickFarmResourcesFor(myUnit, productName)
 {
-    let unitParams = model.myUnitParams[productName];
+    let unitConfig = model.myUnitConfigs[productName];
     
-    if (unitParams)
+    if (unitConfig)
     {
         for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
         {
-            if (myUnit.storage[iSubstance] < unitParams.productionCost[iSubstance])
+            if (myUnit.storage[iSubstance] < unitConfig.productionCost[iSubstance])
             {
                 let nearbyDeposit = deposits[iSubstance];
 

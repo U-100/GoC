@@ -9,7 +9,7 @@ namespace GoC.Arena
         private readonly Arena _arena;
         private readonly TeamConfig _config;
 
-        private readonly Dictionary<string, IUnitParams> _myUnitParams = new();
+        private readonly Dictionary<string, IUnitConfig> _myUnitConfigs = new();
         
         private readonly List<ExposedUnitControl> _myUnits = new(); 
         private readonly List<ExposedUnit> _enemyUnits = new();
@@ -21,9 +21,9 @@ namespace GoC.Arena
         
         public int teamId { get; }
 
-        public UnitParams starterUnitParams => _config.starterUnitParams;
+        public UnitConfig starterUnitConfig => _config.starterUnitConfig;
         
-        public IReadOnlyDictionary<string, IUnitParams> myUnitParams => _myUnitParams;
+        public IReadOnlyDictionary<string, IUnitConfig> myUnitConfigs => _myUnitConfigs;
 
         public IReadOnlyList<IUnitControl> myUnits => _myUnits;
         public IReadOnlyList<IUnit> enemyUnits => _enemyUnits;
@@ -38,18 +38,18 @@ namespace GoC.Arena
             _arena = arena;
             _config = config;
             
-            RecursiveFillMyUnitParams(_config.starterUnitParams);
+            RecursiveFillMyUnitConfigs(_config.starterUnitConfig);
         }
 
-        private void RecursiveFillMyUnitParams(IUnitParams unitParams)
+        private void RecursiveFillMyUnitConfigs(IUnitConfig unitConfig)
         {
-            _myUnitParams.Add(unitParams.name, unitParams);
+            _myUnitConfigs.Add(unitConfig.name, unitConfig);
             
-            //UnityEngine.Debug.Log($"Added {unitParams.name} to team {teamId} myUnitParams");
+            //UnityEngine.Debug.Log($"Added {unitConfig.name} to team {teamId} myUnitConfigs");
 
-            foreach (IUnitParams productUnitParams in unitParams.products)
-                if (!_myUnitParams.ContainsKey(productUnitParams.name))
-                    RecursiveFillMyUnitParams(productUnitParams);
+            foreach (IUnitConfig productConfig in unitConfig.productConfigs)
+                if (!_myUnitConfigs.ContainsKey(productConfig.name))
+                    RecursiveFillMyUnitConfigs(productConfig);
         }
         
         public void Dispose()

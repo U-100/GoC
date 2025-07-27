@@ -5,7 +5,7 @@ using UnityEngine;
 namespace GoC.Arena
 {
     [CreateAssetMenu]
-    public class UnitParams : ScriptableObject, IUnitParams
+    public class UnitConfig : ScriptableObject, IUnitConfig
     {
         [Header("Exposed to scripting:")]
         [Space]
@@ -30,8 +30,9 @@ namespace GoC.Arena
         [SerializeField] private bool _canMine;
         public bool canMine => _canMine;
 
-        [SerializeField] private List<UnitParams> _products;
-        public IReadOnlyList<IUnitParams> products => _products ??= new List<UnitParams>();
+        [SerializeField] private List<UnitConfig> _productConfigs;
+        public IReadOnlyList<UnitConfig> productConfigs => _productConfigs ??= new List<UnitConfig>();
+        IReadOnlyList<IUnitConfig> IUnitConfig.productConfigs => _productConfigs ??= new List<UnitConfig>(); // expose interfaces when accessed through interface (from JavaScript)
         
         [HideInInspector]
         [SerializeField] private string _nameCopy;

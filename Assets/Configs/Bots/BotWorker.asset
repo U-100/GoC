@@ -19,7 +19,7 @@ MonoBehaviour:
   _storageCapacityPerSubstance: 10
   _damage: 0
   _canMine: 1
-  _products:
+  _productConfigs:
   - {fileID: 11400000}
   - {fileID: 11400000, guid: 89a5413e70eba184e8950934ffb62800, type: 2}
   - {fileID: 11400000, guid: bfb3b93136dd1e843ad6746f55b7e151, type: 2}

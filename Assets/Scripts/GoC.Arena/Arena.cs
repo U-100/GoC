@@ -137,7 +137,7 @@ namespace GoC.Arena
             float teamAngleRadians = 2 * iTeam * PI / teamsCount;
 
             int2 unitPos = rotate(Unity.Mathematics.quaternion.RotateY(teamAngleRadians), baseUnitPos.ToUnityPos()).ToArenaPos();
-            CreateUnit(team.starterUnitParams, team, unitPos);
+            CreateUnit(team.starterUnitConfig, team, unitPos);
         }
 
         private void CreateDeposit(DepositConfig depositConfig, int2 depositPos)
@@ -149,12 +149,12 @@ namespace GoC.Arena
 
         public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
-        public void CreateUnit(UnitParams unitParams, Team team, int2 unitPos)
+        public void CreateUnit(UnitConfig unitConfig, Team team, int2 unitPos)
         {
-            UnitView unitView = Instantiate(unitParams.unitViewPrefab);
+            UnitView unitView = Instantiate(unitConfig.unitViewPrefab);
             unitView.Setup(team.skin);
 
-            ExposedUnitControl exposedUnitControl = new ExposedUnitControl(team, unitParams, unitPos, unitView);
+            ExposedUnitControl exposedUnitControl = new ExposedUnitControl(team, unitConfig, unitPos, unitView);
 
             team.AddMyUnit(exposedUnitControl);
             
