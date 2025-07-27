@@ -61,6 +61,8 @@ namespace GoC.Arena
         };
 
         private static readonly HashSet<Type> DISABLED_TYPES = new();
+
+        private static readonly HashSet<MemberInfo> EXPOSED_MEMBERS = new();
         
         // member filter decides which apis should be exposed to javascript by jint engine.
         // We expose apis of ENABLED_TYPES plus apis from assemblies and types marked with ScriptingApiAttribute
@@ -68,19 +70,40 @@ namespace GoC.Arena
         {
             Type declaringType = memberInfo.DeclaringType;
 
+            bool result = false;
             if (ENABLED_TYPES.Contains(declaringType))
-                return true;
+                result = true;
+            else if (!DISABLED_TYPES.Contains(declaringType))
+            {
+                result = CheckType(declaringType);
+                if (result)
+                    ENABLED_TYPES.Add(declaringType);
+                else
+                    DISABLED_TYPES.Add(declaringType);
+            }
 
-            if (DISABLED_TYPES.Contains(declaringType))
-                return false;
+            if (
+                result
+                && declaringType != null
+                && declaringType.Assembly.GetName().Name.Contains("GoC")
+                && EXPOSED_MEMBERS.Add(memberInfo)
+            )
+                switch (memberInfo)
+                {
+                    case FieldInfo fieldInfo:
+                        Debug.Log($"{declaringType.Name}.{fieldInfo.Name}: {fieldInfo.FieldType.Name}");
+                        break;
 
-            bool checkResult = CheckType(declaringType);
-            if (checkResult)
-                ENABLED_TYPES.Add(declaringType);
-            else
-                DISABLED_TYPES.Add(declaringType);
-
-            return checkResult;
+                    case PropertyInfo propertyInfo:
+                        Debug.Log($"{declaringType.Name}.{propertyInfo.Name}: {propertyInfo.PropertyType.Name}");
+                        break;
+                    
+                    case MethodInfo { IsSpecialName: false } methodInfo:
+                        Debug.Log($"{declaringType.Name}.{methodInfo.Name}({methodInfo.GetParameters()}): {methodInfo.ReturnType.Name}");
+                        break;
+                }
+            
+            return result;
         };
         
         private static bool CheckType(Type declaringType)
