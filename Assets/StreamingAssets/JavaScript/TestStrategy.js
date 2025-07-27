@@ -35,32 +35,9 @@ function findNearbyEnemy(pos)
     return nearest;
 }
 
-let workerParams =
-{
-    miningTier: 1,
-    productionTier: 1,
-    movementTier: 1,
-    hullTier: 0,
-    storageTier: 1,
-}
-
-let warriorParams =
-{
-    attackTier: 1,
-    movementTier: 1,
-    hullTier: 1,
-}
-
-let turretParams =
-{
-    attackTier: 1,
-    hullTier: 1,
-}
-
 let enemiesMidPos;
 let deposits = {};
 let workerCount;
-
 let defencePos;
 
 export function tick()
@@ -68,8 +45,8 @@ export function tick()
     if (model.myUnits.count == 0 || model.enemyUnits.count == 0)
         return;
     
-    deposits[Substance.Type.Energy] = findNearbyDeposit(model.myUnits[0].pos, Substance.Type.Energy);
-    deposits[Substance.Type.Matter] = findNearbyDeposit(model.myUnits[0].pos, Substance.Type.Matter);
+    deposits[Substance.Type.Energy] ??= findNearbyDeposit(model.myUnits[0].pos, Substance.Type.Energy);
+    deposits[Substance.Type.Matter] ??= findNearbyDeposit(model.myUnits[0].pos, Substance.Type.Matter);
 
     enemiesMidPos = new int2(0, 0);
     for (let enemyUnit of model.enemyUnits)
@@ -78,7 +55,7 @@ export function tick()
 
     workerCount = 0;
     for (let myUnit of model.myUnits)
-        if (myUnit.storageCapacityPerSubstance > 0)
+        if (myUnit.unitParams.storageCapacityPerSubstance > 0)
             ++workerCount;
     
     for (let iUnit = 0; iUnit < model.myUnits.Count; ++iUnit)
@@ -86,7 +63,7 @@ export function tick()
         let myUnit = model.myUnits[iUnit];
         if (iUnit == 0)
             tickPrimalWorker(myUnit);
-        else if (myUnit.storageCapacityPerSubstance > 0)
+        else if (myUnit.unitParams.storageCapacityPerSubstance > 0)
             tickWorker(myUnit);
         else
             tickTurret(myUnit);
@@ -101,10 +78,10 @@ function tickPrimalWorker(myUnit)
     if (workerCount >= 10)
         return;
 
-    if (myUnit.Produce(workerParams) == Result.Ok)
+    if (myUnit.Produce("BotWorker") == Result.Ok)
         return;
     else
-        tickFarmResourcesFor(myUnit, workerParams);
+        tickFarmResourcesFor(myUnit, "BotWorker");
 }
 
 function tickWorker(myUnit)
@@ -112,32 +89,40 @@ function tickWorker(myUnit)
     if (myUnit.busy)
         return;
 
-    if (myUnit.CanProduce(turretParams) == Result.Ok)
+    if (myUnit.CanProduce("BotTurret") == Result.Ok)
     {
         let enemy = findNearbyEnemy(myUnit.pos);
-        if (distance(enemy.pos, myUnit.pos) < 7)
-            myUnit.Produce(turretParams);
+        
+        if (
+            enemy.unitParams.damage > 0 && distance(enemy.pos, myUnit.pos) < 6
+            || distance(enemy.pos, myUnit.pos) < 3
+        )
+            myUnit.Produce("BotTurret");
         else
             myUnit.MoveTo(enemiesMidPos);
     }
     else
-        tickFarmResourcesFor(myUnit, turretParams);
+        tickFarmResourcesFor(myUnit, "BotTurret");
 }
 
-function tickFarmResourcesFor(myUnit, productionParams)
+function tickFarmResourcesFor(myUnit, productName)
 {
-    for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
+    let unitParams = model.myUnitParams[productName];
+    
+    if (unitParams)
     {
-        if (myUnit.storage[iSubstance] < model.ProductionCost(productionParams, iSubstance))
+        for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
         {
-            //let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
-            let nearbyDeposit = deposits[iSubstance];
+            if (myUnit.storage[iSubstance] < unitParams.productionCost[iSubstance])
+            {
+                let nearbyDeposit = deposits[iSubstance];
 
-            if (myUnit.Mine(nearbyDeposit) == Result.Ok)
+                if (myUnit.Mine(nearbyDeposit) == Result.Ok)
+                    return;
+
+                myUnit.MoveTo(nearbyDeposit.pos);
                 return;
-
-            myUnit.MoveTo(nearbyDeposit.pos);
-            return;
+            }
         }
     }
 }

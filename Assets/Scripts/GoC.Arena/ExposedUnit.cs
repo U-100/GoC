@@ -14,17 +14,12 @@ namespace GoC.Arena
         public int2 pos => exposedUnitControl.pos;
         public bool busy => exposedUnitControl.busy;
 
+        public IUnitParams unitParams => exposedUnitControl.unitParams;
+
         public int integrity => exposedUnitControl.integrity;
-        
-        public int storageCapacityPerSubstance => exposedUnitControl.storageCapacityPerSubstance;
         public IReadOnlyList<int> storage => exposedUnitControl.storage;
         
-        public bool canMove => exposedUnitControl.canMove;
-        public bool canMine => exposedUnitControl.canMine;
-        public int damage => exposedUnitControl.damage;
-        public int maxProductionTier => exposedUnitControl.maxProductionTier;
-
         public Result CanMine(object target) => exposedUnitControl.CanMine(target);
-        public Result CanProduce(object unitParamsObject) => exposedUnitControl.CanProduce(unitParamsObject);
+        public Result CanProduce(string productName) => exposedUnitControl.CanProduce(productName);
     }
 }

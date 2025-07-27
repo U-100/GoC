@@ -30,24 +30,34 @@ namespace GoC.ScriptingApi
         public static readonly int TYPES_COUNT = Enum.GetValues(typeof(Type)).Length;
     }
 
+    public interface IUnitParams
+    {
+        string name { get; }
+        
+        IReadOnlyList<int> productionCost { get; }
+        int productionTicks { get; }
+        
+        bool canMove { get; }
+        int maxIntegrity { get; }
+        int storageCapacityPerSubstance { get; }
+        int damage { get; }
+        bool canMine { get; }
+        IReadOnlyList<IUnitParams> products { get; }
+    }
+    
     public interface IUnit
     {
         int teamId { get; } // owner team id
         int2 pos { get; }
         bool busy { get; }
 
-        int integrity { get; }
+        IUnitParams unitParams { get; }
 
-        int storageCapacityPerSubstance { get; }
+        int integrity { get; }
         IReadOnlyList<int> storage { get; }
-        
-        bool canMove { get; }
-        bool canMine { get; }
-        int damage { get; }
-        int maxProductionTier { get; }
 
         Result CanMine(object target);
-        Result CanProduce(object unitParamsObject);
+        Result CanProduce(string productName);
     }
     
     public interface IUnitControl : IUnit
@@ -56,10 +66,10 @@ namespace GoC.ScriptingApi
         Result Attack(object target);
         Result Mine(object target);
         Result Give(object target, Substance.Type substanceType, int amount);
-        Result Produce(object unitParamsObject);
-        Result Produce(object unitParamsObject, int2 p);
-        Result Produce(object unitParamsObject, int x, int y);
-        Result Produce(object unitParamsObject, int[] p);
+        Result Produce(string productName);
+        Result Produce(string productName, int2 p);
+        Result Produce(string productName, int x, int y);
+        Result Produce(string productName, int[] p);
         Result MoveTo(int2 p);
         Result MoveTo(int x, int y);
         Result MoveTo(int[] p);
@@ -76,12 +86,11 @@ namespace GoC.ScriptingApi
     {
         int teamId { get; } // team id
 
+        IReadOnlyDictionary<string, IUnitParams> myUnitParams { get; }
+        
         IReadOnlyList<IUnitControl> myUnits { get; }
         IReadOnlyList<IUnit> enemyUnits { get; }
         
         IReadOnlyList<IDeposit> deposits { get; }
-        
-        int ProductionCost(object unitParamsObject, Substance.Type substanceType);
-        int ProductionTicks(object unitParamsObject);
     }
 }

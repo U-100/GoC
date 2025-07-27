@@ -11,17 +11,18 @@ namespace GoC.Arena
     {
         private readonly Func<IArena> _arenaFactory;
         private readonly ArenaConfig _arenaConfig;
-        private readonly TeamSkin _playerTeamSkin;
         private readonly TeamConfig _aiTeamConfig;
+        
+        private readonly TeamConfig _playerTeamConfig;
         
         private IArena _currentArena;
         private int _codeVsAIScriptIndex;
 
-        public ArenaViewModel(Func<IArena> arenaFactory, ArenaConfig arenaConfig, TeamSkin playerTeamSkin, TeamConfig aiTeamConfig)
+        public ArenaViewModel(Func<IArena> arenaFactory, ArenaConfig arenaConfig, TeamConfig playerTeamConfig, TeamConfig aiTeamConfig)
         {
             _arenaFactory = arenaFactory;
             _arenaConfig = arenaConfig;
-            _playerTeamSkin = playerTeamSkin;
+            _playerTeamConfig = playerTeamConfig;
             _aiTeamConfig = aiTeamConfig;
             
             codeVsAIScripts = new List<string>();
@@ -86,7 +87,11 @@ namespace GoC.Arena
         
         public void PlayCodeVsAI()
         {
-            TeamConfig playerTeamConfig = TeamConfig.Create(codeVsAIScripts[codeVsAIScriptIndex], _playerTeamSkin);
+            TeamConfig playerTeamConfig =
+                TeamConfig
+                    .Clone(_playerTeamConfig)
+                    .WithScript(codeVsAIScripts[codeVsAIScriptIndex]);
+            
             _currentArena.CreateTeams(playerTeamConfig, _aiTeamConfig);
             
             isInMainMenu = false;

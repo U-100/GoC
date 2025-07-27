@@ -35,22 +35,6 @@ function findNearbyEnemy(pos)
     return nearest;
 }
 
-let workerParams =
-    {
-        miningTier: 1,
-        productionTier: 1,
-        movementTier: 1,
-        hullTier: 0,
-        storageTier: 1,
-    }
-
-let warriorParams =
-    {
-        attackTier: 1,
-        movementTier: 1,
-        hullTier: 1,
-    }
-
 let enemiesMidPos;
 let energyDeposit;
 let matterDeposit;
@@ -78,14 +62,12 @@ export function tick()
 
     workerCount = 0;
     for (let myUnit of model.myUnits)
-    {
-        if (myUnit.storageCapacityPerSubstance > 0)
+        if (myUnit.unitParams.canMine)
             ++workerCount;
-    }
 
     for (let myUnit of model.myUnits)
     {
-        if (myUnit.storageCapacityPerSubstance > 0)
+        if (myUnit.unitParams.canMine)
             tickWorker(myUnit);
         else
             tickWarrior(myUnit);
@@ -97,14 +79,15 @@ function tickWorker(myUnit)
     if (myUnit.busy)
         return;
 
-    let requredProductionParams = workerCount < 5 ? workerParams : warriorParams;
+    let requredProduct = workerCount < 5 ? "BotWorker" : "BotFighter";
 
-    if (myUnit.Produce(requredProductionParams) == Result.Ok)
+    if (myUnit.Produce(requredProduct) == Result.Ok)
         return;
 
+    let unitParams = model.myUnitParams[requredProduct];
     for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
     {
-        if (myUnit.storage[iSubstance] < model.ProductionCost(requredProductionParams, iSubstance))
+        if (myUnit.storage[iSubstance] < unitParams.productionCost[iSubstance])
         {
             let nearbyDeposit = findNearbyDeposit(myUnit.pos, iSubstance);
 

@@ -1,17 +1,28 @@
-﻿using UnityEngine;
+﻿using GoC.ScriptingApi;
+using UnityEngine;
 
 namespace GoC.Arena
 {
     [CreateAssetMenu]
     public class TeamConfig : ScriptableObject
     {
-        public static TeamConfig Create(string initScriptFile, TeamSkin initTeamSkin)
+        public static TeamConfig Clone(TeamConfig rhs)
         {
             TeamConfig teamConfig = CreateInstance<TeamConfig>();
-            teamConfig._scriptFile = initScriptFile;
-            teamConfig._teamSkin = initTeamSkin;
+            teamConfig._starterUnitParams = rhs._starterUnitParams;
+            teamConfig._scriptFile = rhs._scriptFile;
+            teamConfig._teamSkin = rhs._teamSkin;
             return teamConfig;
         }
+
+        public TeamConfig WithScript(string scriptFile)
+        {
+            _scriptFile = scriptFile;
+            return this;
+        }
+        
+        [SerializeField] private UnitParams _starterUnitParams;
+        public IUnitParams starterUnitParams => _starterUnitParams;
         
         [SerializeField] private string _scriptFile;
         public string scriptFile => _scriptFile;

@@ -1,42 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using GoC.ScriptingApi;
+using UnityEngine;
 
 namespace GoC.Arena
 {
-    [Serializable]
-    public struct UnitParams
+    [CreateAssetMenu]
+    public class UnitParams : ScriptableObject, IUnitParams
     {
-        public int attackTier;
-        public int miningTier;
-        public int productionTier;
-        public int movementTier;
-        public int hullTier;
-        public int storageTier;
+        [SerializeField] private string _nameCopy;
+        string IUnitParams.name => _nameCopy;
+        
+        [SerializeField] private int[] _productionCost;
+        public IReadOnlyList<int> productionCost => _productionCost;
 
-        public static UnitParams FromObject(object unitParamsObject)
-        {
-            UnitParams unitParams = new();
-            if (unitParamsObject is IDictionary<string, object> unitParamsDictionary)
-            {
-                if (unitParamsDictionary.TryGetValue("attackTier", out object attackTierObject) && attackTierObject is double attackTier)
-                    unitParams.attackTier = (int)attackTier;
-                
-                if (unitParamsDictionary.TryGetValue("miningTier", out object miningTierObject) && miningTierObject is double miningTier)
-                    unitParams.miningTier = (int)miningTier;
-                
-                if (unitParamsDictionary.TryGetValue("productionTier", out object productionTierObject) && productionTierObject is double productionTier)
-                    unitParams.productionTier = (int)productionTier;
-                
-                if (unitParamsDictionary.TryGetValue("movementTier", out object movementTierObject) && movementTierObject is double movementTier)
-                    unitParams.movementTier = (int)movementTier;
-                
-                if (unitParamsDictionary.TryGetValue("hullTier", out object hullTierObject) && hullTierObject is double hullTier)
-                    unitParams.hullTier = (int)hullTier;
-                
-                if (unitParamsDictionary.TryGetValue("storageTier", out object storageTierObject) && storageTierObject is double storageTier)
-                    unitParams.storageTier = (int)storageTier;
-            }
-            return unitParams;
-        }
+        [SerializeField] private int _productionTicks;
+        public int productionTicks => _productionTicks;
+
+        [SerializeField] private bool _canMove;
+        public bool canMove => _canMove;
+
+        [SerializeField] private int _maxIntegrity;
+        public int maxIntegrity => _maxIntegrity;
+
+        [SerializeField] private int _storageCapacityPerSubstance;
+        public int storageCapacityPerSubstance => _storageCapacityPerSubstance;
+
+        [SerializeField] private int _damage;
+        public int damage => _damage;
+
+        [SerializeField] private bool _canMine;
+        public bool canMine => _canMine;
+
+        [SerializeField] private List<UnitParams> _productParams;
+        public IReadOnlyList<IUnitParams> products => _productParams ??= new List<UnitParams>();
+
+        private void Awake() => _nameCopy = name; // store name for multithreaded access
     }
 }

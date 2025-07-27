@@ -9,31 +9,45 @@ namespace GoC.Arena
         private readonly Arena _arena;
         private readonly TeamConfig _config;
 
+        private readonly Dictionary<string, IUnitParams> _myUnitParams = new();
+        
         private readonly List<ExposedUnitControl> _myUnits = new(); 
         private readonly List<ExposedUnit> _enemyUnits = new();
 
         private readonly List<ExposedUnitControl> _myUnitsCache = new();
-        
+
         public Arena arena => _arena;
         public TeamSkin skin => _config.teamSkin;
-
         
         public int teamId { get; }
 
+        public IUnitParams starterUnitParams => _config.starterUnitParams;
+        
+        public IReadOnlyDictionary<string, IUnitParams> myUnitParams => _myUnitParams;
+
         public IReadOnlyList<IUnitControl> myUnits => _myUnits;
         public IReadOnlyList<IUnit> enemyUnits => _enemyUnits;
+        
         public IReadOnlyList<IDeposit> deposits => _arena.deposits;
 
-        public int ProductionCost(object unitParamsObject, Substance.Type substanceType) => arena.config.unitConfig.ProductionCost(UnitParams.FromObject(unitParamsObject), (int)substanceType);
 
-        public int ProductionTicks(object unitParamsObject) => arena.config.unitConfig.ProductionTicks(UnitParams.FromObject(unitParamsObject));
-
-
-        public Team(int initTeamId, Arena initArena, TeamConfig initConfig)
+        public Team(int teamId, Arena arena, TeamConfig config)
         {
-            teamId = initTeamId;
-            _arena = initArena;
-            _config = initConfig;
+            this.teamId = teamId;
+            
+            _arena = arena;
+            _config = config;
+            
+            RecursiveFillMyUnitParams(_config.starterUnitParams);
+        }
+
+        private void RecursiveFillMyUnitParams(IUnitParams unitParams)
+        {
+            _myUnitParams.Add(unitParams.name, unitParams);
+
+            foreach (IUnitParams productUnitParams in unitParams.products)
+                if (!_myUnitParams.ContainsKey(productUnitParams.name))
+                    RecursiveFillMyUnitParams(productUnitParams);
         }
         
         public void Dispose()

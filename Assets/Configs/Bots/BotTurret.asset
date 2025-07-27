@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6beeb4677ad4779a6712254acdafe32, type: 3}
+  m_Name: BotTurret
+  m_EditorClassIdentifier: 
+  _nameCopy: BotTurret
+  _productionCost: 0200000002000000
+  _productionTicks: 2
+  _canMove: 0
+  _maxIntegrity: 6
+  _storageCapacityPerSubstance: 0
+  _damage: 2
+  _canMine: 0
+  _productParams: []

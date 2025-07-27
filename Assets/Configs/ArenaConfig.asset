@@ -12,17 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75a0869123c543cfb8c8d1cafd3986f3, type: 3}
   m_Name: ArenaConfig
   m_EditorClassIdentifier: 
-  _unitConfig: {fileID: 11400000, guid: 5c3fce1033d3c87499db44a7a17f0ac7, type: 2}
   _depositConfigs:
   - {fileID: 11400000, guid: 90817da335932d145a883da181997d64, type: 2}
   - {fileID: 11400000, guid: 1817e7105a7407a42a0a00bb9c08a737, type: 2}
   _size:
     x: 63
     y: 63
-  _initialUnitParams:
-    attackTier: 0
-    miningTier: 1
-    productionTier: 1
-    movementTier: 1
-    hullTier: 0
-    storageTier: 1
+  _initialUnitParams: {fileID: 11400000, guid: 7a57bf7ce052f2647b801457a288c9be, type: 2}

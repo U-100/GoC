@@ -33,7 +33,7 @@ namespace GoC.Arena
         {
             public int ticks;
             public int2 productionPos;
-            public UnitParams clampedUnitParams;
+            public IUnitParams productUnitParams;
         }
 
         private struct MoveCommand
@@ -43,7 +43,7 @@ namespace GoC.Arena
 
         private readonly Team _team;
         private readonly UnitView _unitView;
-        private readonly int[] _storage = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
+        private readonly int[] _storage;
         
         private AttackCommand? _attackCommand;
         private MineCommand? _mineCommand;
@@ -55,25 +55,17 @@ namespace GoC.Arena
         // Required to track production through multiple ticks
         private ProduceCommand? _currentProduction;
         
-        public ExposedUnitControl(Team team, UnitParams unitParams, int2 initPos, UnitView unitView)
+        public ExposedUnitControl(Team team, IUnitParams unitParams, int2 pos, UnitView unitView)
         {
             _team = team;
             _unitView = unitView;
-
-            pos = initPos;
-
-            UnitConfig unitConfig = _team.arena.config.unitConfig;
-            MovementTier movementTier = unitConfig.movementTiers[unitParams.movementTier];
             
-            canMove = movementTier.canMove;
-            canMine = unitConfig.miningTiers[unitParams.miningTier].canMine;
-            damage = unitConfig.attackTiers[unitParams.attackTier].damage;
-            maxProductionTier = unitConfig.productionTiers[unitParams.productionTier].maxProductionTier;
-            
-            integrity = unitConfig.hullTiers[unitParams.hullTier].maxIntegrity + movementTier.additionalIntegrity;
-            
-            storageCapacityPerSubstance = unitConfig.storageTiers[unitParams.storageTier].storageCapacityPerSubstance;
+            this.unitParams = unitParams;
+            this.pos = pos;
 
+            integrity = this.unitParams.maxIntegrity;
+            _storage = Enumerable.Repeat(0, Substance.TYPES_COUNT).ToArray();
+            
             _team.arena.grid[pos]++;
 
             _unitView.transform.position = pos.ToUnityPos();
@@ -97,19 +89,14 @@ namespace GoC.Arena
             || _moveCommand != null
             || _currentProduction != null;
 
+        public IUnitParams unitParams { get; }
+
         public int integrity { get; private set; }
-        
-        public int storageCapacityPerSubstance { get; private set; }
         public IReadOnlyList<int> storage => _storage;
         
-        public bool canMove { get; }
-        public bool canMine { get; }
-        public int damage { get; }
-        public int maxProductionTier { get; }
-
         public Result CanMine(object targetObject)
         {
-            if (!canMine)
+            if (!unitParams.canMine)
                 return Result.OperationUnavailable;
             
             if (targetObject is not Deposit targetDeposit)
@@ -121,33 +108,39 @@ namespace GoC.Arena
             if (distance(pos, targetDeposit.pos) > 1)
                 return Result.OutOfRange;
 
-            if (storage[(int)targetDeposit.substanceType] + targetDeposit.miningSpeed > storageCapacityPerSubstance)
+            if (storage[(int)targetDeposit.substanceType] + targetDeposit.miningSpeed > unitParams.storageCapacityPerSubstance)
                 return Result.NotEnoughStorageCapacity;
 
             return Result.Ok;
         }
 
-        public Result CanProduce(object unitParamsObject) => CanProduceImpl(UnitParams.FromObject(unitParamsObject));
-
-        private Result CanProduceImpl(UnitParams unitParams)
+        public Result CanProduce(string productName)
         {
-            unitParams = _team.arena.config.unitConfig.ClampUnitParams(unitParams);
+            if (TryFindProductByName(productName, out IUnitParams productUnitParams))
+            {
+                for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
+                    if (storage[substanceIndex] < productUnitParams.productionCost[substanceIndex])
+                        return Result.NotEnoughSubstance;
             
-            if (
-                unitParams.attackTier > maxProductionTier
-                || unitParams.miningTier > maxProductionTier
-                || unitParams.productionTier > maxProductionTier
-                || unitParams.movementTier > maxProductionTier
-                || unitParams.hullTier > maxProductionTier
-                || unitParams.storageTier > maxProductionTier
-            )
-                return Result.OperationUnavailable;
+                return Result.Ok;
+            }
             
-            for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
-                if (storage[substanceIndex] < _team.arena.config.unitConfig.ProductionCost(unitParams, substanceIndex))
-                    return Result.NotEnoughSubstance;
-            
-            return Result.Ok;
+            return Result.OperationUnavailable;
+        }
+
+        private bool TryFindProductByName(string productName, out IUnitParams productUnitParams)
+        {
+            foreach (IUnitParams possibleProductUnitParams in unitParams.products)
+            {
+                if (possibleProductUnitParams.name == productName)
+                {
+                    productUnitParams = possibleProductUnitParams;
+                    return true;
+                }
+            }
+
+            productUnitParams = null;
+            return false;
         }
 
         private string _speech;
@@ -163,7 +156,7 @@ namespace GoC.Arena
             if (busy)
                 return Result.Busy;
             
-            if (damage <= 0)
+            if (unitParams.damage <= 0)
                 return Result.OperationUnavailable;
             
             if (targetObject is not ExposedUnit targetExposedUnit)
@@ -208,7 +201,7 @@ namespace GoC.Arena
             if (storage[(int)substanceType] < amount)
                 return Result.NotEnoughSubstance;
 
-            if (target.storage[(int)substanceType] + amount > target.storageCapacityPerSubstance)
+            if (target.storage[(int)substanceType] + amount > target.unitParams.storageCapacityPerSubstance)
                 return Result.NotEnoughStorageCapacity;
 
             _giveCommand = new GiveCommand
@@ -221,12 +214,12 @@ namespace GoC.Arena
             return Result.Ok;
         }
         
-        public Result Produce(object unitParamsObject) => ProduceImpl(UnitParams.FromObject(unitParamsObject), null);
-        public Result Produce(object unitParamsObject, int2 p) => ProduceImpl(UnitParams.FromObject(unitParamsObject), p);
-        public Result Produce(object unitParamsObject, int x, int y) => ProduceImpl(UnitParams.FromObject(unitParamsObject), new int2(x, y));
-        public Result Produce(object unitParamsObject, int[] p) => ProduceImpl(UnitParams.FromObject(unitParamsObject), new int2(p[0], p[1]));
+        public Result Produce(string productName) => ProduceImpl(productName, null);
+        public Result Produce(string productName, int2 p) => ProduceImpl(productName, p);
+        public Result Produce(string productName, int x, int y) => ProduceImpl(productName, new int2(x, y));
+        public Result Produce(string productName, int[] p) => ProduceImpl(productName, new int2(p[0], p[1]));
 
-        private Result ProduceImpl(UnitParams unitParams, int2? productionPos)
+        private Result ProduceImpl(string productName, int2? productionPos)
         {
             if (busy)
                 return Result.Busy;
@@ -240,16 +233,18 @@ namespace GoC.Arena
                     return Result.PathBlocked;
             }
             
-            Result canProduce = CanProduceImpl(unitParams);
+            Result canProduce = CanProduce(productName);
             if (canProduce != Result.Ok)
                 return canProduce;
 
-            UnitParams clampedUnitParams = _team.arena.config.unitConfig.ClampUnitParams(unitParams);
+            if (!TryFindProductByName(productName, out IUnitParams productUnitParams))
+                throw new Exception($"Can produce {productName}, but can't find it's unit params");
+
             _produceCommand = new ProduceCommand
             {
-                ticks = _team.arena.config.unitConfig.ProductionTicks(clampedUnitParams),
+                ticks = productUnitParams.productionTicks,
                 productionPos = productionPos ?? _team.arena.grid.FindEmptyCellAround(pos),
-                clampedUnitParams = clampedUnitParams,
+                productUnitParams = productUnitParams
             };
             
             return Result.Ok;
@@ -264,7 +259,7 @@ namespace GoC.Arena
             if (busy)
                 return Result.Busy;
 
-            if (!canMove)
+            if (!unitParams.canMove)
                 return Result.OperationUnavailable;
 
             if (any(p < _team.arena.grid.min | _team.arena.grid.max < p))
@@ -312,7 +307,7 @@ namespace GoC.Arena
 
             if (_attackCommand.HasValue)
             {
-                _attackCommand.Value.target.integrity -= damage;
+                _attackCommand.Value.target.integrity -= unitParams.damage;
                 
                 _unitView.StartAttack(_attackCommand.Value.target._unitView.transform);
                 
@@ -353,7 +348,7 @@ namespace GoC.Arena
                 ProduceCommand produceCommand = _produceCommand.Value;
                 
                 for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
-                    _storage[substanceIndex] -= _team.arena.config.unitConfig.ProductionCost(produceCommand.clampedUnitParams, substanceIndex);
+                    _storage[substanceIndex] -= produceCommand.productUnitParams.productionCost[substanceIndex];
 
                 // in rare cases when two productions are targeting the same grid cell one of them will be pushed away into a nearby empty cell
                 if (_team.arena.grid[produceCommand.productionPos] > 0)
@@ -375,7 +370,7 @@ namespace GoC.Arena
                 {
                     _team.arena.grid[currentProduction.productionPos]--;
 
-                    _team.arena.CreateUnit(currentProduction.clampedUnitParams, _team, currentProduction.productionPos);
+                    _team.arena.CreateUnit(currentProduction.productUnitParams, _team, currentProduction.productionPos);
 
                     _currentProduction = null;
                 }
