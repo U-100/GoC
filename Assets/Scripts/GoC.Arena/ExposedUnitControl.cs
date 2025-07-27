@@ -33,7 +33,7 @@ namespace GoC.Arena
         {
             public int ticks;
             public int2 productionPos;
-            public IUnitParams productUnitParams;
+            public UnitParams productUnitParams;
         }
 
         private struct MoveCommand
@@ -42,6 +42,7 @@ namespace GoC.Arena
         }
 
         private readonly Team _team;
+        private readonly UnitParams _unitParams;
         private readonly UnitView _unitView;
         private readonly int[] _storage;
         
@@ -55,12 +56,12 @@ namespace GoC.Arena
         // Required to track production through multiple ticks
         private ProduceCommand? _currentProduction;
         
-        public ExposedUnitControl(Team team, IUnitParams unitParams, int2 pos, UnitView unitView)
+        public ExposedUnitControl(Team team, UnitParams unitParams, int2 pos, UnitView unitView)
         {
             _team = team;
+            _unitParams = unitParams;
             _unitView = unitView;
             
-            this.unitParams = unitParams;
             this.pos = pos;
 
             integrity = this.unitParams.maxIntegrity;
@@ -89,7 +90,7 @@ namespace GoC.Arena
             || _moveCommand != null
             || _currentProduction != null;
 
-        public IUnitParams unitParams { get; }
+        public IUnitParams unitParams => _unitParams;
 
         public int integrity { get; private set; }
         public IReadOnlyList<int> storage => _storage;
@@ -116,7 +117,7 @@ namespace GoC.Arena
 
         public Result CanProduce(string productName)
         {
-            if (TryFindProductByName(productName, out IUnitParams productUnitParams))
+            if (TryFindProductByName(productName, out UnitParams productUnitParams))
             {
                 for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; ++substanceIndex)
                     if (storage[substanceIndex] < productUnitParams.productionCost[substanceIndex])
@@ -128,9 +129,9 @@ namespace GoC.Arena
             return Result.OperationUnavailable;
         }
 
-        private bool TryFindProductByName(string productName, out IUnitParams productUnitParams)
+        private bool TryFindProductByName(string productName, out UnitParams productUnitParams)
         {
-            foreach (IUnitParams possibleProductUnitParams in unitParams.products)
+            foreach (UnitParams possibleProductUnitParams in unitParams.products)
             {
                 if (possibleProductUnitParams.name == productName)
                 {
@@ -237,7 +238,7 @@ namespace GoC.Arena
             if (canProduce != Result.Ok)
                 return canProduce;
 
-            if (!TryFindProductByName(productName, out IUnitParams productUnitParams))
+            if (!TryFindProductByName(productName, out UnitParams productUnitParams))
                 throw new Exception($"Can produce {productName}, but can't find it's unit params");
 
             _produceCommand = new ProduceCommand

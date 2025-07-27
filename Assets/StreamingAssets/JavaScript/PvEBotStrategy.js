@@ -85,6 +85,13 @@ function tickWorker(myUnit)
         return;
 
     let unitParams = model.myUnitParams[requredProduct];
+    
+    if (!unitParams)
+    {
+        log("Couldn't get unitParams for " + requredProduct);
+        return;
+    }
+    
     for (let iSubstance = 0; iSubstance < Substance.TYPES_COUNT; ++iSubstance)
     {
         if (myUnit.storage[iSubstance] < unitParams.productionCost[iSubstance])

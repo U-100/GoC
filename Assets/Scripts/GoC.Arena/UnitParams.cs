@@ -7,9 +7,8 @@ namespace GoC.Arena
     [CreateAssetMenu]
     public class UnitParams : ScriptableObject, IUnitParams
     {
-        [SerializeField] private string _nameCopy;
-        string IUnitParams.name => _nameCopy;
-        
+        [Header("Exposed to scripting:")]
+        [Space]
         [SerializeField] private int[] _productionCost;
         public IReadOnlyList<int> productionCost => _productionCost;
 
@@ -31,9 +30,18 @@ namespace GoC.Arena
         [SerializeField] private bool _canMine;
         public bool canMine => _canMine;
 
-        [SerializeField] private List<UnitParams> _productParams;
-        public IReadOnlyList<IUnitParams> products => _productParams ??= new List<UnitParams>();
+        [SerializeField] private List<UnitParams> _products;
+        public IReadOnlyList<IUnitParams> products => _products ??= new List<UnitParams>();
+        
+        [HideInInspector]
+        [SerializeField] private string _nameCopy;
+        public new string name => _nameCopy; // we can't use Unity-provided name property because we need multithreaded access
 
-        private void Awake() => _nameCopy = name; // store name for multithreaded access
+        void Awake() => _nameCopy = base.name; // store name for multithreaded access
+
+        [Header("Not exposed to scripting:")]
+        [Space]
+        [SerializeField] private UnitView _unitViewPrefab;
+        public UnitView unitViewPrefab => _unitViewPrefab;
     }
 }

@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6beeb4677ad4779a6712254acdafe32, type: 3}
   m_Name: BotTurret
   m_EditorClassIdentifier: 
-  _nameCopy: BotTurret
   _productionCost: 0200000002000000
   _productionTicks: 2
   _canMove: 0
@@ -20,4 +19,7 @@ MonoBehaviour:
   _storageCapacityPerSubstance: 0
   _damage: 2
   _canMine: 0
-  _productParams: []
+  _products: []
+  _nameCopy: BotTurret
+  _unitViewPrefab: {fileID: 6637246959213643231, guid: 435601d0b3425b44f8068cc5b4020b3a,
+    type: 3}

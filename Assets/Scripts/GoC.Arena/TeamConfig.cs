@@ -1,5 +1,4 @@
-﻿using GoC.ScriptingApi;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace GoC.Arena
 {
@@ -22,7 +21,7 @@ namespace GoC.Arena
         }
         
         [SerializeField] private UnitParams _starterUnitParams;
-        public IUnitParams starterUnitParams => _starterUnitParams;
+        public UnitParams starterUnitParams => _starterUnitParams;
         
         [SerializeField] private string _scriptFile;
         public string scriptFile => _scriptFile;

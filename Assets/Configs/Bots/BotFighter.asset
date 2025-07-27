@@ -19,4 +19,7 @@ MonoBehaviour:
   _storageCapacityPerSubstance: 0
   _damage: 1
   _canMine: 0
-  _productParams: []
+  _products: []
+  _nameCopy: BotFighter
+  _unitViewPrefab: {fileID: 2029166070667984591, guid: fbe162e681484454cbf0be1820cbfca9,
+    type: 3}

@@ -31,8 +31,6 @@ namespace GoC.Arena
     public class Arena : MonoBehaviour, IArena
     {
         [SerializeField] private VisualEffect _gridEffect;
-        [SerializeField] private UnitView _stationaryUnitViewPrefab;
-        [SerializeField] private UnitView _movingUnitViewPrefab;
         
         [Tooltip("One prefab per substance")]
         [SerializeField] private Deposit[] _depositPrefabs;
@@ -145,11 +143,9 @@ namespace GoC.Arena
 
         public void Unregister(Deposit deposit) => _deposits.Remove(deposit);
 
-        public void CreateUnit(IUnitParams unitParams, Team team, int2 unitPos)
+        public void CreateUnit(UnitParams unitParams, Team team, int2 unitPos)
         {
-            UnitView unitViewPrefab = unitParams.canMove ? _movingUnitViewPrefab : _stationaryUnitViewPrefab;
-            
-            UnitView unitView = Instantiate(unitViewPrefab);
+            UnitView unitView = Instantiate(unitParams.unitViewPrefab);
             unitView.Setup(team.skin);
 
             ExposedUnitControl exposedUnitControl = new ExposedUnitControl(team, unitParams, unitPos, unitView);

@@ -21,7 +21,7 @@ namespace GoC.Arena
         
         public int teamId { get; }
 
-        public IUnitParams starterUnitParams => _config.starterUnitParams;
+        public UnitParams starterUnitParams => _config.starterUnitParams;
         
         public IReadOnlyDictionary<string, IUnitParams> myUnitParams => _myUnitParams;
 
@@ -44,6 +44,8 @@ namespace GoC.Arena
         private void RecursiveFillMyUnitParams(IUnitParams unitParams)
         {
             _myUnitParams.Add(unitParams.name, unitParams);
+            
+            //UnityEngine.Debug.Log($"Added {unitParams.name} to team {teamId} myUnitParams");
 
             foreach (IUnitParams productUnitParams in unitParams.products)
                 if (!_myUnitParams.ContainsKey(productUnitParams.name))

@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6beeb4677ad4779a6712254acdafe32, type: 3}
   m_Name: BotWorker
   m_EditorClassIdentifier: 
-  _nameCopy: BotWorker
   _productionCost: 0400000000000000
   _productionTicks: 2
   _canMove: 1
@@ -20,7 +19,10 @@ MonoBehaviour:
   _storageCapacityPerSubstance: 10
   _damage: 0
   _canMine: 1
-  _productParams:
+  _products:
   - {fileID: 11400000}
-  - {fileID: 11400000, guid: fc54588ca77099b4e9318e60c7a01eb8, type: 2}
+  - {fileID: 11400000, guid: 89a5413e70eba184e8950934ffb62800, type: 2}
   - {fileID: 11400000, guid: bfb3b93136dd1e843ad6746f55b7e151, type: 2}
+  _nameCopy: BotWorker
+  _unitViewPrefab: {fileID: 2029166070667984591, guid: fbe162e681484454cbf0be1820cbfca9,
+    type: 3}
