@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _substanceType: 1
   _miningSpeed: 1
+  _prefab: {fileID: 6952737876265442335, guid: af028da984bfdc94eb56b21ac8569b2c, type: 3}

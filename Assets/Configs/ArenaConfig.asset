@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75a0869123c543cfb8c8d1cafd3986f3, type: 3}
   m_Name: ArenaConfig
   m_EditorClassIdentifier: 
+  _prefab: {fileID: 3968549526113034293, guid: 392edaee5dd43b146b6f16031c52d835, type: 3}
+  _size:
+    x: 31
+    y: 31
   _depositConfigs:
   - {fileID: 11400000, guid: 90817da335932d145a883da181997d64, type: 2}
   - {fileID: 11400000, guid: 1817e7105a7407a42a0a00bb9c08a737, type: 2}
-  _size:
-    x: 63
-    y: 63
-  _initialUnitParams: {fileID: 11400000, guid: 7a57bf7ce052f2647b801457a288c9be, type: 2}

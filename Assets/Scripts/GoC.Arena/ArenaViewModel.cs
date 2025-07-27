@@ -10,7 +10,6 @@ namespace GoC.Arena
     public class ArenaViewModel
     {
         private readonly Func<IArena> _arenaFactory;
-        private readonly ArenaConfig _arenaConfig;
         private readonly TeamConfig _aiTeamConfig;
         
         private readonly TeamConfig _playerTeamConfig;
@@ -18,10 +17,9 @@ namespace GoC.Arena
         private IArena _currentArena;
         private int _codeVsAIScriptIndex;
 
-        public ArenaViewModel(Func<IArena> arenaFactory, ArenaConfig arenaConfig, TeamConfig playerTeamConfig, TeamConfig aiTeamConfig)
+        public ArenaViewModel(Func<IArena> arenaFactory, TeamConfig playerTeamConfig, TeamConfig aiTeamConfig)
         {
             _arenaFactory = arenaFactory;
-            _arenaConfig = arenaConfig;
             _playerTeamConfig = playerTeamConfig;
             _aiTeamConfig = aiTeamConfig;
             
@@ -64,7 +62,6 @@ namespace GoC.Arena
             isInCodeVsAIMenu = true;
 
             _currentArena = _arenaFactory();
-            _currentArena.Setup(_arenaConfig);
             
             codeVsAIScripts.Clear();
             codeVsAIScripts.AddRange(

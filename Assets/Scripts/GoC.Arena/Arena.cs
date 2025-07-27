@@ -15,6 +15,8 @@ namespace GoC.Arena
 {
     public interface IArena : IDisposable
     {
+        public ArenaConfig config { get; }
+        
         public uint currentTick { get; }
         
         void Setup(ArenaConfig initConfig);
@@ -31,9 +33,6 @@ namespace GoC.Arena
     public class Arena : MonoBehaviour, IArena
     {
         [SerializeField] private VisualEffect _gridEffect;
-        
-        [Tooltip("One prefab per substance")]
-        [SerializeField] private Deposit[] _depositPrefabs;
 
         private ArenaConfig _config;
         
@@ -52,6 +51,13 @@ namespace GoC.Arena
 
         public IReadOnlyList<IDeposit> deposits => _deposits;
 
+
+        public static Arena Create(ArenaConfig config)
+        {
+            Arena arena = Instantiate(config.prefab);
+            arena.Setup(config);
+            return arena;
+        }
         
         public void Setup(ArenaConfig initConfig)
         {
@@ -136,7 +142,7 @@ namespace GoC.Arena
 
         private void CreateDeposit(DepositConfig depositConfig, int2 depositPos)
         {
-            Deposit deposit = Instantiate(_depositPrefabs[(int)depositConfig.substanceType]);
+            Deposit deposit = Instantiate(depositConfig.prefab);
             deposit.Setup(this, depositConfig, depositPos);
             _deposits.Add(deposit);
         }
