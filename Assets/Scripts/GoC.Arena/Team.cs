@@ -64,13 +64,25 @@ namespace GoC.Arena
             }
         }
 
-        public void ApplyTick()
+        public void ApplyTickPhaseOne()
         {
             try
             {
                 _myUnitsCache.AddRange(_myUnits);
                 foreach (ExposedUnitControl myUnit in _myUnitsCache)
                     myUnit.ApplyTickPhaseOne();
+            }
+            finally
+            {
+                _myUnitsCache.Clear();
+            }
+        }
+
+        public void ApplyTickPhaseTwo()
+        {
+            try
+            {
+                _myUnitsCache.AddRange(_myUnits);
                 foreach (ExposedUnitControl myUnit in _myUnitsCache)
                     myUnit.ApplyTickPhaseTwo();
             }

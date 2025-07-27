@@ -7,7 +7,6 @@ using Jint.Native;
 using Jint.Native.Object;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.VFX;
 
 using static Unity.Mathematics.math;
@@ -225,18 +224,26 @@ namespace GoC.Arena
             {
                 if (_tickTask != null)
                 {
-                    if (_tickTask.IsCompletedSuccessfully)
+                    if (_tickTask.IsCompleted)
                     {
+                        //Debug.Log($"Applying tick {currentTick}");
+                        
                         foreach (TeamRecord teamRecord in _teamRecords)
-                            teamRecord.team.ApplyTick();
+                            teamRecord.team.ApplyTickPhaseOne();
+
+                        foreach (TeamRecord teamRecord in _teamRecords)
+                            teamRecord.team.ApplyTickPhaseTwo();
+
+                        ++currentTick;
                     }
                     else
-                        Debug.LogWarning("Tick task still running");
+                        Debug.LogWarning("Tick script didn't finish on time");
                 }
 
-                if (_tickTask == null || _tickTask.IsCompletedSuccessfully)
+                if (_tickTask is not {IsCompleted: false})
                 {
-                    ++currentTick;
+                    //Debug.Log($"Tick {currentTick}");
+            
                     _tickTask = Task.Run(InvokeScripts);
                     _tickCooldown += Tick.TIME;
                 }
@@ -257,6 +264,8 @@ namespace GoC.Arena
                     Debug.LogException(exception);
                 }
             }
+
+            //Debug.Log($"Finished tick {currentTick} scripts");
         }
     }
 }
