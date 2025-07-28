@@ -240,11 +240,20 @@ namespace GoC.Arena
 
             if (!TryFindProductByName(productName, out UnitConfig productConfig))
                 throw new Exception($"Can produce {productName}, but can't find it's UnitConfig");
+            
+            for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
+                _storage[substanceIndex] -= productConfig.productionCost[substanceIndex];
+
+            // in rare cases when two productions are targeting the same grid cell one of them will be pushed away into a nearby empty cell
+            if (productionPos == null || _team.arena.grid[productionPos.Value] > 0)
+                productionPos = _team.arena.grid.FindEmptyCellAround(pos);
+            
+            _team.arena.grid[productionPos.Value]++;
 
             _produceCommand = new ProduceCommand
             {
                 ticks = productConfig.productionTicks,
-                productionPos = productionPos ?? _team.arena.grid.FindEmptyCellAround(pos),
+                productionPos = productionPos.Value,
                 productUnitConfig = productConfig
             };
             
@@ -348,15 +357,6 @@ namespace GoC.Arena
             {
                 ProduceCommand produceCommand = _produceCommand.Value;
                 
-                for (int substanceIndex = 0; substanceIndex < Substance.TYPES_COUNT; substanceIndex++)
-                    _storage[substanceIndex] -= produceCommand.productUnitConfig.productionCost[substanceIndex];
-
-                // in rare cases when two productions are targeting the same grid cell one of them will be pushed away into a nearby empty cell
-                if (_team.arena.grid[produceCommand.productionPos] > 0)
-                    produceCommand.productionPos = _team.arena.grid.FindEmptyCellAround(produceCommand.productionPos);
-                    
-                _team.arena.grid[produceCommand.productionPos]++;
-
                 _unitView.StartProduce(produceCommand.productionPos, produceCommand.ticks);
 
                 _currentProduction = produceCommand;
