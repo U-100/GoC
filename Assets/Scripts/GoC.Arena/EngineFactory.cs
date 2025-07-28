@@ -62,8 +62,6 @@ namespace GoC.Arena
 
         private static readonly HashSet<Type> DISABLED_TYPES = new();
 
-        private static readonly HashSet<MemberInfo> EXPOSED_MEMBERS = new();
-        
         // member filter decides which apis should be exposed to javascript by jint engine.
         // We expose apis of ENABLED_TYPES plus apis from assemblies and types marked with ScriptingApiAttribute
         private static readonly Predicate<MemberInfo> MEMBER_FILTER = delegate(MemberInfo memberInfo)
@@ -81,27 +79,6 @@ namespace GoC.Arena
                 else
                     DISABLED_TYPES.Add(declaringType);
             }
-
-            if (
-                result
-                && declaringType != null
-                && declaringType.Assembly.GetName().Name.Contains("GoC")
-                && EXPOSED_MEMBERS.Add(memberInfo)
-            )
-                switch (memberInfo)
-                {
-                    case FieldInfo fieldInfo:
-                        Debug.Log($"{declaringType.Name}.{fieldInfo.Name}: {fieldInfo.FieldType.Name}");
-                        break;
-
-                    case PropertyInfo propertyInfo:
-                        Debug.Log($"{declaringType.Name}.{propertyInfo.Name}: {propertyInfo.PropertyType.Name}");
-                        break;
-                    
-                    case MethodInfo { IsSpecialName: false } methodInfo:
-                        Debug.Log($"{declaringType.Name}.{methodInfo.Name}({methodInfo.GetParameters()}): {methodInfo.ReturnType.Name}");
-                        break;
-                }
             
             return result;
         };
