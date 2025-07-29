@@ -279,7 +279,7 @@ namespace GoC.Arena
             {
                 from = pos - _team.arena.grid.min,
                 to = p - _team.arena.grid.min,
-                enoughManhattanDistance = 1,
+                enoughManhattanDistance = _team.arena.grid[p] > 0 ? 1 : 0,
                 grid = _team.arena.grid.nativeArray,
                 size = _team.arena.grid.size,
                 path = new NativeList<int2>(0, Allocator.TempJob)
