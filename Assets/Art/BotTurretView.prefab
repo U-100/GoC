@@ -31,7 +31,7 @@ PrefabInstance:
     - target: {fileID: 2270813136937699141, guid: fbe162e681484454cbf0be1820cbfca9,
         type: 3}
       propertyPath: m_Name
-      value: StationaryUnit
+      value: BotTurretView
       objectReference: {fileID: 0}
     - target: {fileID: 5894296014513820637, guid: fbe162e681484454cbf0be1820cbfca9,
         type: 3}
@@ -101,6 +101,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 171682839257001900, guid: fbe162e681484454cbf0be1820cbfca9, type: 3}
+    - {fileID: 942459141170435213, guid: fbe162e681484454cbf0be1820cbfca9, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5894296014513820637, guid: fbe162e681484454cbf0be1820cbfca9,
         type: 3}
