@@ -9,8 +9,5 @@ EditorBuildSettings:
     path: Assets/Art/Arena.unity
     guid: 572b081b77d93d741914341f11f61e6e
   m_configObjects:
-    com.unity.input.settings: {fileID: 11400000, guid: 64acf69ee1566f648b735575b5a86c8a,
-      type: 2}
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 3f50dd3649964ee4eafc03fbdd7a6415,
-      type: 3}
-  m_UseUCBPForAssetBundles: 0
+    com.unity.input.settings: {fileID: 11400000, guid: 64acf69ee1566f648b735575b5a86c8a, type: 2}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 3f50dd3649964ee4eafc03fbdd7a6415, type: 3}
